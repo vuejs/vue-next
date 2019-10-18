@@ -33,6 +33,7 @@ function createRoot(options: Partial<RootNode> = {}): RootNode {
     helpers: [],
     components: [],
     directives: [],
+    filters: [],
     hoists: [],
     codegenNode: createSimpleExpression(`null`, false),
     loc: locStub,

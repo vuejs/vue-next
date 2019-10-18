@@ -72,6 +72,7 @@ export interface TransformContext extends Required<TransformOptions> {
   helpers: Set<symbol>
   components: Set<string>
   directives: Set<string>
+  filters: Set<string>
   hoists: JSChildNode[]
   identifiers: { [name: string]: number | undefined }
   scopes: {
@@ -108,6 +109,7 @@ function createTransformContext(
     helpers: new Set(),
     components: new Set(),
     directives: new Set(),
+    filters: new Set(),
     hoists: [],
     identifiers: {},
     scopes: {
@@ -272,6 +274,7 @@ function finalizeRoot(root: RootNode, context: TransformContext) {
   root.helpers = [...context.helpers]
   root.components = [...context.components]
   root.directives = [...context.directives]
+  root.filters = [...context.filters]
   root.hoists = context.hoists
 }
 

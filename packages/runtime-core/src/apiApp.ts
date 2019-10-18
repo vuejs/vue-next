@@ -16,6 +16,8 @@ export interface App<HostElement = any> {
   component(name: string, component: Component): this
   directive(name: string): Directive | undefined
   directive(name: string, directive: Directive): this
+  filter(name: string): Function | undefined
+  filter(name: string, directive: Function): this
   mount(
     rootComponent: Component,
     rootContainer: HostElement,
@@ -46,6 +48,7 @@ export interface AppContext {
   mixins: ComponentOptions[]
   components: Record<string, Component>
   directives: Record<string, Directive>
+  filters: Record<string, Function>
   provides: Record<string | symbol, any>
 }
 
@@ -70,6 +73,7 @@ export function createAppContext(): AppContext {
     mixins: [],
     components: {},
     directives: {},
+    filters: {},
     provides: {}
   }
 }
@@ -132,6 +136,15 @@ export function createAppAPI<HostNode, HostElement>(
           return context.directives[name] as any
         } else {
           context.directives[name] = directive
+          return app
+        }
+      },
+
+      filter(name: string, filter?: Function) {
+        if (!filter) {
+          return context.filters[name] as any
+        } else {
+          context.filters[name] = filter
           return app
         }
       },

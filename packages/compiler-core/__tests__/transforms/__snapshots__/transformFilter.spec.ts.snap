@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`compiler: transform filter basic usage 1`] = `
+"const _Vue = Vue
+
+return function render() {
+  with (this) {
+    const { resolveFilter: _resolveFilter, toString: _toString } = _Vue
+    
+    const _filter_upper = _resolveFilter(\\"upper\\")
+    return _toString(_filter_upper(msg))
+  }
+}"
+`;
+
+exports[`compiler: transform filter basic usage with element 1`] = `
+"const _Vue = Vue
+
+return function render() {
+  with (this) {
+    const { resolveFilter: _resolveFilter, toString: _toString, createVNode: _createVNode, createBlock: _createBlock, openBlock: _openBlock } = _Vue
+    
+    const _filter_upper = _resolveFilter(\\"upper\\")
+    return (_openBlock(), _createBlock(\\"div\\", null, _toString(_filter_upper(msg)), 1 /* TEXT */))
+  }
+}"
+`;
+
+exports[`compiler: transform filter basic usage with element v-bind 1`] = `
+"const _Vue = Vue
+
+return function render() {
+  with (this) {
+    const { resolveFilter: _resolveFilter, createVNode: _createVNode, applyDirectives: _applyDirectives, resolveDirective: _resolveDirective, createBlock: _createBlock, openBlock: _openBlock } = _Vue
+    
+    const _directive_bind = _resolveDirective(\\"bind\\")
+    const _filter_upper = _resolveFilter(\\"upper\\")
+    const _filter_reverse = _resolveFilter(\\"reverse\\")
+    const _filter_lower = _resolveFilter(\\"lower\\")
+    
+    return (_openBlock(), _applyDirectives(_createBlock(\\"div\\", null, null, 32 /* NEED_PATCH */), [
+      [_directive_bind, _filter_reverse(_filter_upper(id)), \\"id\\"],
+      [_directive_bind, _filter_reverse(cls), \\"class\\"],
+      [_directive_bind, _filter_lower(ref), \\"ref\\"]
+    ]))
+  }
+}"
+`;
+
+exports[`compiler: transform filter chained usage 1`] = `
+"const _Vue = Vue
+
+return function render() {
+  with (this) {
+    const { resolveFilter: _resolveFilter, toString: _toString } = _Vue
+    
+    const _filter_upper = _resolveFilter(\\"upper\\")
+    const _filter_reverse = _resolveFilter(\\"reverse\\")
+    return _toString(_filter_reverse(_filter_upper(msg)))
+  }
+}"
+`;

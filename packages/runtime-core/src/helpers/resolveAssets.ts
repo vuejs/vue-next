@@ -12,12 +12,21 @@ export function resolveDirective(name: string): Directive | undefined {
   return resolveAsset('directives', name)
 }
 
+export function resolveFilter(name: string): Function | undefined {
+  return resolveAsset('filters', name)
+}
+
 // overload 1: components
 function resolveAsset(type: 'components', name: string): Component | undefined
 // overload 2: directives
 function resolveAsset(type: 'directives', name: string): Directive | undefined
 
-function resolveAsset(type: 'components' | 'directives', name: string) {
+function resolveAsset(type: 'filters', name: string): Function | undefined
+
+function resolveAsset(
+  type: 'components' | 'directives' | 'filters',
+  name: string
+) {
   const instance = currentRenderingInstance || currentInstance
   if (instance) {
     let camelized

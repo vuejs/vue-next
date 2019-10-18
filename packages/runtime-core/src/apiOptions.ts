@@ -58,6 +58,7 @@ interface ComponentOptionsBase<
   render?: Function
   components?: Record<string, Component>
   directives?: Record<string, Directive>
+  filters?: Record<string, Function>
 }
 
 export type ComponentOptionsWithoutProps<
@@ -203,6 +204,7 @@ export function applyOptions(
     // assets
     components,
     directives,
+    filters,
     // lifecycle
     beforeMount,
     mounted,
@@ -330,6 +332,9 @@ export function applyOptions(
   }
   if (directives) {
     extend(instance.directives, directives)
+  }
+  if (filters) {
+    extend(instance.filters, filters)
   }
 
   // lifecycle options

@@ -15,6 +15,7 @@ import { trackSlotScopes, trackVForSlotScopes } from './transforms/vSlot'
 import { optimizeText } from './transforms/optimizeText'
 import { transformOnce } from './transforms/vOnce'
 import { transformModel } from './transforms/vModel'
+import { transformFilter } from './transforms/transformFilter'
 
 export type CompilerOptions = ParserOptions & TransformOptions & CodegenOptions
 
@@ -46,6 +47,7 @@ export function baseCompile(
     nodeTransforms: [
       transformIf,
       transformFor,
+      transformFilter,
       ...(prefixIdentifiers
         ? [
             // order is important

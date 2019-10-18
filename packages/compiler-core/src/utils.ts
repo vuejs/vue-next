@@ -242,7 +242,7 @@ export function injectProp(
 
 export function toValidAssetId(
   name: string,
-  type: 'component' | 'directive'
+  type: 'component' | 'directive' | 'filter'
 ): string {
   return `_${type}_${name.replace(/[^\w]/g, '_')}`
 }

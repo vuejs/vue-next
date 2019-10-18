@@ -92,6 +92,7 @@ export interface RootNode extends Node {
   helpers: symbol[]
   components: string[]
   directives: string[]
+  filters: string[]
   hoists: JSChildNode[]
   codegenNode: TemplateChildNode | JSChildNode | undefined
 }

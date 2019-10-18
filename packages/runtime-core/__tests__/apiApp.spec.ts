@@ -11,7 +11,8 @@ import {
   applyDirectives,
   Plugin,
   ref,
-  getCurrentInstance
+  getCurrentInstance,
+  resolveFilter
 } from '@vue/runtime-test'
 
 describe('api: createApp', () => {
@@ -138,6 +139,34 @@ describe('api: createApp', () => {
     expect(spy1).toHaveBeenCalled()
     expect(spy2).not.toHaveBeenCalled()
     expect(spy3).toHaveBeenCalled()
+  })
+
+  test('filter', () => {
+    const app = createApp()
+
+    const toUpperCase = (s: string) => s.toUpperCase()
+    app.filter('toUpperCase', toUpperCase)
+    expect(app.filter('toUpperCase')).toBe(toUpperCase)
+
+    const Root = {
+      // local override
+      filters: {
+        toLowerCase: (s: string) => s.toLowerCase()
+      },
+      setup() {
+        // resolve in setup
+        const toUpperCase = resolveFilter('toUpperCase')!
+        return () => {
+          // resolve in render
+          const toLowerCase = resolveFilter('toLowerCase')!
+          return h('div', `${toUpperCase('a')}${toLowerCase('B')}`)
+        }
+      }
+    }
+
+    const root = nodeOps.createElement('div')
+    app.mount(Root, root)
+    expect(serializeInner(root)).toBe(`<div>Ab</div>`)
   })
 
   test('mixin', () => {

@@ -33,7 +33,8 @@ import {
   COMMENT,
   helperNameMap,
   RESOLVE_COMPONENT,
-  RESOLVE_DIRECTIVE
+  RESOLVE_DIRECTIVE,
+  RESOLVE_FILTER
 } from './runtimeHelpers'
 
 type CodegenNode = TemplateChildNode | JSChildNode
@@ -260,6 +261,9 @@ export function generate(
   if (ast.directives.length) {
     genAssets(ast.directives, 'directive', context)
   }
+  if (ast.filters.length) {
+    genAssets(ast.filters, 'filter', context)
+  }
   if (ast.components.length || ast.directives.length) {
     newline()
   }
@@ -286,14 +290,18 @@ export function generate(
   }
 }
 
+const assetMap = {
+  component: RESOLVE_COMPONENT,
+  directive: RESOLVE_DIRECTIVE,
+  filter: RESOLVE_FILTER
+}
+
 function genAssets(
   assets: string[],
-  type: 'component' | 'directive',
+  type: 'component' | 'directive' | 'filter',
   context: CodegenContext
 ) {
-  const resolver = context.helper(
-    type === 'component' ? RESOLVE_COMPONENT : RESOLVE_DIRECTIVE
-  )
+  let resolver = context.helper(assetMap[type])
   for (let i = 0; i < assets.length; i++) {
     const id = assets[i]
     context.push(

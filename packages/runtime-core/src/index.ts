@@ -39,7 +39,11 @@ export {
 // Internal, for compiler generated code
 // should sync with '@vue/compiler-core/src/runtimeConstants.ts'
 export { applyDirectives } from './directives'
-export { resolveComponent, resolveDirective } from './helpers/resolveAssets'
+export {
+  resolveComponent,
+  resolveDirective,
+  resolveFilter
+} from './helpers/resolveAssets'
 export { renderList } from './helpers/renderList'
 export { toString } from './helpers/toString'
 export { toHandlers } from './helpers/toHandlers'

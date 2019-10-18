@@ -8,6 +8,7 @@ export const CREATE_BLOCK = Symbol(__DEV__ ? `createBlock` : ``)
 export const CREATE_VNODE = Symbol(__DEV__ ? `createVNode` : ``)
 export const RESOLVE_COMPONENT = Symbol(__DEV__ ? `resolveComponent` : ``)
 export const RESOLVE_DIRECTIVE = Symbol(__DEV__ ? `resolveDirective` : ``)
+export const RESOLVE_FILTER = Symbol(__DEV__ ? `resolveFilter` : ``)
 export const APPLY_DIRECTIVES = Symbol(__DEV__ ? `applyDirectives` : ``)
 export const RENDER_LIST = Symbol(__DEV__ ? `renderList` : ``)
 export const RENDER_SLOT = Symbol(__DEV__ ? `renderSlot` : ``)
@@ -31,6 +32,7 @@ export const helperNameMap: any = {
   [CREATE_VNODE]: `createVNode`,
   [RESOLVE_COMPONENT]: `resolveComponent`,
   [RESOLVE_DIRECTIVE]: `resolveDirective`,
+  [RESOLVE_FILTER]: `resolveFilter`,
   [APPLY_DIRECTIVES]: `applyDirectives`,
   [RENDER_LIST]: `renderList`,
   [RENDER_SLOT]: `renderSlot`,
