@@ -17,6 +17,8 @@ export const enum ErrorCodes {
   TRANSITION_HOOK,
   APP_ERROR_HANDLER,
   APP_WARN_HANDLER,
+  COMPUTED_GETTER,
+  COMPUTED_SETTER,
   FUNCTION_REF,
   SCHEDULER
 }
@@ -46,6 +48,8 @@ export const ErrorTypeStrings: Record<number | string, string> = {
   [ErrorCodes.TRANSITION_HOOK]: 'transition hook',
   [ErrorCodes.APP_ERROR_HANDLER]: 'app errorHandler',
   [ErrorCodes.APP_WARN_HANDLER]: 'app warnHandler',
+  [ErrorCodes.COMPUTED_GETTER]: 'computed getter',
+  [ErrorCodes.COMPUTED_SETTER]: 'computed setter',
   [ErrorCodes.FUNCTION_REF]: 'ref function',
   [ErrorCodes.SCHEDULER]:
     'scheduler flush. This is likely a Vue internals bug. ' +
