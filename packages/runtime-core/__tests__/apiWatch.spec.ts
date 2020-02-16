@@ -323,9 +323,12 @@ describe('api: watch', () => {
   })
 
   it('deep', async () => {
+    const countSymbol = Symbol('countSymbol')
+
     const state = reactive({
       nested: {
-        count: ref(0)
+        count: ref(0),
+        [countSymbol]: ref(0)
       },
       array: [1, 2, 3],
       map: new Map([['a', 1], ['b', 2]]),
@@ -338,6 +341,7 @@ describe('api: watch', () => {
       state => {
         dummy = [
           state.nested.count,
+          state.nested[countSymbol],
           state.array[0],
           state.map.get('a'),
           state.set.has(1)
@@ -347,26 +351,30 @@ describe('api: watch', () => {
     )
 
     await nextTick()
-    expect(dummy).toEqual([0, 1, 1, true])
+    expect(dummy).toEqual([0, 0, 1, 1, true])
 
     state.nested.count++
     await nextTick()
-    expect(dummy).toEqual([1, 1, 1, true])
+    expect(dummy).toEqual([1, 0, 1, 1, true])
+
+    state.nested[countSymbol]++
+    await nextTick()
+    expect(dummy).toEqual([1, 1, 1, 1, true])
 
     // nested array mutation
     state.array[0] = 2
     await nextTick()
-    expect(dummy).toEqual([1, 2, 1, true])
+    expect(dummy).toEqual([1, 1, 2, 1, true])
 
     // nested map mutation
     state.map.set('a', 2)
     await nextTick()
-    expect(dummy).toEqual([1, 2, 2, true])
+    expect(dummy).toEqual([1, 1, 2, 2, true])
 
     // nested set mutation
     state.set.delete(1)
     await nextTick()
-    expect(dummy).toEqual([1, 2, 2, false])
+    expect(dummy).toEqual([1, 1, 2, 2, false])
   })
 
   it('lazy', async () => {

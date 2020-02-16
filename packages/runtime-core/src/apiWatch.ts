@@ -272,17 +272,26 @@ function traverse(value: unknown, seen: Set<unknown> = new Set()) {
       traverse(value[i], seen)
     }
   } else if (value instanceof Map) {
-    value.forEach((v, key) => {
-      // to register mutation dep for existing keys
-      traverse(value.get(key), seen)
-    })
+    const keys = [...value.keys()]
+
+    for (let i = 0; i < keys.length; i++) {
+      traverse(value.get(keys[i]), seen)
+    }
   } else if (value instanceof Set) {
-    value.forEach(v => {
-      traverse(v, seen)
-    })
+    const values = [...value.values()]
+
+    for (let i = 0; i < values.length; i++) {
+      traverse(values[i], seen)
+    }
   } else {
-    for (const key in value) {
-      traverse(value[key], seen)
+    const keys = [
+      ...Object.getOwnPropertyNames(value),
+      ...Object.getOwnPropertySymbols(value)
+    ]
+
+    for (let i = 0; i < keys.length; i++) {
+      // TS doesn't allow symbol as index type
+      traverse(value[keys[i] as string], seen)
     }
   }
   return value
