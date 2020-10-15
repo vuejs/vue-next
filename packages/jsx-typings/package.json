@@ -1,0 +1,25 @@
+{
+  "name": "@vue/jsx-typings",
+  "version": "3.0.0",
+  "description": "JSX typings for vue",
+  "sideEffects": false,
+  "files": [
+    "index.d.ts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vuejs/vue-next.git"
+  },
+  "keywords": [
+    "vue",
+    "jsx",
+    "typings",
+    "types"
+  ],
+  "author": "Evan You",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vuejs/vue-next/issues"
+  },
+  "homepage": "https://github.com/vuejs/vue-next/tree/master/packages/jsx-typings#readme"
+}

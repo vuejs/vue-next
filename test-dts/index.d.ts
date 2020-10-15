@@ -4,6 +4,7 @@
 // it's intended. We cannot use directives like @ts-ignore or @ts-nocheck since
 // that would suppress the errors that should be caught.
 
+import '@vue/jsx-typings'
 export * from '@vue/runtime-dom'
 
 export function describe(_name: string, _fn: () => void): void

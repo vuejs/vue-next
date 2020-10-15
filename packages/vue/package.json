@@ -39,6 +39,7 @@
   "dependencies": {
     "@vue/shared": "3.0.0",
     "@vue/compiler-dom": "3.0.0",
+    "@vue/jsx-typings": "3.0.0",
     "@vue/runtime-dom": "3.0.0"
   },
   "devDependencies": {

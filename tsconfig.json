@@ -24,6 +24,7 @@
   },
   "include": [
     "packages/global.d.ts",
+    "packages/jsx-typings/index.d.ts",
     "packages/*/src",
     "packages/runtime-dom/types/jsx.d.ts",
     "packages/*/__tests__",

@@ -1,6 +1,7 @@
 // This entry is the "full-build" that includes both the runtime
 // and the compiler, and supports on-the-fly compilation of the template option.
 import { initDev } from './dev'
+import '@vue/jsx-typings'
 import { compile, CompilerOptions, CompilerError } from '@vue/compiler-dom'
 import { registerRuntimeCompiler, RenderFunction, warn } from '@vue/runtime-dom'
 import * as runtimeDom from '@vue/runtime-dom'
@@ -62,7 +63,7 @@ function compileToFunction(
             /* istanbul ignore next */
             throw err
           }
-        }
+        },
       },
       options
     )
