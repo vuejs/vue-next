@@ -209,8 +209,8 @@ export function generate(
 
   // binding optimizations
   const optimizeSources = options.bindingMetadata
-    ? `, $props, $setup, $data, $options`
-    : ``
+    ? ', $props, $setup, $data, $options'
+    : ''
   // enter render function
   if (!ssr) {
     if (genScopeId) {
@@ -255,36 +255,36 @@ export function generate(
     }
   }
   if (ast.temps > 0) {
-    push(`let `)
+    push('let ')
     for (let i = 0; i < ast.temps; i++) {
-      push(`${i > 0 ? `, ` : ``}_temp${i}`)
+      push(`${i > 0 ? ', ' : ''}_temp${i}`)
     }
   }
   if (ast.components.length || ast.directives.length || ast.temps) {
-    push(`\n`)
+    push('\n')
     newline()
   }
 
   // generate the VNode tree expression
   if (!ssr) {
-    push(`return `)
+    push('return ')
   }
   if (ast.codegenNode) {
     genNode(ast.codegenNode, context)
   } else {
-    push(`null`)
+    push('null')
   }
 
   if (useWithBlock) {
     deindent()
-    push(`}`)
+    push('}')
   }
 
   deindent()
-  push(`}`)
+  push('}')
 
   if (genScopeId) {
-    push(`)`)
+    push(')')
   }
 
   return {
@@ -350,7 +350,7 @@ function genFunctionPreamble(ast: RootNode, context: CodegenContext) {
   }
   genHoists(ast.hoists, context)
   newline()
-  push(`return `)
+  push('return ')
 }
 
 function genModulePreamble(
@@ -423,7 +423,7 @@ function genModulePreamble(
 
   genHoists(ast.hoists, context)
   newline()
-  push(`export `)
+  push('export ')
 }
 
 function genAssets(
@@ -481,7 +481,7 @@ function genImports(importsOptions: ImportItem[], context: CodegenContext) {
     return
   }
   importsOptions.forEach(imports => {
-    context.push(`import `)
+    context.push('import ')
     genNode(imports.exp, context)
     context.push(` from '${imports.path}'`)
     context.newline()
@@ -505,11 +505,11 @@ function genNodeListAsArray(
   const multilines =
     nodes.length > 3 ||
     ((!__BROWSER__ || __DEV__) && nodes.some(n => isArray(n) || !isText(n)))
-  context.push(`[`)
+  context.push('[')
   multilines && context.indent()
   genNodeList(nodes, context, multilines)
   multilines && context.deindent()
-  context.push(`]`)
+  context.push(']')
 }
 
 function genNodeList(
@@ -891,7 +891,7 @@ function genCacheExpression(node: CacheExpression, context: CodegenContext) {
     push(`_cache[${node.index}]`)
     deindent()
   }
-  push(`)`)
+  push(')')
 }
 
 function genTemplateLiteral(node: TemplateLiteral, context: CodegenContext) {
@@ -917,23 +917,23 @@ function genTemplateLiteral(node: TemplateLiteral, context: CodegenContext) {
 function genIfStatement(node: IfStatement, context: CodegenContext) {
   const { push, indent, deindent } = context
   const { test, consequent, alternate } = node
-  push(`if (`)
+  push('if (')
   genNode(test, context)
-  push(`) {`)
+  push(') {')
   indent()
   genNode(consequent, context)
   deindent()
-  push(`}`)
+  push('}')
   if (alternate) {
-    push(` else `)
+    push(' else ')
     if (alternate.type === NodeTypes.JS_IF_STATEMENT) {
       genIfStatement(alternate, context)
     } else {
-      push(`{`)
+      push('{')
       indent()
       genNode(alternate, context)
       deindent()
-      push(`}`)
+      push('}')
     }
   }
 }
@@ -943,7 +943,7 @@ function genAssignmentExpression(
   context: CodegenContext
 ) {
   genNode(node.left, context)
-  context.push(` = `)
+  context.push(' = ')
   genNode(node.right, context)
 }
 
@@ -951,16 +951,16 @@ function genSequenceExpression(
   node: SequenceExpression,
   context: CodegenContext
 ) {
-  context.push(`(`)
+  context.push('(')
   genNodeList(node.expressions, context)
-  context.push(`)`)
+  context.push(')')
 }
 
 function genReturnStatement(
   { returns }: ReturnStatement,
   context: CodegenContext
 ) {
-  context.push(`return `)
+  context.push('return ')
   if (isArray(returns)) {
     genNodeListAsArray(returns, context)
   } else {

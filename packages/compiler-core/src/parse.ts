@@ -568,8 +568,9 @@ function parseAttribute(
 
   if (nameSet.has(name)) {
     emitError(context, ErrorCodes.DUPLICATE_ATTRIBUTE)
+  } else {
+    nameSet.add(name)
   }
-  nameSet.add(name)
 
   if (name[0] === '=') {
     emitError(context, ErrorCodes.UNEXPECTED_EQUALS_SIGN_BEFORE_ATTRIBUTE_NAME)
@@ -802,7 +803,7 @@ function parseText(context: ParserContext, mode: TextModes): TextNode {
   }
 
   let endIndex = context.source.length
-  for (let i = 0; i < endTokens.length; i++) {
+  for (let i = 0, len = endTokens.length; i < len; i++) {
     const index = context.source.indexOf(endTokens[i], 1)
     if (index !== -1 && endIndex > index) {
       endIndex = index
