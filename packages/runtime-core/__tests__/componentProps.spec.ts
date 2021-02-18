@@ -275,6 +275,28 @@ describe('component props', () => {
     expect(root.innerHTML).toBe('<div id="b">2</div>')
   })
 
+  test('validator arguments', async () => {
+    const mockFn = jest.fn((...args: any[]) => true)
+    const Comp = defineComponent({
+      props: {
+        foo: {
+          type: Number,
+          validator: (value, props) => mockFn(value, props)
+        },
+        bar: {
+          type: Number
+        }
+      },
+      template: `<div />`
+    })
+
+    // Note this one is using the main Vue render so it can compile template
+    // on the fly
+    const root = document.createElement('div')
+    domRender(h(Comp, { foo: 1, bar: 2 }), root)
+    expect(mockFn).toHaveBeenCalledWith(1, { foo: 1, bar: 2 })
+  })
+
   test('warn props mutation', () => {
     let instance: ComponentInternalInstance
     let setupProps: any
