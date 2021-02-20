@@ -2,7 +2,8 @@ import {
   toRaw,
   shallowReactive,
   trigger,
-  TriggerOpTypes
+  TriggerOpTypes,
+  shallowReadonly
 } from '@vue/reactivity'
 import {
   EMPTY_OBJ,
@@ -466,7 +467,13 @@ function validateProps(props: Data, instance: ComponentInternalInstance) {
   for (const key in options) {
     let opt = options[key]
     if (opt == null) continue
-    validateProp(key, rawValues[key], opt, rawValues, !hasOwn(rawValues, key))
+    validateProp(
+      key,
+      rawValues[key],
+      opt,
+      shallowReadonly(rawValues),
+      !hasOwn(rawValues, key)
+    )
   }
 }
 

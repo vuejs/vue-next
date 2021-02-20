@@ -275,26 +275,54 @@ describe('component props', () => {
     expect(root.innerHTML).toBe('<div id="b">2</div>')
   })
 
-  test('validator arguments', async () => {
-    const mockFn = jest.fn((...args: any[]) => true)
-    const Comp = defineComponent({
-      props: {
-        foo: {
-          type: Number,
-          validator: (value, props) => mockFn(value, props)
+  describe('validator', () => {
+    test('validator should be called with two arguments', async () => {
+      const mockFn = jest.fn((...args: any[]) => true)
+      const Comp = defineComponent({
+        props: {
+          foo: {
+            type: Number,
+            validator: (value, props) => mockFn(value, props)
+          },
+          bar: {
+            type: Number
+          }
         },
-        bar: {
-          type: Number
-        }
-      },
-      template: `<div />`
+        template: `<div />`
+      })
+
+      // Note this one is using the main Vue render so it can compile template
+      // on the fly
+      const root = document.createElement('div')
+      domRender(h(Comp, { foo: 1, bar: 2 }), root)
+      expect(mockFn).toHaveBeenCalledWith(1, { foo: 1, bar: 2 })
     })
 
-    // Note this one is using the main Vue render so it can compile template
-    // on the fly
-    const root = document.createElement('div')
-    domRender(h(Comp, { foo: 1, bar: 2 }), root)
-    expect(mockFn).toHaveBeenCalledWith(1, { foo: 1, bar: 2 })
+    test('validator should not be able to mutate other props', async () => {
+      const mockFn = jest.fn((...args: any[]) => true)
+      const Comp = defineComponent({
+        props: {
+          foo: {
+            type: Number,
+            validator: (value, props) => !!(props.bar = 1)
+          },
+          bar: {
+            type: Number,
+            validator: value => mockFn(value)
+          }
+        },
+        template: `<div />`
+      })
+
+      // Note this one is using the main Vue render so it can compile template
+      // on the fly
+      const root = document.createElement('div')
+      domRender(h(Comp, { foo: 1, bar: 2 }), root)
+      expect(
+        `Set operation on key "bar" failed: target is readonly.`
+      ).toHaveBeenWarnedLast()
+      expect(mockFn).toHaveBeenCalledWith(2)
+    })
   })
 
   test('warn props mutation', () => {
