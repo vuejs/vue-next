@@ -121,8 +121,10 @@ export const ssrTransformComponent: NodeTransform = (node, context) => {
     wipMap.set(node, wipEntries)
 
     const buildSSRSlotFn: SlotFnBuilder = (props, children, loc) => {
+      let p0: any = props || `_`
+      if ('content' in p0 && !p0.content) p0 = `_`
       const fn = createFunctionExpression(
-        [props || `_`, `_push`, `_parent`, `_scopeId`],
+        [p0, `_push`, `_parent`, `_scopeId`],
         undefined, // no return, assign body later
         true, // newline
         true, // isSlot
