@@ -534,7 +534,7 @@ function baseCreateRenderer(
             optimized
           )
         } else if (shapeFlag & ShapeFlags.TELEPORT) {
-          ;(type as typeof TeleportImpl).process(
+          ;((type as any) as typeof TeleportImpl).process(
             n1 as TeleportVNode,
             n2 as TeleportVNode,
             container,
@@ -1940,7 +1940,12 @@ function baseCreateRenderer(
     }
 
     if (shapeFlag & ShapeFlags.TELEPORT) {
-      ;(type as typeof TeleportImpl).move(vnode, container, anchor, internals)
+      ;((type as any) as typeof TeleportImpl).move(
+        vnode,
+        container,
+        anchor,
+        internals
+      )
       return
     }
 
@@ -2062,7 +2067,7 @@ function baseCreateRenderer(
         shapeFlag & ShapeFlags.TELEPORT &&
         (doRemove || !isTeleportDisabled(vnode.props))
       ) {
-        ;(vnode.type as typeof TeleportImpl).remove(vnode, internals)
+        ;((vnode.type as any) as typeof TeleportImpl).remove(vnode, internals)
       }
 
       if (doRemove) {

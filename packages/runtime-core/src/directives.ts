@@ -74,7 +74,7 @@ export type DirectiveArguments = Array<
   | [Directive]
   | [Directive, any]
   | [Directive, any, string]
-  | [Directive, any, string, DirectiveModifiers]
+  | [Directive, any, string | undefined, DirectiveModifiers]
 >
 
 /**

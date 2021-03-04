@@ -33,7 +33,7 @@ import { DirectiveBinding } from './directives'
 import { TransitionHooks } from './components/BaseTransition'
 import { warn } from './warning'
 import { currentScopeId } from './helpers/scopeId'
-import { TeleportImpl, isTeleport } from './components/Teleport'
+import { Teleport, isTeleport } from './components/Teleport'
 import { currentRenderingInstance } from './componentRenderUtils'
 import { RendererNode, RendererElement } from './renderer'
 import { NULL_DYNAMIC_COMPONENT } from './helpers/resolveAssets'
@@ -58,7 +58,7 @@ export type VNodeTypes =
   | typeof Static
   | typeof Comment
   | typeof Fragment
-  | typeof TeleportImpl
+  | typeof Teleport
   | typeof SuspenseImpl
 
 export type VNodeRef =

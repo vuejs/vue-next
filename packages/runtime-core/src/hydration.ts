@@ -200,7 +200,7 @@ export function createHydrationFunctions(
           if (domType !== DOMNodeTypes.COMMENT) {
             nextNode = onMismatch()
           } else {
-            nextNode = (vnode.type as typeof TeleportImpl).hydrate(
+            nextNode = ((vnode.type as any) as typeof TeleportImpl).hydrate(
               node,
               vnode as TeleportVNode,
               parentComponent,
