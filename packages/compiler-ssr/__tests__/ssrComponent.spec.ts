@@ -90,30 +90,9 @@ describe('ssr: components', () => {
       `)
     })
 
-    // previously this would produce syntax error `default: _withCtx((, _push, ...)`
-    // XXX if this should error it should do better than a syntax error without emitting compiled source
     test('empty attribute should not produce syntax error', () => {
-      expect(compile(`<foo v-slot="">foo</foo>`).code).toMatchInlineSnapshot(`
-        "const { resolveComponent: _resolveComponent, withCtx: _withCtx, createTextVNode: _createTextVNode } = require(\\"vue\\")
-        const { ssrRenderComponent: _ssrRenderComponent } = require(\\"@vue/server-renderer\\")
-
-        return function ssrRender(_ctx, _push, _parent, _attrs) {
-          const _component_foo = _resolveComponent(\\"foo\\")
-
-          _push(_ssrRenderComponent(_component_foo, _attrs, {
-            default: _withCtx((_, _push, _parent, _scopeId) => {
-              if (_push) {
-                _push(\`foo\`)
-              } else {
-                return [
-                  _createTextVNode(\\"foo\\")
-                ]
-              }
-            }),
-            _: 1 /* STABLE */
-          }, _parent))
-        }"
-      `)
+      // previously this would produce syntax error `default: _withCtx((, _push, ...)`
+      expect(compile(`<foo v-slot="">foo</foo>`).code).not.toMatch(`(,`)
     })
 
     test('named slots', () => {
