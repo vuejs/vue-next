@@ -1,15 +1,24 @@
-import { shallowReactive, isReactive, reactive } from '../src/reactive'
+import {
+  shallowReactive,
+  isReactive,
+  reactive,
+  isShallow
+} from '../src/reactive'
 import { effect } from '../src/effect'
 
 describe('shallowReactive', () => {
   test('should not make non-reactive properties reactive', () => {
     const props = shallowReactive({ n: { foo: 1 } })
+    expect(isShallow(props)).toBe(true)
+    expect(isShallow(props.n)).toBe(false)
     expect(isReactive(props.n)).toBe(false)
   })
 
   test('should keep reactive properties reactive', () => {
     const props: any = shallowReactive({ n: reactive({ foo: 1 }) })
     props.n = reactive({ foo: 2 })
+    expect(isShallow(props)).toBe(true)
+    expect(isShallow(props.n)).toBe(false)
     expect(isReactive(props.n)).toBe(true)
   })
 
@@ -47,7 +56,6 @@ describe('shallowReactive', () => {
       const key = 'a'
 
       shallowMap.set(key, a)
-
       expect(isReactive(shallowMap.get(key))).toBe(false)
     })
 

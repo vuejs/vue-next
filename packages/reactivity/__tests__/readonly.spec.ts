@@ -4,6 +4,8 @@ import {
   toRaw,
   isReactive,
   isReadonly,
+  isShallow,
+  isShallowReadonly,
   markRaw,
   effect,
   ref,
@@ -459,6 +461,8 @@ describe('reactivity/readonly', () => {
   describe('shallowReadonly', () => {
     test('should not make non-reactive properties reactive', () => {
       const props = shallowReadonly({ n: { foo: 1 } })
+      expect(isShallowReadonly(props)).toBe(true)
+      expect(isShallow(props)).toBe(true)
       expect(isReactive(props.n)).toBe(false)
     })
 

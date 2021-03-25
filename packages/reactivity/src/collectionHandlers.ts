@@ -314,6 +314,8 @@ function createInstrumentationGetter(isReadonly: boolean, shallow: boolean) {
       return !isReadonly
     } else if (key === ReactiveFlags.IS_READONLY) {
       return isReadonly
+    } else if (key === ReactiveFlags.IS_SHALLOW) {
+      return shallow
     } else if (key === ReactiveFlags.RAW) {
       return target
     }
