@@ -78,7 +78,7 @@ async function main() {
   step('\nRunning tests...')
   if (!skipTests && !isDryRun) {
     await run(bin('jest'), ['--clearCache'])
-    await run('yarn', ['test'])
+    await run('yarn', ['test', '--bail'])
   } else {
     console.log(`(skipped)`)
   }

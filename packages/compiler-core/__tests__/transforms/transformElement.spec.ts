@@ -75,7 +75,7 @@ describe('compiler: element transform', () => {
       filename: `/foo/bar/Example.vue?vue&type=template`
     })
     expect(root.helpers).toContain(RESOLVE_COMPONENT)
-    expect(root.components).toContain(`_self`)
+    expect(root.components).toContain(`Example__self`)
   })
 
   test('static props', () => {

@@ -247,14 +247,17 @@ describe('BaseTransition', () => {
   })
 
   describe('toggle on-off', () => {
-    async function testToggleOnOff({
-      trueBranch,
-      trueSerialized,
-      falseBranch,
-      falseSerialized
-    }: ToggleOptions) {
+    async function testToggleOnOff(
+      {
+        trueBranch,
+        trueSerialized,
+        falseBranch,
+        falseSerialized
+      }: ToggleOptions,
+      mode?: BaseTransitionProps['mode']
+    ) {
       const toggle = ref(true)
-      const { props, cbs } = mockProps()
+      const { props, cbs } = mockProps({ mode })
       const root = mount(
         props,
         () => (toggle.value ? trueBranch() : falseBranch())
@@ -321,6 +324,18 @@ describe('BaseTransition', () => {
         falseBranch: () => null,
         falseSerialized: `<!---->`
       })
+    })
+
+    test('w/ mode: "in-out', async () => {
+      await testToggleOnOff(
+        {
+          trueBranch: () => h('div'),
+          trueSerialized: `<div></div>`,
+          falseBranch: () => null,
+          falseSerialized: `<!---->`
+        },
+        'in-out'
+      )
     })
   })
 

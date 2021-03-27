@@ -60,11 +60,8 @@ type StringifiableNode = PlainElementNode | TextCallNode
  * This optimization is only performed in Node.js.
  */
 export const stringifyStatic: HoistTransform = (children, context, parent) => {
-  if (
-    parent.type === NodeTypes.ELEMENT &&
-    (parent.tagType === ElementTypes.COMPONENT ||
-      parent.tagType === ElementTypes.TEMPLATE)
-  ) {
+  // bail stringification for slot content
+  if (context.scopes.vSlot > 0) {
     return
   }
 
@@ -267,15 +264,17 @@ function stringifyElement(
     } else if (p.type === NodeTypes.DIRECTIVE && p.name === 'bind') {
       // constant v-bind, e.g. :foo="1"
       let evaluated = evaluateConstant(p.exp as SimpleExpressionNode)
-      const arg = p.arg && (p.arg as SimpleExpressionNode).content
-      if (arg === 'class') {
-        evaluated = normalizeClass(evaluated)
-      } else if (arg === 'style') {
-        evaluated = stringifyStyle(normalizeStyle(evaluated))
+      if (evaluated != null) {
+        const arg = p.arg && (p.arg as SimpleExpressionNode).content
+        if (arg === 'class') {
+          evaluated = normalizeClass(evaluated)
+        } else if (arg === 'style') {
+          evaluated = stringifyStyle(normalizeStyle(evaluated))
+        }
+        res += ` ${(p.arg as SimpleExpressionNode).content}="${escapeHtml(
+          evaluated
+        )}"`
       }
-      res += ` ${(p.arg as SimpleExpressionNode).content}="${escapeHtml(
-        evaluated
-      )}"`
     }
   }
   if (context.scopeId) {

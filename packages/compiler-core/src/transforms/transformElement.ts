@@ -264,12 +264,17 @@ export function resolveComponentType(
   }
 
   // 4. Self referencing component (inferred from filename)
-  if (!__BROWSER__ && context.selfName) {
-    if (capitalize(camelize(tag)) === context.selfName) {
-      context.helper(RESOLVE_COMPONENT)
-      context.components.add(`_self`)
-      return toValidAssetId(`_self`, `component`)
-    }
+  if (
+    !__BROWSER__ &&
+    context.selfName &&
+    capitalize(camelize(tag)) === context.selfName
+  ) {
+    context.helper(RESOLVE_COMPONENT)
+    // codegen.ts has special check for __self postfix when generating
+    // component imports, which will pass additional `maybeSelfReference` flag
+    // to `resolveComponent`.
+    context.components.add(tag + `__self`)
+    return toValidAssetId(tag, `component`)
   }
 
   // 5. user component (resolve)

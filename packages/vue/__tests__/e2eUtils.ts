@@ -28,9 +28,16 @@ export function setupPuppeteer() {
   let browser: puppeteer.Browser
   let page: puppeteer.Page
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     browser = await puppeteer.launch(puppeteerOptions)
+  })
+
+  beforeEach(async () => {
     page = await browser.newPage()
+
+    await page.evaluateOnNewDocument(() => {
+      localStorage.clear()
+    })
 
     page.on('console', e => {
       if (e.type() === 'error') {
@@ -44,6 +51,10 @@ export function setupPuppeteer() {
   })
 
   afterEach(async () => {
+    await page.close()
+  })
+
+  afterAll(async () => {
     await browser.close()
   })
 

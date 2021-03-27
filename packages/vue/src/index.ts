@@ -7,7 +7,7 @@ import * as runtimeDom from '@vue/runtime-dom'
 import { isString, NOOP, generateCodeFrame, extend } from '@vue/shared'
 import { InternalRenderFunction } from 'packages/runtime-core/src/component'
 
-if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
+if (__DEV__) {
   initDev()
 }
 

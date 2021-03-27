@@ -62,12 +62,12 @@ exports[`compiler: v-once transform on slot outlet 1`] = `
 
 return function render(_ctx, _cache) {
   with (_ctx) {
-    const { setBlockTracking: _setBlockTracking, renderSlot: _renderSlot, createVNode: _createVNode, openBlock: _openBlock, createBlock: _createBlock } = _Vue
+    const { setBlockTracking: _setBlockTracking, renderSlot: _renderSlot, openBlock: _openBlock, createBlock: _createBlock } = _Vue
 
     return (_openBlock(), _createBlock(\\"div\\", null, [
       _cache[1] || (
         _setBlockTracking(-1),
-        _cache[1] = _renderSlot($slots, \\"default\\"),
+        _cache[1] = _renderSlot($slots, \\"default\\", {}, undefined, true),
         _setBlockTracking(1),
         _cache[1]
       )

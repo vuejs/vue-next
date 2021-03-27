@@ -32,9 +32,11 @@ import {
 import { DirectiveBinding } from './directives'
 import { TransitionHooks } from './components/BaseTransition'
 import { warn } from './warning'
-import { currentScopeId } from './helpers/scopeId'
 import { TeleportImpl, isTeleport } from './components/Teleport'
-import { currentRenderingInstance } from './componentRenderUtils'
+import {
+  currentRenderingInstance,
+  currentScopeId
+} from './componentRenderContext'
 import { RendererNode, RendererElement } from './renderer'
 import { NULL_DYNAMIC_COMPONENT } from './helpers/resolveAssets'
 import { hmrDirtyComponents } from './hmr'
@@ -133,7 +135,18 @@ export interface VNode<
   props: (VNodeProps & ExtraProps) | null
   key: string | number | null
   ref: VNodeNormalizedRef | null
-  scopeId: string | null // SFC only
+  /**
+   * SFC only. This is assigned on vnode creation using currentScopeId
+   * which is set alongside currentRenderingInstance.
+   */
+  scopeId: string | null
+  /**
+   * SFC only. This is assigned to:
+   * - Slot fragment vnodes with :slotted SFC styles.
+   * - Component vnodes (during patch/hydration) so that its root node can
+   *   inherit the component's slotScopeIds
+   */
+  slotScopeIds: string[] | null
   children: VNodeNormalizedChildren
   component: ComponentInternalInstance | null
   dirs: DirectiveBinding[] | null
@@ -398,6 +411,7 @@ function _createVNode(
     key: props && normalizeKey(props),
     ref: props && normalizeRef(props),
     scopeId: currentScopeId,
+    slotScopeIds: null,
     children: null,
     component: null,
     suspense: null,
@@ -479,6 +493,7 @@ export function cloneVNode<T, U>(
           : normalizeRef(extraProps)
         : ref,
     scopeId: vnode.scopeId,
+    slotScopeIds: vnode.slotScopeIds,
     children:
       __DEV__ && patchFlag === PatchFlags.HOISTED && isArray(children)
         ? (children as VNode[]).map(deepCloneVNode)

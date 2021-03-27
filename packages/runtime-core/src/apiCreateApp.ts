@@ -27,7 +27,8 @@ export interface App<HostElement = any> {
   directive(name: string, directive: Directive): this
   mount(
     rootContainer: HostElement | string,
-    isHydrate?: boolean
+    isHydrate?: boolean,
+    isSVG?: boolean
   ): ComponentPublicInstance
   unmount(): void
   provide<T>(key: InjectionKey<T> | string, value: T): this
@@ -224,7 +225,11 @@ export function createAppAPI<HostElement>(
         return app
       },
 
-      mount(rootContainer: HostElement, isHydrate?: boolean): any {
+      mount(
+        rootContainer: HostElement,
+        isHydrate?: boolean,
+        isSVG?: boolean
+      ): any {
         if (!isMounted) {
           const vnode = createVNode(
             rootComponent as ConcreteComponent,
@@ -237,14 +242,14 @@ export function createAppAPI<HostElement>(
           // HMR root reload
           if (__DEV__) {
             context.reload = () => {
-              render(cloneVNode(vnode), rootContainer)
+              render(cloneVNode(vnode), rootContainer, isSVG)
             }
           }
 
           if (isHydrate && hydrate) {
             hydrate(vnode as VNode<Node, Element>, rootContainer as any)
           } else {
-            render(vnode, rootContainer)
+            render(vnode, rootContainer, isSVG)
           }
           isMounted = true
           app._container = rootContainer

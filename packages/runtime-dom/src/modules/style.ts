@@ -9,7 +9,14 @@ export function patchStyle(el: Element, prev: Style, next: Style) {
     el.removeAttribute('style')
   } else if (isString(next)) {
     if (prev !== next) {
+      const current = style.display
       style.cssText = next
+      // indicates that the `display` of the element is controlled by `v-show`,
+      // so we always keep the current `display` value regardless of the `style` value,
+      // thus handing over control to `v-show`.
+      if ('_vod' in el) {
+        style.display = current
+      }
     }
   } else {
     for (const key in next) {

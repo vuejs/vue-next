@@ -626,6 +626,35 @@ return {  }
 }"
 `;
 
+exports[`SFC compile <script setup> ref: syntax sugar should not rewrite scope variable 1`] = `
+"import { ref as _ref } from 'vue'
+
+export default {
+  expose: [],
+  setup(__props) {
+
+        const a = _ref(1)
+        const b = _ref(1)
+        const d = _ref(1)
+        const e = 1
+        function test() {
+          const a = 2
+          console.log(a)
+          console.log(b.value)
+          let c = { c: 3 }
+          console.log(c)
+          let $d
+          console.log($d)
+          console.log(d.value)
+          console.log(e)
+        }
+      
+return { a, b, d, e, test }
+}
+
+}"
+`;
+
 exports[`SFC compile <script setup> ref: syntax sugar using ref binding in property shorthand 1`] = `
 "import { ref as _ref } from 'vue'
 

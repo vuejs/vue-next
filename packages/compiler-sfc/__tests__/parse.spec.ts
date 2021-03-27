@@ -170,6 +170,24 @@ h1 { color: red }
     expect(errors.length).toBe(0)
   })
 
+  test('slotted detection', async () => {
+    expect(parse(`<template>hi</template>`).descriptor.slotted).toBe(false)
+    expect(
+      parse(`<template>hi</template><style>h1{color:red;}</style>`).descriptor
+        .slotted
+    ).toBe(false)
+    expect(
+      parse(
+        `<template>hi</template><style scoped>:slotted(h1){color:red;}</style>`
+      ).descriptor.slotted
+    ).toBe(true)
+    expect(
+      parse(
+        `<template>hi</template><style scoped>::v-slotted(h1){color:red;}</style>`
+      ).descriptor.slotted
+    ).toBe(true)
+  })
+
   test('error tolerance', () => {
     const { errors } = parse(`<template>`)
     expect(errors.length).toBe(1)

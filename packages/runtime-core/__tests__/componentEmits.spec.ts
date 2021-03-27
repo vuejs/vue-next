@@ -175,6 +175,21 @@ describe('component: emit', () => {
     expect(`event validation failed for event "foo"`).toHaveBeenWarned()
   })
 
+  // #2651
+  test('should not attach normalized object when mixins do not contain emits', () => {
+    const Foo = defineComponent({
+      mixins: [{}],
+      render() {},
+      created() {
+        this.$emit('foo')
+      }
+    })
+    render(h(Foo), nodeOps.createElement('div'))
+    expect(
+      `Component emitted event "foo" but it is neither declared`
+    ).not.toHaveBeenWarned()
+  })
+
   test('.once', () => {
     const Foo = defineComponent({
       render() {},

@@ -215,8 +215,10 @@ describe('SFC scoped CSS', () => {
     expect(style).toContain(
       `.anim-multiple-2[data-v-test] {\n  animation-name: color-test,opacity-test;`
     )
-    expect(style).toContain(`@keyframes opacity-test {`)
-    expect(style).toContain(`@-webkit-keyframes opacity-test {`)
+    expect(style).toContain(`@keyframes opacity-test {\nfrom { opacity: 0;`)
+    expect(style).toContain(
+      `@-webkit-keyframes opacity-test {\nfrom { opacity: 0;`
+    )
   })
 
   // vue-loader/#1370

@@ -10,7 +10,8 @@ import {
   serializeInner,
   createApp,
   provide,
-  inject
+  inject,
+  watch
 } from '@vue/runtime-test'
 import { render as domRender, nextTick } from 'vue'
 
@@ -351,6 +352,23 @@ describe('component props', () => {
     }).not.toThrow(TypeError)
   })
 
+  test('warn absent required props', () => {
+    const Comp = {
+      props: {
+        bool: { type: Boolean, required: true },
+        str: { type: String, required: true },
+        num: { type: Number, required: true }
+      },
+      setup() {
+        return () => null
+      }
+    }
+    render(h(Comp), nodeOps.createElement('div'))
+    expect(`Missing required prop: "bool"`).toHaveBeenWarned()
+    expect(`Missing required prop: "str"`).toHaveBeenWarned()
+    expect(`Missing required prop: "num"`).toHaveBeenWarned()
+  })
+
   test('merging props from mixins and extends', () => {
     let setupProps: any
     let renderProxy: any
@@ -452,5 +470,44 @@ describe('component props', () => {
     )
 
     expect(serializeInner(root)).toMatch('<div>60000000100000111</div>')
+  })
+
+  // #3474
+  test('should cache the value returned from the default factory to avoid unnecessary watcher trigger', async () => {
+    let count = 0
+    const Comp = {
+      props: {
+        foo: {
+          type: Object,
+          default: () => ({ val: 1 })
+        },
+        bar: Number
+      },
+      setup(props: any) {
+        watch(
+          () => props.foo,
+          () => {
+            count++
+          }
+        )
+        return () => h('h1', [props.foo.val, props.bar])
+      }
+    }
+
+    const foo = ref()
+    const bar = ref(0)
+    const app = createApp({
+      render: () => h(Comp, { foo: foo.value, bar: bar.value })
+    })
+
+    const root = nodeOps.createElement('div')
+    app.mount(root)
+    expect(serializeInner(root)).toMatch(`<h1>10</h1>`)
+    expect(count).toBe(0)
+
+    bar.value++
+    await nextTick()
+    expect(serializeInner(root)).toMatch(`<h1>11</h1>`)
+    expect(count).toBe(0)
   })
 })

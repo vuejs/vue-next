@@ -44,6 +44,38 @@ describe('scheduler', () => {
       expect(calls).toEqual(['job1', 'job2'])
     })
 
+    it("should insert jobs in ascending order of job's id when flushing", async () => {
+      const calls: string[] = []
+      const job1 = () => {
+        calls.push('job1')
+
+        queueJob(job2)
+        queueJob(job3)
+        queueJob(job4)
+      }
+
+      const job2 = () => {
+        calls.push('job2')
+      }
+      job2.id = 10
+
+      const job3 = () => {
+        calls.push('job3')
+      }
+      job3.id = 1
+
+      // job4 gets the Infinity as it's id
+      const job4 = () => {
+        calls.push('job4')
+      }
+
+      queueJob(job1)
+
+      expect(calls).toEqual([])
+      await nextTick()
+      expect(calls).toEqual(['job1', 'job3', 'job2', 'job4'])
+    })
+
     it('should dedupe queued jobs', async () => {
       const calls: string[] = []
       const job1 = () => {

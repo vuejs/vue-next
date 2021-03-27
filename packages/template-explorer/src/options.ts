@@ -6,6 +6,7 @@ export const ssrMode = ref(false)
 
 export const compilerOptions: CompilerOptions = reactive({
   mode: 'module',
+  filename: 'Foo.vue',
   prefixIdentifiers: false,
   optimizeImports: false,
   hoistStatic: false,

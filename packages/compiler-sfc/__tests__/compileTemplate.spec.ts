@@ -137,3 +137,19 @@ test('preprocessor errors', () => {
     `The end of the string reached with no closing bracket ) found.`
   )
 })
+
+// #3447
+test('should generate the correct imports expression', () => {
+  const { code } = compile({
+    filename: 'example.vue',
+    source: `
+      <img src="./foo.svg"/>
+      <Comp>
+        <img src="./bar.svg"/>
+      </Comp>
+    `,
+    ssr: true
+  })
+  expect(code).toMatch(`_ssrRenderAttr(\"src\", _imports_1)`)
+  expect(code).toMatch(`_createVNode(\"img\", { src: _imports_1 })`)
+})

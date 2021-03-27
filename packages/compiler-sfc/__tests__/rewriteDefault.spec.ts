@@ -26,4 +26,55 @@ describe('compiler sfc: rewriteDefault', () => {
       const script = a"
     `)
   })
+
+  test('w/ comments', async () => {
+    expect(rewriteDefault(`// export default\nexport default {}`, 'script'))
+      .toMatchInlineSnapshot(`
+      "// export default
+      const script = {}"
+    `)
+  })
+
+  test('export default class', async () => {
+    expect(rewriteDefault(`export default class Foo {}`, 'script'))
+      .toMatchInlineSnapshot(`
+      "class Foo {}
+      const script = Foo"
+    `)
+  })
+
+  test('export default class w/ comments', async () => {
+    expect(
+      rewriteDefault(`// export default\nexport default class Foo {}`, 'script')
+    ).toMatchInlineSnapshot(`
+      "// export default
+      class Foo {}
+      const script = Foo"
+    `)
+  })
+
+  test('export default class w/ comments 2', async () => {
+    expect(
+      rewriteDefault(
+        `export default {}\n` + `// export default class Foo {}`,
+        'script'
+      )
+    ).toMatchInlineSnapshot(`
+      "const script = {}
+      // export default class Foo {}"
+    `)
+  })
+
+  test('export default class w/ comments 3', async () => {
+    expect(
+      rewriteDefault(
+        `/*\nexport default class Foo {}*/\n` + `export default class Bar {}`,
+        'script'
+      )
+    ).toMatchInlineSnapshot(`
+      "/*
+      export default class Foo {}*/
+      const script = class Bar {}"
+    `)
+  })
 })

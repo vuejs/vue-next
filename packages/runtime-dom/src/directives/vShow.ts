@@ -20,7 +20,8 @@ export const vShow: ObjectDirective<VShowElement> = {
     }
   },
   updated(el, { value, oldValue }, { transition }) {
-    if (transition && value !== oldValue) {
+    if (!value === !oldValue) return
+    if (transition) {
       if (value) {
         transition.beforeEnter(el)
         setDisplay(el, true)

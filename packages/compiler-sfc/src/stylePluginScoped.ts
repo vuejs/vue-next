@@ -1,4 +1,4 @@
-import { PluginCreator, Rule } from 'postcss'
+import { PluginCreator, Rule, AtRule } from 'postcss'
 import selectorParser from 'postcss-selector-parser'
 import { warn } from './warn'
 
@@ -62,7 +62,12 @@ const scopedPlugin: PluginCreator<string> = (id = '') => {
 const processedRules = new WeakSet<Rule>()
 
 function processRule(id: string, rule: Rule) {
-  if (processedRules.has(rule)) {
+  if (
+    processedRules.has(rule) ||
+    (rule.parent &&
+      rule.parent.type === 'atrule' &&
+      /-?keyframes$/.test((rule.parent as AtRule).name))
+  ) {
     return
   }
   processedRules.add(rule)

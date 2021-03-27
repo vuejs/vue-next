@@ -14,7 +14,7 @@ import {
 import { TransformContext } from '../transform'
 import { PatchFlags, isString, isSymbol } from '@vue/shared'
 import { isSlotOutlet } from '../utils'
-import { CREATE_VNODE } from '../runtimeHelpers'
+import { CREATE_BLOCK, CREATE_VNODE, OPEN_BLOCK } from '../runtimeHelpers'
 
 export function hoistStatic(root: RootNode, context: TransformContext) {
   walk(
@@ -111,7 +111,14 @@ function walk(
 
     // walk further
     if (child.type === NodeTypes.ELEMENT) {
+      const isComponent = child.tagType === ElementTypes.COMPONENT
+      if (isComponent) {
+        context.scopes.vSlot++
+      }
       walk(child, context)
+      if (isComponent) {
+        context.scopes.vSlot--
+      }
     } else if (child.type === NodeTypes.FOR) {
       // Do not hoist v-for single child because it has to be a block
       walk(child, context, child.children.length === 1)
@@ -205,6 +212,8 @@ export function getConstantType(
         // static then they don't need to be blocks since there will be no
         // nested updates.
         if (codegenNode.isBlock) {
+          context.removeHelper(OPEN_BLOCK)
+          context.removeHelper(CREATE_BLOCK)
           codegenNode.isBlock = false
           context.helper(CREATE_VNODE)
         }

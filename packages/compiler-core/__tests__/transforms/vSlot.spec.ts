@@ -15,6 +15,7 @@ import { transformElement } from '../../src/transforms/transformElement'
 import { transformOn } from '../../src/transforms/vOn'
 import { transformBind } from '../../src/transforms/vBind'
 import { transformExpression } from '../../src/transforms/transformExpression'
+import { transformSlotOutlet } from '../../src/transforms/transformSlotOutlet'
 import {
   trackSlotScopes,
   trackVForSlotScopes
@@ -34,6 +35,7 @@ function parseWithSlots(template: string, options: CompilerOptions = {}) {
       ...(options.prefixIdentifiers
         ? [trackVForSlotScopes, transformExpression]
         : []),
+      transformSlotOutlet,
       transformElement,
       trackSlotScopes
     ],
@@ -737,9 +739,8 @@ describe('compiler: transform component slots', () => {
     expect(generate(root, { prefixIdentifiers: true }).code).toMatchSnapshot()
   })
 
-  test('generate flag on forwarded slots', () => {
-    const { slots } = parseWithSlots(`<Comp><slot/></Comp>`)
-    expect(slots).toMatchObject({
+  describe('forwarded slots', () => {
+    const toMatch = {
       type: NodeTypes.JS_OBJECT_EXPRESSION,
       properties: [
         {
@@ -751,6 +752,20 @@ describe('compiler: transform component slots', () => {
           value: { content: `3 /* FORWARDED */` }
         }
       ]
+    }
+    test('<slot> tag only', () => {
+      const { slots } = parseWithSlots(`<Comp><slot/></Comp>`)
+      expect(slots).toMatchObject(toMatch)
+    })
+
+    test('<slot> tag w/ v-if', () => {
+      const { slots } = parseWithSlots(`<Comp><slot v-if="ok"/></Comp>`)
+      expect(slots).toMatchObject(toMatch)
+    })
+
+    test('<slot> tag w/ v-for', () => {
+      const { slots } = parseWithSlots(`<Comp><slot v-for="a in b"/></Comp>`)
+      expect(slots).toMatchObject(toMatch)
     })
   })
 

@@ -5,7 +5,7 @@ exports[`compiler: v-show transform simple expression 1`] = `
 
 return function render(_ctx, _cache) {
   with (_ctx) {
-    const { vShow: _vShow, createVNode: _createVNode, withDirectives: _withDirectives, openBlock: _openBlock, createBlock: _createBlock } = _Vue
+    const { vShow: _vShow, withDirectives: _withDirectives, openBlock: _openBlock, createBlock: _createBlock } = _Vue
 
     return _withDirectives((_openBlock(), _createBlock(\\"div\\", null, null, 512 /* NEED_PATCH */)), [
       [_vShow, a]

@@ -66,6 +66,7 @@ return function render(_ctx, _cache) {
     const _component_Foo = _resolveComponent(\\"Foo\\")
     const _component_bar_baz = _resolveComponent(\\"bar-baz\\")
     const _component_barbaz = _resolveComponent(\\"barbaz\\")
+    const _component_Qux = _resolveComponent(\\"Qux\\", true)
     const _directive_my_dir_0 = _resolveDirective(\\"my_dir_0\\")
     const _directive_my_dir_1 = _resolveDirective(\\"my_dir_1\\")
     let _temp0, _temp1, _temp2

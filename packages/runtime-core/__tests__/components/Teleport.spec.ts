@@ -128,16 +128,40 @@ describe('renderer: teleport', () => {
     const target = nodeOps.createElement('div')
     const root = nodeOps.createElement('div')
 
+    function testUnmount(props: any) {
+      render(
+        h(() => [h(Teleport, props, h('div', 'teleported')), h('div', 'root')]),
+        root
+      )
+      expect(serializeInner(target)).toMatchInlineSnapshot(
+        props.disabled ? `""` : `"<div>teleported</div>"`
+      )
+
+      render(null, root)
+      expect(serializeInner(target)).toBe('')
+      expect(target.children.length).toBe(0)
+    }
+
+    testUnmount({ to: target, disabled: false })
+    testUnmount({ to: target, disabled: true })
+    testUnmount({ to: null, disabled: true })
+  })
+
+  test('component with multi roots should be removed when unmounted', () => {
+    const target = nodeOps.createElement('div')
+    const root = nodeOps.createElement('div')
+
+    const Comp = {
+      render() {
+        return [h('p'), h('p')]
+      }
+    }
+
     render(
-      h(() => [
-        h(Teleport, { to: target }, h('div', 'teleported')),
-        h('div', 'root')
-      ]),
+      h(() => [h(Teleport, { to: target }, h(Comp)), h('div', 'root')]),
       root
     )
-    expect(serializeInner(target)).toMatchInlineSnapshot(
-      `"<div>teleported</div>"`
-    )
+    expect(serializeInner(target)).toMatchInlineSnapshot(`"<p></p><p></p>"`)
 
     render(null, root)
     expect(serializeInner(target)).toBe('')

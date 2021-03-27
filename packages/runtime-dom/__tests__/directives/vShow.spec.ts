@@ -3,9 +3,11 @@ import {
   defineComponent,
   h,
   nextTick,
-  VNode
+  VNode,
+  ref,
+  watch
 } from '@vue/runtime-core'
-import { render, vShow } from '@vue/runtime-dom'
+import { render, Transition, vShow } from '@vue/runtime-dom'
 
 const withVShow = (node: VNode, exp: any) =>
   withDirectives(node, [[vShow, exp]])
@@ -123,5 +125,64 @@ describe('runtime-dom: v-show directive', () => {
     data.value = true
     await nextTick()
     expect($div.style.display).toEqual('block')
+  })
+
+  // #2583
+  test('the value of `display` set by v-show should not be overwritten by the style attribute when updated', async () => {
+    const style = ref('width: 100px')
+    const display = ref(false)
+    const component = defineComponent({
+      render() {
+        return withVShow(h('div', { style: style.value }), display.value)
+      }
+    })
+    render(h(component), root)
+
+    const $div = root.querySelector('div')
+
+    expect($div.style.display).toEqual('none')
+
+    style.value = 'width: 50px'
+    await nextTick()
+    expect($div.style.display).toEqual('none')
+
+    display.value = true
+    await nextTick()
+    expect($div.style.display).toEqual('')
+  })
+
+  // #2583, #2757
+  test('the value of `display` set by v-show should not be overwritten by the style attribute when updated (with Transition)', async () => {
+    const style = ref('width: 100px')
+    const display = ref(false)
+    const component = defineComponent({
+      setup() {
+        const innerValue = ref(false)
+        watch(display, val => {
+          innerValue.value = val
+        })
+        return () => {
+          return h(Transition, () =>
+            withVShow(
+              h('div', { style: style.value }, innerValue.value),
+              display.value
+            )
+          )
+        }
+      }
+    })
+    render(h(component), root)
+
+    const $div = root.querySelector('div')
+
+    expect($div.style.display).toEqual('none')
+
+    style.value = 'width: 50px'
+    await nextTick()
+    expect($div.style.display).toEqual('none')
+
+    display.value = true
+    await nextTick()
+    expect($div.style.display).toEqual('')
   })
 })

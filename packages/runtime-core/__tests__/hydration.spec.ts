@@ -9,7 +9,8 @@ import {
   Suspense,
   onMounted,
   defineAsyncComponent,
-  defineComponent
+  defineComponent,
+  createTextVNode
 } from '@vue/runtime-dom'
 import { renderToString, SSRContext } from '@vue/server-renderer'
 
@@ -45,6 +46,14 @@ describe('SSR hydration', () => {
     msg.value = 'bar'
     await nextTick()
     expect(container.textContent).toBe('bar')
+  })
+
+  test('empty text', async () => {
+    const { container } = mountWithHydration('<div></div>', () =>
+      h('div', createTextVNode(''))
+    )
+    expect(container.textContent).toBe('')
+    expect(`Hydration children mismatch in <div>`).not.toHaveBeenWarned()
   })
 
   test('comment', () => {
@@ -615,6 +624,29 @@ describe('SSR hydration', () => {
     // should be hydrated now
     triggerEvent('click', container.querySelector('button')!)
     expect(spy).toHaveBeenCalled()
+  })
+
+  test('elements with camel-case in svg ', () => {
+    const { vnode, container } = mountWithHydration(
+      '<animateTransform></animateTransform>',
+      () => h('animateTransform')
+    )
+    expect(vnode.el).toBe(container.firstChild)
+    expect(`Hydration node mismatch`).not.toHaveBeenWarned()
+  })
+
+  test('SVG as a mount container', () => {
+    const svgContainer = document.createElement('svg')
+    svgContainer.innerHTML = '<g></g>'
+    const app = createSSRApp({
+      render: () => h('g')
+    })
+
+    expect(
+      (app.mount(svgContainer).$.subTree as VNode<Node, Element> & {
+        el: Element
+      }).el instanceof SVGElement
+    )
   })
 
   describe('mismatch handling', () => {

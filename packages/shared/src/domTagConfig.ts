@@ -30,11 +30,6 @@ const SVG_TAGS =
 const VOID_TAGS =
   'area,base,br,col,embed,hr,img,input,link,meta,param,source,track,wbr'
 
-const FORM_TAGS =
-  'button,datalist,fieldset,input,keygen,label,legend,meter,optgroup,option,' +
-  'output,progress,select,textarea'
-
 export const isHTMLTag = /*#__PURE__*/ makeMap(HTML_TAGS)
 export const isSVGTag = /*#__PURE__*/ makeMap(SVG_TAGS)
 export const isVoidTag = /*#__PURE__*/ makeMap(VOID_TAGS)
-export const isFormTag = /*#__PURE__*/ makeMap(FORM_TAGS, true)

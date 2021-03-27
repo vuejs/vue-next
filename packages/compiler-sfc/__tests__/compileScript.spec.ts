@@ -708,6 +708,34 @@ const emit = defineEmit(['a', 'b'])
       assertCode(content)
     })
 
+    test('should not rewrite scope variable', () => {
+      const { content } = compile(`
+      <script setup>
+        ref: a = 1
+        ref: b = 1
+        ref: d = 1
+        const e = 1
+        function test() {
+          const a = 2
+          console.log(a)
+          console.log(b)
+          let c = { c: 3 }
+          console.log(c)
+          let $d
+          console.log($d)
+          console.log(d)
+          console.log(e)
+        }
+      </script>`)
+      expect(content).toMatch('console.log(a)')
+      expect(content).toMatch('console.log(b.value)')
+      expect(content).toMatch('console.log(c)')
+      expect(content).toMatch('console.log($d)')
+      expect(content).toMatch('console.log(d.value)')
+      expect(content).toMatch('console.log(e)')
+      assertCode(content)
+    })
+
     test('object destructure', () => {
       const { content, bindings } = compile(`<script setup>
       ref: n = 1, ({ a, b: c, d = 1, e: f = 2, ...g } = useFoo())

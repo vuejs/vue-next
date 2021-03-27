@@ -20,7 +20,8 @@ import {
   ReactiveFlags,
   track,
   TrackOpTypes,
-  ShallowUnwrapRef
+  ShallowUnwrapRef,
+  UnwrapNestedRefs
 } from '@vue/reactivity'
 import {
   ExtractComputedReturns,
@@ -31,14 +32,12 @@ import {
   OptionTypesType,
   OptionTypesKeys,
   resolveMergedOptions,
-  isInBeforeCreate
+  shouldCacheAccess
 } from './componentOptions'
 import { EmitsOptions, EmitFn } from './componentEmits'
 import { Slots } from './componentSlots'
-import {
-  currentRenderingInstance,
-  markAttrsAccessed
-} from './componentRenderUtils'
+import { markAttrsAccessed } from './componentRenderUtils'
+import { currentRenderingInstance } from './componentRenderContext'
 import { warn } from './warning'
 import { UnionToIntersection } from './helpers/typeUtils'
 
@@ -197,7 +196,7 @@ export type ComponentPublicInstance<
   ): WatchStopHandle
 } & P &
   ShallowUnwrapRef<B> &
-  D &
+  UnwrapNestedRefs<D> &
   ExtractComputedReturns<C> &
   M &
   ComponentCustomProperties
@@ -307,7 +306,7 @@ export const PublicInstanceProxyHandlers: ProxyHandler<any> = {
       } else if (ctx !== EMPTY_OBJ && hasOwn(ctx, key)) {
         accessCache![key] = AccessTypes.CONTEXT
         return ctx[key]
-      } else if (!__FEATURE_OPTIONS_API__ || !isInBeforeCreate) {
+      } else if (!__FEATURE_OPTIONS_API__ || shouldCacheAccess) {
         accessCache![key] = AccessTypes.OTHER
       }
     }

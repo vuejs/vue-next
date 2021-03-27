@@ -294,4 +294,26 @@ describe('stringify static html', () => {
       })
     })
   })
+
+  test('should remove attribute for `null`', () => {
+    const { ast } = compileWithStringify(
+      `<div>${repeat(
+        `<span :title="null"></span>`,
+        StringifyThresholds.ELEMENT_WITH_BINDING_COUNT
+      )}</div>`
+    )
+    expect(ast.hoists[0]).toMatchObject({
+      type: NodeTypes.JS_CALL_EXPRESSION,
+      callee: CREATE_STATIC,
+      arguments: [
+        JSON.stringify(
+          `${repeat(
+            `<span></span>`,
+            StringifyThresholds.ELEMENT_WITH_BINDING_COUNT
+          )}`
+        ),
+        '5'
+      ]
+    })
+  })
 })

@@ -877,4 +877,42 @@ describe('api: watch', () => {
     expect(instance).toBeDefined()
     expect(source).toHaveBeenCalledWith(instance)
   })
+
+  // #2728
+  test('pre watcher callbacks should not track dependencies', async () => {
+    const a = ref(0)
+    const b = ref(0)
+    const updated = jest.fn()
+
+    const Child = defineComponent({
+      props: ['a'],
+      updated,
+      watch: {
+        a() {
+          b.value
+        }
+      },
+      render() {
+        return h('div', this.a)
+      }
+    })
+
+    const Parent = defineComponent({
+      render() {
+        return h(Child, { a: a.value })
+      }
+    })
+
+    const root = nodeOps.createElement('div')
+    createApp(Parent).mount(root)
+
+    a.value++
+    await nextTick()
+    expect(updated).toHaveBeenCalledTimes(1)
+
+    b.value++
+    await nextTick()
+    // should not track b as dependency of Child
+    expect(updated).toHaveBeenCalledTimes(1)
+  })
 })

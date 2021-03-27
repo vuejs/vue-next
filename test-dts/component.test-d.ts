@@ -39,6 +39,7 @@ describe('object props', () => {
     ggg: 'foo' | 'bar'
     ffff: (a: number, b: string) => { a: boolean }
     validated?: string
+    object?: object
   }
 
   describe('defineComponent', () => {
@@ -106,7 +107,8 @@ describe('object props', () => {
           type: String,
           // validator requires explicit annotation
           validator: (val: unknown) => val !== ''
-        }
+        },
+        object: Object as PropType<object>
       },
       setup(props) {
         return {
@@ -140,6 +142,7 @@ describe('object props', () => {
     expectType<ExpectedProps['ggg']>(props.ggg)
     expectType<ExpectedProps['ffff']>(props.ffff)
     expectType<ExpectedProps['validated']>(props.validated)
+    expectType<ExpectedProps['object']>(props.object)
 
     // raw bindings
     expectType<Number>(rawBindings.setupA)
@@ -263,7 +266,8 @@ describe('object props', () => {
           type: String,
           // validator requires explicit annotation
           validator: (val: unknown) => val !== ''
-        }
+        },
+        object: Object as PropType<object>
       },
 
       setup() {
@@ -293,6 +297,7 @@ describe('object props', () => {
     expectType<ExpectedProps['ggg']>(props.ggg)
     // expectType<ExpectedProps['ffff']>(props.ffff) // todo fix
     expectType<ExpectedProps['validated']>(props.validated)
+    expectType<ExpectedProps['object']>(props.object)
 
     // rawBindings
     expectType<Number>(rawBindings.setupA)

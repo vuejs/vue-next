@@ -275,4 +275,25 @@ describe('renderer: component', () => {
     await nextTick()
     expect(App.updated).toHaveBeenCalledTimes(0)
   })
+
+  describe('render with access caches', () => {
+    // #3297
+    test('should not set the access cache in the data() function (production mode)', () => {
+      const Comp = {
+        data() {
+          ;(this as any).foo
+          return { foo: 1 }
+        },
+        render() {
+          return h('h1', (this as any).foo)
+        }
+      }
+      const root = nodeOps.createElement('div')
+
+      __DEV__ = false
+      render(h(Comp), root)
+      __DEV__ = true
+      expect(serializeInner(root)).toBe(`<h1>1</h1>`)
+    })
+  })
 })

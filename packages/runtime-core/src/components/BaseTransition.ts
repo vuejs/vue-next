@@ -223,7 +223,7 @@ const BaseTransitionImpl = {
             instance.update()
           }
           return emptyPlaceholder(child)
-        } else if (mode === 'in-out') {
+        } else if (mode === 'in-out' && innerChild.type !== Comment) {
           leavingHooks.delayLeave = (
             el: TransitionElement,
             earlyRemove,

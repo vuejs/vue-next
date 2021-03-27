@@ -1,6 +1,6 @@
 import { isFunction } from '@vue/shared'
 import { currentInstance } from './component'
-import { currentRenderingInstance } from './componentRenderUtils'
+import { currentRenderingInstance } from './componentRenderContext'
 import { warn } from './warning'
 
 export interface InjectionKey<T> extends Symbol {}

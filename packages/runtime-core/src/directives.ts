@@ -15,7 +15,7 @@ import { VNode } from './vnode'
 import { isFunction, EMPTY_OBJ, makeMap } from '@vue/shared'
 import { warn } from './warning'
 import { ComponentInternalInstance, Data } from './component'
-import { currentRenderingInstance } from './componentRenderUtils'
+import { currentRenderingInstance } from './componentRenderContext'
 import { callWithAsyncErrorHandling, ErrorCodes } from './errorHandling'
 import { ComponentPublicInstance } from './componentPublicInstance'
 

@@ -56,10 +56,10 @@ export function ssrCodegenTransform(ast: RootNode, options: CompilerOptions) {
 
   // Finalize helpers.
   // We need to separate helpers imported from 'vue' vs. '@vue/server-renderer'
-  ast.ssrHelpers = [
-    ...ast.helpers.filter(h => h in ssrHelpers),
-    ...context.helpers
-  ]
+  ast.ssrHelpers = Array.from(
+    new Set([...ast.helpers.filter(h => h in ssrHelpers), ...context.helpers])
+  )
+
   ast.helpers = ast.helpers.filter(h => !(h in ssrHelpers))
 }
 

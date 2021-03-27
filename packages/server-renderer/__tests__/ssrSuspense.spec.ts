@@ -29,6 +29,7 @@ describe('SSR Suspense', () => {
 
   test('reject', async () => {
     const Comp = {
+      errorCaptured: jest.fn(() => false),
       render() {
         return h(Suspense, null, {
           default: h(RejectingAsync),
@@ -38,7 +39,8 @@ describe('SSR Suspense', () => {
     }
 
     expect(await renderToString(createApp(Comp))).toBe(`<!---->`)
-    expect('Uncaught error in async setup').toHaveBeenWarned()
+
+    expect(Comp.errorCaptured).toHaveBeenCalledTimes(1)
     expect('missing template').toHaveBeenWarned()
   })
 
@@ -59,6 +61,7 @@ describe('SSR Suspense', () => {
 
   test('resolving component + rejecting component', async () => {
     const Comp = {
+      errorCaptured: jest.fn(() => false),
       render() {
         return h(Suspense, null, {
           default: h('div', [h(ResolvingAsync), h(RejectingAsync)]),
@@ -70,12 +73,14 @@ describe('SSR Suspense', () => {
     expect(await renderToString(createApp(Comp))).toBe(
       `<div><div>async</div><!----></div>`
     )
-    expect('Uncaught error in async setup').toHaveBeenWarned()
+
+    expect(Comp.errorCaptured).toHaveBeenCalledTimes(1)
     expect('missing template or render function').toHaveBeenWarned()
   })
 
   test('failing suspense in passing suspense', async () => {
     const Comp = {
+      errorCaptured: jest.fn(() => false),
       render() {
         return h(Suspense, null, {
           default: h('div', [
@@ -93,12 +98,14 @@ describe('SSR Suspense', () => {
     expect(await renderToString(createApp(Comp))).toBe(
       `<div><div>async</div><div><!----></div></div>`
     )
-    expect('Uncaught error in async setup').toHaveBeenWarned()
+
+    expect(Comp.errorCaptured).toHaveBeenCalledTimes(1)
     expect('missing template').toHaveBeenWarned()
   })
 
   test('passing suspense in failing suspense', async () => {
     const Comp = {
+      errorCaptured: jest.fn(() => false),
       render() {
         return h(Suspense, null, {
           default: h('div', [
@@ -116,7 +123,7 @@ describe('SSR Suspense', () => {
     expect(await renderToString(createApp(Comp))).toBe(
       `<div><!----><div><div>async</div></div></div>`
     )
-    expect('Uncaught error in async setup').toHaveBeenWarned()
+    expect(Comp.errorCaptured).toHaveBeenCalledTimes(1)
     expect('missing template').toHaveBeenWarned()
   })
 })

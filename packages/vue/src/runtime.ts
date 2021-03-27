@@ -3,7 +3,7 @@
 import { initDev } from './dev'
 import { warn } from '@vue/runtime-dom'
 
-if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
+if (__DEV__) {
   initDev()
 }
 

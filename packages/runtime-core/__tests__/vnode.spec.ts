@@ -14,7 +14,7 @@ import { Data } from '../src/component'
 import { ShapeFlags, PatchFlags } from '@vue/shared'
 import { h, reactive, isReactive, setBlockTracking } from '../src'
 import { createApp, nodeOps, serializeInner } from '@vue/runtime-test'
-import { setCurrentRenderingInstance } from '../src/componentRenderUtils'
+import { setCurrentRenderingInstance } from '../src/componentRenderContext'
 
 describe('vnode', () => {
   test('create with just tag', () => {
@@ -231,8 +231,8 @@ describe('vnode', () => {
 
   // ref normalizes to [currentRenderingInstance, ref]
   test('cloneVNode ref normalization', () => {
-    const mockInstance1 = {} as any
-    const mockInstance2 = {} as any
+    const mockInstance1 = { type: {} } as any
+    const mockInstance2 = { type: {} } as any
 
     setCurrentRenderingInstance(mockInstance1)
     const original = createVNode('div', { ref: 'foo' })
@@ -272,8 +272,8 @@ describe('vnode', () => {
   })
 
   test('cloneVNode ref merging', () => {
-    const mockInstance1 = {} as any
-    const mockInstance2 = {} as any
+    const mockInstance1 = { type: {} } as any
+    const mockInstance2 = { type: {} } as any
 
     setCurrentRenderingInstance(mockInstance1)
     const original = createVNode('div', { ref: 'foo' })

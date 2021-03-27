@@ -78,6 +78,8 @@ describe('api: options', () => {
   test('methods', async () => {
     const Comp = defineComponent({
       data() {
+        // #3300 method on ctx should be overwritable
+        this.incBy = this.incBy.bind(this, 2)
         return {
           foo: 1
         }
@@ -85,13 +87,17 @@ describe('api: options', () => {
       methods: {
         inc() {
           this.foo++
+        },
+        incBy(n = 0) {
+          this.foo += n
         }
       },
       render() {
         return h(
           'div',
           {
-            onClick: this.inc
+            onClick: this.inc,
+            onFoo: this.incBy
           },
           this.foo
         )
@@ -104,6 +110,10 @@ describe('api: options', () => {
     triggerEvent(root.children[0] as TestElement, 'click')
     await nextTick()
     expect(serializeInner(root)).toBe(`<div>2</div>`)
+
+    triggerEvent(root.children[0] as TestElement, 'foo')
+    await nextTick()
+    expect(serializeInner(root)).toBe(`<div>4</div>`)
   })
 
   test('component’s own methods have higher priority than global properties', async () => {
@@ -632,6 +642,93 @@ describe('api: options', () => {
       ]
     }
     expect(renderToString(h(Comp))).toBe('from mixin')
+  })
+
+  test('chained mixins in extends', () => {
+    const calls: string[] = []
+    const mixinA = {
+      beforeCreate() {
+        calls.push('mixinA beforeCreate')
+      },
+      created() {
+        calls.push('mixinA created')
+      }
+    }
+
+    const extendA = {
+      mixins: [mixinA],
+      beforeCreate() {
+        calls.push('extendA beforeCreate')
+      },
+      created() {
+        calls.push('extendA created')
+      }
+    }
+
+    const Comp = {
+      extends: extendA,
+      render: () => '123',
+      beforeCreate() {
+        calls.push('self beforeCreate')
+      },
+      created() {
+        calls.push('self created')
+      }
+    }
+
+    expect(renderToString(h(Comp))).toBe(`123`)
+    expect(calls).toEqual([
+      'mixinA beforeCreate',
+      'extendA beforeCreate',
+      'self beforeCreate',
+      'mixinA created',
+      'extendA created',
+      'self created'
+    ])
+  })
+
+  test('chained extends in mixins', () => {
+    const calls: string[] = []
+
+    const extendA = {
+      beforeCreate() {
+        calls.push('extendA beforeCreate')
+      },
+      created() {
+        calls.push('extendA created')
+      }
+    }
+
+    const mixinA = {
+      extends: extendA,
+      beforeCreate() {
+        calls.push('mixinA beforeCreate')
+      },
+      created() {
+        calls.push('mixinA created')
+      }
+    }
+
+    const Comp = {
+      mixins: [mixinA],
+      render: () => '123',
+      beforeCreate() {
+        calls.push('self beforeCreate')
+      },
+      created() {
+        calls.push('self created')
+      }
+    }
+
+    expect(renderToString(h(Comp))).toBe(`123`)
+    expect(calls).toEqual([
+      'extendA beforeCreate',
+      'mixinA beforeCreate',
+      'self beforeCreate',
+      'extendA created',
+      'mixinA created',
+      'self created'
+    ])
   })
 
   test('extends', () => {

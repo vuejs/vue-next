@@ -14,8 +14,7 @@ import {
   ComponentPublicInstance,
   Ref,
   cloneVNode,
-  provide,
-  withScopeId
+  provide
 } from '@vue/runtime-test'
 import { KeepAliveProps } from '../../src/components/KeepAlive'
 
@@ -804,14 +803,13 @@ describe('KeepAlive', () => {
   test('should work with cloned root due to scopeId / fallthrough attrs', async () => {
     const viewRef = ref('one')
     const instanceRef = ref<any>(null)
-    const withId = withScopeId('foo')
     const App = {
       __scopeId: 'foo',
-      render: withId(() => {
+      render: () => {
         return h(KeepAlive, null, {
           default: () => h(views[viewRef.value], { ref: instanceRef })
         })
-      })
+      }
     }
     render(h(App), root)
     expect(serializeInner(root)).toBe(`<div foo>one</div>`)

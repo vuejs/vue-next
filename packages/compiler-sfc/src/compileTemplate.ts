@@ -45,6 +45,7 @@ export interface SFCTemplateCompileOptions {
   filename: string
   id: string
   scoped?: boolean
+  slotted?: boolean
   isProd?: boolean
   ssr?: boolean
   ssrCssVars?: string[]
@@ -158,6 +159,7 @@ function doCompileTemplate({
   filename,
   id,
   scoped,
+  slotted,
   inMap,
   source,
   ssr = false,
@@ -204,6 +206,7 @@ function doCompileTemplate({
         ? genCssVarsFromList(ssrCssVars, shortId, isProd)
         : '',
     scopeId: scoped ? longId : undefined,
+    slotted,
     ...compilerOptions,
     nodeTransforms: nodeTransforms.concat(compilerOptions.nodeTransforms || []),
     filename,

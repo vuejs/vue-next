@@ -507,6 +507,13 @@ describe('compiler: transform v-model', () => {
       )
     })
 
+    test('allow unicode', () => {
+      const onError = jest.fn()
+      parseWithVModel('<span v-model="变.量" />', { onError })
+
+      expect(onError).toHaveBeenCalledTimes(0)
+    })
+
     test('used on scope variable', () => {
       const onError = jest.fn()
       parseWithVModel('<span v-for="i in list" v-model="i" />', {

@@ -1812,6 +1812,16 @@ foo
         `\n  foo  bar  `
       )
     })
+
+    it('should NOT condense whitespaces in RCDATA text mode', () => {
+      const ast = baseParse(`<textarea>Text:\n   foo</textarea>`, {
+        getTextMode: ({ tag }) =>
+          tag === 'textarea' ? TextModes.RCDATA : TextModes.DATA
+      })
+      const preElement = ast.children[0] as ElementNode
+      expect(preElement.children).toHaveLength(1)
+      expect((preElement.children[0] as TextNode).content).toBe(`Text:\n   foo`)
+    })
   })
 
   describe('Errors', () => {

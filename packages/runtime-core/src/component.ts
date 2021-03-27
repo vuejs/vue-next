@@ -23,7 +23,7 @@ import {
 } from './componentProps'
 import { Slots, initSlots, InternalSlots } from './componentSlots'
 import { warn } from './warning'
-import { ErrorCodes, callWithErrorHandling } from './errorHandling'
+import { ErrorCodes, callWithErrorHandling, handleError } from './errorHandling'
 import { AppContext, createAppContext, AppConfig } from './apiCreateApp'
 import { Directive, validateDirectiveName } from './directives'
 import {
@@ -51,10 +51,8 @@ import {
 } from '@vue/shared'
 import { SuspenseBoundary } from './components/Suspense'
 import { CompilerOptions } from '@vue/compiler-core'
-import {
-  currentRenderingInstance,
-  markAttrsAccessed
-} from './componentRenderUtils'
+import { markAttrsAccessed } from './componentRenderUtils'
+import { currentRenderingInstance } from './componentRenderContext'
 import { startMeasure, endMeasure } from './profiling'
 
 export type Data = Record<string, unknown>
@@ -304,7 +302,12 @@ export interface ComponentInternalInstance {
    * @internal
    */
   emitted: Record<string, boolean> | null
-
+  /**
+   * used for caching the value returned from props default factory functions to
+   * avoid unnecessary watcher trigger
+   * @internal
+   */
+  propsDefaults: Data
   /**
    * setup related
    * @internal
@@ -441,6 +444,9 @@ export function createComponentInstance(
     // emit
     emit: null as any, // to be set immediately
     emitted: null,
+
+    // props default value
+    propsDefaults: EMPTY_OBJ,
 
     // state
     ctx: EMPTY_OBJ,
@@ -585,9 +591,13 @@ function setupStatefulComponent(
     if (isPromise(setupResult)) {
       if (isSSR) {
         // return the promise so server-renderer can wait on it
-        return setupResult.then((resolvedResult: unknown) => {
-          handleSetupResult(instance, resolvedResult, isSSR)
-        })
+        return setupResult
+          .then((resolvedResult: unknown) => {
+            handleSetupResult(instance, resolvedResult, isSSR)
+          })
+          .catch(e => {
+            handleError(e, instance, ErrorCodes.SETUP_FUNCTION)
+          })
       } else if (__FEATURE_SUSPENSE__) {
         // async setup returned Promise.
         // bail here and wait for re-entry.
@@ -653,6 +663,9 @@ type CompileFunction = (
 
 let compile: CompileFunction | undefined
 
+// dev only
+export const isRuntimeOnly = () => !compile
+
 /**
  * For runtime-dom to register the compiler.
  * Note the exported method uses any to avoid d.ts relying on the compiler types.
@@ -669,9 +682,14 @@ function finishComponentSetup(
 
   // template / render function normalization
   if (__NODE_JS__ && isSSR) {
-    if (Component.render) {
-      instance.render = Component.render as InternalRenderFunction
-    }
+    // 1. the render function may already exist, returned by `setup`
+    // 2. otherwise try to use the `Component.render`
+    // 3. if the component doesn't have a render function,
+    //    set `instance.render` to NOOP so that it can inherit the render
+    //    function from mixins/extend
+    instance.render = (instance.render ||
+      Component.render ||
+      NOOP) as InternalRenderFunction
   } else if (!instance.render) {
     // could be set from setup()
     if (compile && Component.template && !Component.render) {
@@ -710,7 +728,8 @@ function finishComponentSetup(
   }
 
   // warn missing template/render
-  if (__DEV__ && !Component.render && instance.render === NOOP) {
+  // the runtime compilation of template in SSR is done by server-render
+  if (__DEV__ && !Component.render && instance.render === NOOP && !isSSR) {
     /* istanbul ignore if */
     if (!compile && Component.template) {
       warn(

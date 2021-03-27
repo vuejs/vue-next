@@ -65,6 +65,37 @@ describe('resolveAssets', () => {
     expect(directive4!).toBe(BarBaz)
   })
 
+  test('maybeSelfReference', async () => {
+    let component1: Component | string
+    let component2: Component | string
+    let component3: Component | string
+
+    const Foo = () => null
+
+    const Root = {
+      name: 'Root',
+      components: {
+        Foo,
+        Root: Foo
+      },
+      setup() {
+        return () => {
+          component1 = resolveComponent('Root', true)
+          component2 = resolveComponent('Foo', true)
+          component3 = resolveComponent('Bar', true)
+        }
+      }
+    }
+
+    const app = createApp(Root)
+    const root = nodeOps.createElement('div')
+    app.mount(root)
+
+    expect(component1!).toBe(Root) // explicit self name reference
+    expect(component2!).toBe(Foo) // successful resolve take higher priority
+    expect(component3!).toBe(Root) // fallback when resolve fails
+  })
+
   describe('warning', () => {
     test('used outside render() or setup()', () => {
       resolveComponent('foo')

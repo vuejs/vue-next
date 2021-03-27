@@ -35,7 +35,8 @@ import {
   helperNameMap,
   CREATE_BLOCK,
   CREATE_COMMENT,
-  OPEN_BLOCK
+  OPEN_BLOCK,
+  CREATE_VNODE
 } from './runtimeHelpers'
 import { isVSlot } from './utils'
 import { hoistStatic, isSingleElementRoot } from './transforms/hoistStatic'
@@ -85,7 +86,7 @@ export interface TransformContext
   extends Required<Omit<TransformOptions, 'filename'>> {
   selfName: string | null
   root: RootNode
-  helpers: Set<symbol>
+  helpers: Map<symbol, number>
   components: Set<string>
   directives: Set<string>
   hoists: (JSChildNode | null)[]
@@ -103,6 +104,7 @@ export interface TransformContext
   childIndex: number
   currentNode: RootNode | TemplateChildNode | null
   helper<T extends symbol>(name: T): T
+  removeHelper<T extends symbol>(name: T): void
   helperString(name: symbol): string
   replaceNode(node: TemplateChildNode): void
   removeNode(node?: TemplateChildNode): void
@@ -128,6 +130,7 @@ export function createTransformContext(
     isCustomElement = NOOP,
     expressionPlugins = [],
     scopeId = null,
+    slotted = true,
     ssr = false,
     ssrCssVars = ``,
     bindingMetadata = EMPTY_OBJ,
@@ -150,6 +153,7 @@ export function createTransformContext(
     isCustomElement,
     expressionPlugins,
     scopeId,
+    slotted,
     ssr,
     ssrCssVars,
     bindingMetadata,
@@ -159,7 +163,7 @@ export function createTransformContext(
 
     // state
     root,
-    helpers: new Set(),
+    helpers: new Map(),
     components: new Set(),
     directives: new Set(),
     hoists: [],
@@ -180,8 +184,20 @@ export function createTransformContext(
 
     // methods
     helper(name) {
-      context.helpers.add(name)
+      const count = context.helpers.get(name) || 0
+      context.helpers.set(name, count + 1)
       return name
+    },
+    removeHelper(name) {
+      const count = context.helpers.get(name)
+      if (count) {
+        const currentCount = count - 1
+        if (!currentCount) {
+          context.helpers.delete(name)
+        } else {
+          context.helpers.set(name, currentCount)
+        }
+      }
     },
     helperString(name) {
       return `_${helperNameMap[context.helper(name)]}`
@@ -290,7 +306,7 @@ export function transform(root: RootNode, options: TransformOptions) {
     createRootCodegen(root, context)
   }
   // finalize meta information
-  root.helpers = [...context.helpers]
+  root.helpers = [...context.helpers.keys()]
   root.components = [...context.components]
   root.directives = [...context.directives]
   root.imports = context.imports
@@ -300,7 +316,7 @@ export function transform(root: RootNode, options: TransformOptions) {
 }
 
 function createRootCodegen(root: RootNode, context: TransformContext) {
-  const { helper } = context
+  const { helper, removeHelper } = context
   const { children } = root
   if (children.length === 1) {
     const child = children[0]
@@ -310,9 +326,12 @@ function createRootCodegen(root: RootNode, context: TransformContext) {
       // SimpleExpressionNode
       const codegenNode = child.codegenNode
       if (codegenNode.type === NodeTypes.VNODE_CALL) {
-        codegenNode.isBlock = true
-        helper(OPEN_BLOCK)
-        helper(CREATE_BLOCK)
+        if (!codegenNode.isBlock) {
+          removeHelper(CREATE_VNODE)
+          codegenNode.isBlock = true
+          helper(OPEN_BLOCK)
+          helper(CREATE_BLOCK)
+        }
       }
       root.codegenNode = codegenNode
     } else {

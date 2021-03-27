@@ -7,7 +7,7 @@ exports[`compiler: expression transform bindingMetadata inline mode 1`] = `
 `;
 
 exports[`compiler: expression transform bindingMetadata non-inline mode 1`] = `
-"const { toDisplayString: _toDisplayString, createVNode: _createVNode, openBlock: _openBlock, createBlock: _createBlock } = Vue
+"const { toDisplayString: _toDisplayString, openBlock: _openBlock, createBlock: _createBlock } = Vue
 
 return function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (_openBlock(), _createBlock(\\"div\\", null, _toDisplayString($props.props) + \\" \\" + _toDisplayString($setup.setup) + \\" \\" + _toDisplayString($data.data) + \\" \\" + _toDisplayString($options.options), 1 /* TEXT */))

@@ -203,6 +203,12 @@ export function ssrProcessComponent(
         vnodeBranch
       )
     }
+
+    // component is inside a slot, inherit slot scope Id
+    if (context.withSlotScopeId) {
+      node.ssrCodegenNode!.arguments.push(`_scopeId`)
+    }
+
     if (typeof component === 'string') {
       // static component
       context.pushStatement(
@@ -287,12 +293,22 @@ function subTransform(
   // inherit parent scope analysis state
   childContext.scopes = { ...parentContext.scopes }
   childContext.identifiers = { ...parentContext.identifiers }
+  childContext.imports = parentContext.imports
   // traverse
   traverseNode(childRoot, childContext)
   // merge helpers/components/directives into parent context
   ;(['helpers', 'components', 'directives'] as const).forEach(key => {
-    childContext[key].forEach((value: any) => {
-      ;(parentContext[key] as any).add(value)
+    childContext[key].forEach((value: any, helperKey: any) => {
+      if (key === 'helpers') {
+        const parentCount = parentContext.helpers.get(helperKey)
+        if (parentCount === undefined) {
+          parentContext.helpers.set(helperKey, value)
+        } else {
+          parentContext.helpers.set(helperKey, value + parentCount)
+        }
+      } else {
+        ;(parentContext[key] as any).add(value)
+      }
     })
   })
   // imports/hoists are not merged because:

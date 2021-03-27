@@ -77,19 +77,26 @@ const KeepAliveImpl = {
   },
 
   setup(props: KeepAliveProps, { slots }: SetupContext) {
-    const cache: Cache = new Map()
-    const keys: Keys = new Set()
-    let current: VNode | null = null
-
     const instance = getCurrentInstance()!
-    const parentSuspense = instance.suspense
-
     // KeepAlive communicates with the instantiated renderer via the
     // ctx where the renderer passes in its internals,
     // and the KeepAlive instance exposes activate/deactivate implementations.
     // The whole point of this is to avoid importing KeepAlive directly in the
     // renderer to facilitate tree-shaking.
     const sharedContext = instance.ctx as KeepAliveContext
+
+    // if the internal renderer is not registered, it indicates that this is server-side rendering,
+    // for KeepAlive, we just need to render its children
+    if (!sharedContext.renderer) {
+      return slots.default
+    }
+
+    const cache: Cache = new Map()
+    const keys: Keys = new Set()
+    let current: VNode | null = null
+
+    const parentSuspense = instance.suspense
+
     const {
       renderer: {
         p: patch,
@@ -112,6 +119,7 @@ const KeepAliveImpl = {
         instance,
         parentSuspense,
         isSVG,
+        vnode.slotScopeIds,
         optimized
       )
       queuePostRenderEffect(() => {

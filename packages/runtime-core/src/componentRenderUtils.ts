@@ -10,7 +10,8 @@ import {
   Comment,
   cloneVNode,
   VNodeArrayChildren,
-  isVNode
+  isVNode,
+  blockStack
 } from './vnode'
 import { handleError, ErrorCodes } from './errorHandling'
 import { PatchFlags, ShapeFlags, isOn, isModelListener } from '@vue/shared'
@@ -18,18 +19,7 @@ import { warn } from './warning'
 import { isHmrUpdating } from './hmr'
 import { NormalizedProps } from './componentProps'
 import { isEmitListener } from './componentEmits'
-
-/**
- * mark the current rendering instance for asset resolution (e.g.
- * resolveComponent, resolveDirective) during render
- */
-export let currentRenderingInstance: ComponentInternalInstance | null = null
-
-export function setCurrentRenderingInstance(
-  instance: ComponentInternalInstance | null
-) {
-  currentRenderingInstance = instance
-}
+import { setCurrentRenderingInstance } from './componentRenderContext'
 
 /**
  * dev only flag to track whether $attrs was used during render.
@@ -63,7 +53,7 @@ export function renderComponentRoot(
   } = instance
 
   let result
-  currentRenderingInstance = instance
+  const prev = setCurrentRenderingInstance(instance)
   if (__DEV__) {
     accessedAttrs = false
   }
@@ -212,11 +202,12 @@ export function renderComponentRoot(
       result = root
     }
   } catch (err) {
+    blockStack.length = 0
     handleError(err, instance, ErrorCodes.RENDER_FUNCTION)
     result = createVNode(Comment)
   }
-  currentRenderingInstance = null
 
+  setCurrentRenderingInstance(prev)
   return result
 }
 

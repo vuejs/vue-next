@@ -11,6 +11,7 @@ import {
   ComponentPublicInstance,
   ComponentOptions,
   SetupContext,
+  IsUnion,
   h
 } from './index'
 
@@ -33,6 +34,9 @@ describe('with object props', () => {
     hhh: boolean
     ggg: 'foo' | 'bar'
     ffff: (a: number, b: string) => { a: boolean }
+    iii?: (() => string) | (() => number)
+    jjj: ((arg1: string) => string) | ((arg1: string, arg2: string) => string)
+    kkk?: any
     validated?: string
     date?: Date
   }
@@ -100,6 +104,16 @@ describe('with object props', () => {
         type: Function as PropType<(a: number, b: string) => { a: boolean }>,
         default: (a: number, b: string) => ({ a: a > +b })
       },
+      // union + function with different return types
+      iii: Function as PropType<(() => string) | (() => number)>,
+      // union + function with different args & same return type
+      jjj: {
+        type: Function as PropType<
+          ((arg1: string) => string) | ((arg1: string, arg2: string) => string)
+        >,
+        required: true
+      },
+      kkk: null,
       validated: {
         type: String,
         // validator requires explicit annotation
@@ -126,6 +140,13 @@ describe('with object props', () => {
       expectType<ExpectedProps['hhh']>(props.hhh)
       expectType<ExpectedProps['ggg']>(props.ggg)
       expectType<ExpectedProps['ffff']>(props.ffff)
+      if (typeof props.iii !== 'function') {
+        expectType<undefined>(props.iii)
+      }
+      expectType<ExpectedProps['iii']>(props.iii)
+      expectType<IsUnion<typeof props.jjj>>(true)
+      expectType<ExpectedProps['jjj']>(props.jjj)
+      expectType<ExpectedProps['kkk']>(props.kkk)
       expectType<ExpectedProps['validated']>(props.validated)
       expectType<ExpectedProps['date']>(props.date)
 
@@ -160,6 +181,13 @@ describe('with object props', () => {
       expectType<ExpectedProps['fff']>(props.fff)
       expectType<ExpectedProps['hhh']>(props.hhh)
       expectType<ExpectedProps['ggg']>(props.ggg)
+      if (typeof props.iii !== 'function') {
+        expectType<undefined>(props.iii)
+      }
+      expectType<ExpectedProps['iii']>(props.iii)
+      expectType<IsUnion<typeof props.jjj>>(true)
+      expectType<ExpectedProps['jjj']>(props.jjj)
+      expectType<ExpectedProps['kkk']>(props.kkk)
 
       // @ts-expect-error props should be readonly
       expectError((props.a = 1))
@@ -180,6 +208,14 @@ describe('with object props', () => {
       expectType<ExpectedProps['fff']>(this.fff)
       expectType<ExpectedProps['hhh']>(this.hhh)
       expectType<ExpectedProps['ggg']>(this.ggg)
+      if (typeof this.iii !== 'function') {
+        expectType<undefined>(this.iii)
+      }
+      expectType<ExpectedProps['iii']>(this.iii)
+      const { jjj } = this
+      expectType<IsUnion<typeof jjj>>(true)
+      expectType<ExpectedProps['jjj']>(this.jjj)
+      expectType<ExpectedProps['kkk']>(this.kkk)
 
       // @ts-expect-error props on `this` should be readonly
       expectError((this.a = 1))
@@ -214,6 +250,7 @@ describe('with object props', () => {
       fff={(a, b) => ({ a: a > +b })}
       hhh={false}
       ggg="foo"
+      jjj={() => ''}
       // should allow class/style as attrs
       class="bar"
       style={{ color: 'red' }}
@@ -232,6 +269,7 @@ describe('with object props', () => {
       eee={() => ({ a: 'eee' })}
       fff={(a, b) => ({ a: a > +b })}
       hhh={false}
+      jjj={() => ''}
     />
   )
 
@@ -341,7 +379,8 @@ describe('type inference w/ options API', () => {
       // here in data() - somehow that would mess up the inference
       expectType<number | undefined>(this.a)
       return {
-        c: this.a || 123
+        c: this.a || 123,
+        someRef: ref(0)
       }
     },
     computed: {
@@ -380,6 +419,7 @@ describe('type inference w/ options API', () => {
       expectType<number>(this.d)
       // computed get/set
       expectType<number>(this.e)
+      expectType<number>(this.someRef)
     },
     methods: {
       doSomething() {

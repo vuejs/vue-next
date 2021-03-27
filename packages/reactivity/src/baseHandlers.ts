@@ -5,7 +5,9 @@ import {
   ReactiveFlags,
   Target,
   readonlyMap,
-  reactiveMap
+  reactiveMap,
+  shallowReactiveMap,
+  shallowReadonlyMap
 } from './reactive'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
 import {
@@ -80,7 +82,15 @@ function createGetter(isReadonly = false, shallow = false) {
       return isReadonly
     } else if (
       key === ReactiveFlags.RAW &&
-      receiver === (isReadonly ? readonlyMap : reactiveMap).get(target)
+      receiver ===
+        (isReadonly
+          ? shallow
+            ? shallowReadonlyMap
+            : readonlyMap
+          : shallow
+            ? shallowReactiveMap
+            : reactiveMap
+        ).get(target)
     ) {
       return target
     }
@@ -182,7 +192,7 @@ function has(target: object, key: string | symbol): boolean {
   return result
 }
 
-function ownKeys(target: object): (string | number | symbol)[] {
+function ownKeys(target: object): (string | symbol)[] {
   track(target, TrackOpTypes.ITERATE, isArray(target) ? 'length' : ITERATE_KEY)
   return Reflect.ownKeys(target)
 }

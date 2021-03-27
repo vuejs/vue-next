@@ -7,8 +7,8 @@ import {
   markRaw,
   effect,
   ref,
-  shallowReadonly,
-  isProxy
+  isProxy,
+  computed
 } from '../src'
 
 /**
@@ -435,31 +435,23 @@ describe('reactivity/readonly', () => {
     ).toHaveBeenWarned()
   })
 
-  describe('shallowReadonly', () => {
-    test('should not make non-reactive properties reactive', () => {
-      const props = shallowReadonly({ n: { foo: 1 } })
-      expect(isReactive(props.n)).toBe(false)
-    })
+  // https://github.com/vuejs/vue-next/issues/3376
+  test('calling readonly on computed should allow computed to set its private properties', () => {
+    const r = ref<boolean>(false)
+    const c = computed(() => r.value)
+    const rC = readonly(c)
 
-    test('should make root level properties readonly', () => {
-      const props = shallowReadonly({ n: 1 })
-      // @ts-ignore
-      props.n = 2
-      expect(props.n).toBe(1)
-      expect(
-        `Set operation on key "n" failed: target is readonly.`
-      ).toHaveBeenWarned()
-    })
+    r.value = true
 
-    // to retain 2.x behavior.
-    test('should NOT make nested properties readonly', () => {
-      const props = shallowReadonly({ n: { foo: 1 } })
-      // @ts-ignore
-      props.n.foo = 2
-      expect(props.n.foo).toBe(2)
-      expect(
-        `Set operation on key "foo" failed: target is readonly.`
-      ).not.toHaveBeenWarned()
-    })
+    expect(rC.value).toBe(true)
+    expect(
+      'Set operation on key "_dirty" failed: target is readonly.'
+    ).not.toHaveBeenWarned()
+    // @ts-expect-error - non-existant property
+    rC.randomProperty = true
+
+    expect(
+      'Set operation on key "randomProperty" failed: target is readonly.'
+    ).toHaveBeenWarned()
   })
 })

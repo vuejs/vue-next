@@ -165,8 +165,11 @@ export function normalizeEmitsOptions(
   let hasExtends = false
   if (__FEATURE_OPTIONS_API__ && !isFunction(comp)) {
     const extendEmits = (raw: ComponentOptions) => {
-      hasExtends = true
-      extend(normalized, normalizeEmitsOptions(raw, appContext, true))
+      const normalizedFromExtend = normalizeEmitsOptions(raw, appContext, true)
+      if (normalizedFromExtend) {
+        hasExtends = true
+        extend(normalized, normalizedFromExtend)
+      }
     }
     if (!asMixin && appContext.mixins.length) {
       appContext.mixins.forEach(extendEmits)

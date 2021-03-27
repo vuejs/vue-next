@@ -332,4 +332,65 @@ describe('hot module replacement', () => {
     rerender(last.__hmrId!, compileToFunction(`<Parent class="test"/>`))
     expect(serializeInner(root)).toBe(`<div class="test">child</div>`)
   })
+
+  // #3302
+  test('rerender with Teleport', () => {
+    const root = nodeOps.createElement('div')
+    const target = nodeOps.createElement('div')
+    const parentId = 'parent-teleport'
+
+    const Child: ComponentOptions = {
+      data() {
+        return {
+          // style is used to ensure that the div tag will be tracked by Teleport
+          style: {},
+          target
+        }
+      },
+      render: compileToFunction(`
+        <teleport :to="target">
+          <div :style="style">
+            <slot/>
+          </div>
+        </teleport>
+      `)
+    }
+
+    const Parent: ComponentOptions = {
+      __hmrId: parentId,
+      components: { Child },
+      render: compileToFunction(`
+        <Child>
+          <template #default>
+            <div>1</div>
+          </template>
+        </Child>
+      `)
+    }
+    createRecord(parentId, Parent)
+
+    render(h(Parent), root)
+    expect(serializeInner(root)).toBe(
+      `<!--teleport start--><!--teleport end-->`
+    )
+    expect(serializeInner(target)).toBe(`<div style={}><div>1</div></div>`)
+
+    rerender(
+      parentId,
+      compileToFunction(`
+      <Child>
+        <template #default>
+          <div>1</div>
+          <div>2</div>
+        </template>
+      </Child>
+    `)
+    )
+    expect(serializeInner(root)).toBe(
+      `<!--teleport start--><!--teleport end-->`
+    )
+    expect(serializeInner(target)).toBe(
+      `<div style={}><div>1</div><div>2</div></div>`
+    )
+  })
 })

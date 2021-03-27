@@ -48,12 +48,14 @@ class ComputedRefImpl<T> {
   }
 
   get value() {
-    if (this._dirty) {
-      this._value = this.effect()
-      this._dirty = false
+    // the computed ref may get wrapped by other proxies e.g. readonly() #3376
+    const self = toRaw(this)
+    if (self._dirty) {
+      self._value = this.effect()
+      self._dirty = false
     }
-    track(toRaw(this), TrackOpTypes.GET, 'value')
-    return this._value
+    track(self, TrackOpTypes.GET, 'value')
+    return self._value
   }
 
   set value(newValue: T) {

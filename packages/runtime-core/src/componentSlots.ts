@@ -17,7 +17,7 @@ import {
 } from '@vue/shared'
 import { warn } from './warning'
 import { isKeepAlive } from './components/KeepAlive'
-import { withCtx } from './helpers/withRenderContext'
+import { withCtx } from './componentRenderContext'
 import { isHmrUpdating } from './hmr'
 
 export type Slot = (...args: any[]) => VNode[]
@@ -70,7 +70,7 @@ const normalizeSlot = (
       )
     }
     return normalizeSlotValue(rawSlot(props))
-  }, ctx)
+  }, ctx) as Slot
 
 const normalizeObjectSlots = (rawSlots: RawSlots, slots: InternalSlots) => {
   const ctx = rawSlots._ctx

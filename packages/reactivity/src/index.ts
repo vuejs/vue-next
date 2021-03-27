@@ -25,7 +25,8 @@ export {
   markRaw,
   toRaw,
   ReactiveFlags,
-  DeepReadonly
+  DeepReadonly,
+  UnwrapNestedRefs
 } from './reactive'
 export {
   computed,
