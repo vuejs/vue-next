@@ -342,6 +342,8 @@ function _createVNode(
     type = Comment
   }
 
+  children = toRaw(children)
+
   if (isVNode(type)) {
     // createVNode receiving an existing vnode. This happens in cases like
     // <component :is="vnode"/>

@@ -432,4 +432,31 @@ describe('renderer: teleport', () => {
       `"<div>teleported</div><span>false</span><!--v-if-->"`
     )
   })
+
+  test('should not throw error', async () => {
+    const targetA = nodeOps.createElement('div')
+    const targetB = nodeOps.createElement('div')
+    const target = ref(targetA)
+    const root = nodeOps.createElement('div')
+
+    const children = ref([h('div', 'teleported')])
+    render(
+      h(() => [
+        h(Teleport, { to: target.value }, children.value),
+        h('div', 'root')
+      ]),
+      root
+    )
+
+    try {
+      target.value = targetB
+      await nextTick()
+    } catch (err) {
+      expect(err).toBeUndefined()
+    }
+
+    expect(serializeInner(targetB)).toMatchInlineSnapshot(
+      `"<div>teleported</div>"`
+    )
+  })
 })
