@@ -486,7 +486,7 @@ function validateProps(
       resolvedValues[key],
       opt,
       shallowReadonly(resolvedValues),
-      !hasOwn(rawProps, key)
+      !hasOwn(rawProps, key) && !hasOwn(rawProps, hyphenate(key))
     )
   }
 }

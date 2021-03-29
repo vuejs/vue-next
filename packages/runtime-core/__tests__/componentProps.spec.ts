@@ -369,6 +369,25 @@ describe('component props', () => {
     expect(`Missing required prop: "num"`).toHaveBeenWarned()
   })
 
+  // #3495
+  test('should not warn required props using kebab-case', async () => {
+    const Comp = {
+      props: {
+        fooBar: { type: String, required: true }
+      },
+      setup() {
+        return () => null
+      }
+    }
+    render(
+      h(Comp, {
+        'foo-bar': 'hello'
+      }),
+      nodeOps.createElement('div')
+    )
+    expect(`Missing required prop: "fooBar"`).not.toHaveBeenWarned()
+  })
+
   test('merging props from mixins and extends', () => {
     let setupProps: any
     let renderProxy: any

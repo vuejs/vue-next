@@ -105,7 +105,7 @@ describe('ssr: <slot>', () => {
               _ssrRenderSlot(_ctx.$slots, \\"default\\", {}, null, _push, _parent, \\"hello-s\\" + _scopeId)
             } else {
               return [
-                _renderSlot(_ctx.$slots, \\"default\\", {}, undefined, true)
+                _renderSlot(_ctx.$slots, \\"default\\")
               ]
             }
           }),

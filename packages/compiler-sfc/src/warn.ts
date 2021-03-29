@@ -16,6 +16,10 @@ export function warn(msg: string) {
 }
 
 export function warnExperimental(feature: string, rfcId: number) {
+  // eslint-disable-next-line
+  if (typeof window !== 'undefined') {
+    return
+  }
   warnOnce(
     `${feature} is still an experimental proposal.\n` +
       `Follow its status at https://github.com/vuejs/rfcs/pull/${rfcId}.`

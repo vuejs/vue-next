@@ -1,6 +1,6 @@
 {
   "name": "@vue/server-renderer",
-  "version": "3.0.8",
+  "version": "3.0.9",
   "description": "@vue/server-renderer",
   "main": "index.js",
   "types": "dist/server-renderer.d.ts",
@@ -28,10 +28,10 @@
   },
   "homepage": "https://github.com/vuejs/vue-next/tree/master/packages/server-renderer#readme",
   "peerDependencies": {
-    "vue": "3.0.8"
+    "vue": "3.0.9"
   },
   "dependencies": {
-    "@vue/shared": "3.0.8",
-    "@vue/compiler-ssr": "3.0.8"
+    "@vue/shared": "3.0.9",
+    "@vue/compiler-ssr": "3.0.9"
   }
 }

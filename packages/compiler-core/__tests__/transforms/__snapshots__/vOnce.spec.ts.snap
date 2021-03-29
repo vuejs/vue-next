@@ -67,7 +67,7 @@ return function render(_ctx, _cache) {
     return (_openBlock(), _createBlock(\\"div\\", null, [
       _cache[1] || (
         _setBlockTracking(-1),
-        _cache[1] = _renderSlot($slots, \\"default\\", {}, undefined, true),
+        _cache[1] = _renderSlot($slots, \\"default\\"),
         _setBlockTracking(1),
         _cache[1]
       )

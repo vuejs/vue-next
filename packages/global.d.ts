@@ -22,3 +22,15 @@ declare namespace jest {
     toHaveBeenWarnedTimes(n: number): R
   }
 }
+
+declare module '*.vue' {
+
+}
+declare module '*?raw' {
+  const content: string
+  export default content
+}
+
+declare module 'file-saver' {
+  export function saveAs(blob: any, name: any): void
+}

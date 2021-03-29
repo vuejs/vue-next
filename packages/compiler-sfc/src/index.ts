@@ -6,6 +6,13 @@ export { compileScript } from './compileScript'
 export { rewriteDefault } from './rewriteDefault'
 export { generateCodeFrame } from '@vue/compiler-core'
 
+// Utilities
+export { parse as babelParse } from '@babel/parser'
+export { walkIdentifiers } from './compileScript'
+import MagicString from 'magic-string'
+export { MagicString }
+export { walk } from 'estree-walker'
+
 // Types
 export {
   SFCParseOptions,

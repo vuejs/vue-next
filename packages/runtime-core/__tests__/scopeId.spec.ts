@@ -3,9 +3,12 @@ import {
   render,
   nodeOps,
   serializeInner,
-  renderSlot
+  renderSlot,
+  withScopeId,
+  pushScopeId,
+  popScopeId
 } from '@vue/runtime-test'
-import { setScopeId, withCtx } from '../src/componentRenderContext'
+import { withCtx } from '../src/componentRenderContext'
 
 describe('scopeId runtime support', () => {
   test('should attach scopeId', () => {
@@ -40,7 +43,7 @@ describe('scopeId runtime support', () => {
     const Child = {
       __scopeId: 'child',
       render(this: any) {
-        return h('div', renderSlot(this.$slots, 'default', {}, undefined, true))
+        return h('div', renderSlot(this.$slots, 'default'))
       }
     }
     const Child2 = {
@@ -82,7 +85,13 @@ describe('scopeId runtime support', () => {
       render(this: any) {
         // <div class="wrapper"><slot/></div>
         return h('div', { class: 'wrapper' }, [
-          renderSlot(this.$slots, 'default')
+          renderSlot(
+            this.$slots,
+            'default',
+            {},
+            undefined,
+            true /* noSlotted */
+          )
         ])
       }
     }
@@ -92,17 +101,15 @@ describe('scopeId runtime support', () => {
       render(this: any) {
         // <Wrapper><slot/></Wrapper>
         return h(Wrapper, null, {
-          default: withCtx(() => [
-            renderSlot(this.$slots, 'default', {}, undefined, true)
-          ])
+          default: withCtx(() => [renderSlot(this.$slots, 'default')])
         })
       }
     }
 
     // simulate hoisted node
-    setScopeId('root')
+    pushScopeId('root')
     const hoisted = h('div', 'hoisted')
-    setScopeId(null)
+    popScopeId()
 
     const Root = {
       __scopeId: 'root',
@@ -176,5 +183,126 @@ describe('scopeId runtime support', () => {
     render(h(App), root)
 
     expect(serializeInner(root)).toBe(`<div parent></div>`)
+  })
+})
+
+describe('backwards compat with <=3.0.7', () => {
+  const withParentId = withScopeId('parent')
+  const withChildId = withScopeId('child')
+
+  test('should attach scopeId', () => {
+    const App = {
+      __scopeId: 'parent',
+      render: withParentId(() => {
+        return h('div', [h('div')])
+      })
+    }
+    const root = nodeOps.createElement('div')
+    render(h(App), root)
+    expect(serializeInner(root)).toBe(`<div parent><div parent></div></div>`)
+  })
+
+  test('should attach scopeId to components in parent component', () => {
+    const Child = {
+      __scopeId: 'child',
+      render: withChildId(() => {
+        return h('div')
+      })
+    }
+    const App = {
+      __scopeId: 'parent',
+      render: withParentId(() => {
+        return h('div', [h(Child)])
+      })
+    }
+
+    const root = nodeOps.createElement('div')
+    render(h(App), root)
+    expect(serializeInner(root)).toBe(
+      `<div parent><div child parent></div></div>`
+    )
+  })
+
+  test('should work on slots', () => {
+    const Child = {
+      __scopeId: 'child',
+      render: withChildId(function(this: any) {
+        return h('div', renderSlot(this.$slots, 'default'))
+      })
+    }
+    const withChild2Id = withScopeId('child2')
+    const Child2 = {
+      __scopeId: 'child2',
+      render: withChild2Id(() => h('span'))
+    }
+    const App = {
+      __scopeId: 'parent',
+      render: withParentId(() => {
+        return h(
+          Child,
+          withParentId(() => {
+            return [h('div'), h(Child2)]
+          })
+        )
+      })
+    }
+    const root = nodeOps.createElement('div')
+    render(h(App), root)
+    // slot content should have:
+    // - scopeId from parent
+    // - slotted scopeId (with `-s` postfix) from child (the tree owner)
+    expect(serializeInner(root)).toBe(
+      `<div child parent>` +
+        `<div parent child-s></div>` +
+        // component inside slot should have:
+        // - scopeId from template context
+        // - slotted scopeId from slot owner
+        // - its own scopeId
+        `<span child2 parent child-s></span>` +
+        `</div>`
+    )
+  })
+
+  // #1988
+  test('should inherit scopeId through nested HOCs with inheritAttrs: false', () => {
+    const withParentId = withScopeId('parent')
+    const App = {
+      __scopeId: 'parent',
+      render: withParentId(() => {
+        return h(Child)
+      })
+    }
+
+    function Child() {
+      return h(Child2, { class: 'foo' })
+    }
+
+    function Child2() {
+      return h('div')
+    }
+    Child2.inheritAttrs = false
+
+    const root = nodeOps.createElement('div')
+    render(h(App), root)
+
+    expect(serializeInner(root)).toBe(`<div parent></div>`)
+  })
+
+  test('hoisted nodes', async () => {
+    pushScopeId('foobar')
+    const hoisted = h('div', 'hello')
+    popScopeId()
+
+    const App = {
+      __scopeId: 'foobar',
+      render: () => h('div', [hoisted])
+    }
+
+    const root = nodeOps.createElement('div')
+    render(h(App), root)
+
+    expect(serializeInner(root)).toBe(
+      `<div foobar><div foobar>hello</div></div>`
+    )
   })
 })

@@ -80,7 +80,7 @@ return function render(_ctx, _cache) {
     const { renderSlot: _renderSlot, createCommentVNode: _createCommentVNode } = _Vue
 
     return ok
-      ? _renderSlot($slots, \\"default\\", { key: 0 }, undefined, true)
+      ? _renderSlot($slots, \\"default\\", { key: 0 })
       : _createCommentVNode(\\"v-if\\", true)
   }
 }"
@@ -140,7 +140,7 @@ return function render(_ctx, _cache) {
     const { renderSlot: _renderSlot, createCommentVNode: _createCommentVNode } = _Vue
 
     return ok
-      ? _renderSlot($slots, \\"default\\", { key: 0 }, undefined, true)
+      ? _renderSlot($slots, \\"default\\", { key: 0 })
       : _createCommentVNode(\\"v-if\\", true)
   }
 }"

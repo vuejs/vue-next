@@ -1367,7 +1367,7 @@ function markScopeIdentifier(
  * but with some subtle differences as this needs to handle a wider range of
  * possible syntax.
  */
-function walkIdentifiers(
+export function walkIdentifiers(
   root: Node,
   onIdentifier: (node: Identifier, parent: Node, parentStack: Node[]) => void
 ) {
@@ -1389,13 +1389,11 @@ function walkIdentifiers(
         if (node.body.type === 'BlockStatement') {
           node.body.body.forEach(p => {
             if (p.type === 'VariableDeclaration') {
-              ;(walk as any)(p, {
-                enter(child: Node) {
-                  if (child.type === 'Identifier') {
-                    markScopeIdentifier(node, child, knownIds)
-                  }
-                }
-              })
+              for (const decl of p.declarations) {
+                extractIdentifiers(decl.id).forEach(id => {
+                  markScopeIdentifier(node, id, knownIds)
+                })
+              }
             }
           })
         }
@@ -1691,4 +1689,49 @@ function getObjectOrArrayExpressionKeys(value: Node): string[] {
     return getObjectExpressionKeys(value)
   }
   return []
+}
+
+function extractIdentifiers(
+  param: Node,
+  nodes: Identifier[] = []
+): Identifier[] {
+  switch (param.type) {
+    case 'Identifier':
+      nodes.push(param)
+      break
+
+    case 'MemberExpression':
+      let object: any = param
+      while (object.type === 'MemberExpression') {
+        object = object.object
+      }
+      nodes.push(object)
+      break
+
+    case 'ObjectPattern':
+      param.properties.forEach(prop => {
+        if (prop.type === 'RestElement') {
+          extractIdentifiers(prop.argument, nodes)
+        } else {
+          extractIdentifiers(prop.value, nodes)
+        }
+      })
+      break
+
+    case 'ArrayPattern':
+      param.elements.forEach(element => {
+        if (element) extractIdentifiers(element, nodes)
+      })
+      break
+
+    case 'RestElement':
+      extractIdentifiers(param.argument, nodes)
+      break
+
+    case 'AssignmentPattern':
+      extractIdentifiers(param.left, nodes)
+      break
+  }
+
+  return nodes
 }

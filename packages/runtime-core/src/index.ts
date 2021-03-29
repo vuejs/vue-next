@@ -226,8 +226,13 @@ export { HMRRuntime } from './hmr'
 // user code should avoid relying on them.
 
 // For compiler generated code
-// should sync with '@vue/compiler-core/src/runtimeConstants.ts'
-export { withCtx, setScopeId } from './componentRenderContext'
+// should sync with '@vue/compiler-core/src/runtimeHelpers.ts'
+export {
+  withCtx,
+  pushScopeId,
+  popScopeId,
+  withScopeId
+} from './componentRenderContext'
 export { renderList } from './helpers/renderList'
 export { toHandlers } from './helpers/toHandlers'
 export { renderSlot } from './helpers/renderSlot'

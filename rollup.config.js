@@ -119,9 +119,7 @@ function createConfig(format, output, plugins = []) {
   const external =
     isGlobalBuild || isBrowserESMBuild
       ? packageOptions.enableNonBrowserBranches
-        ? // externalize postcss for @vue/compiler-sfc
-          // because @rollup/plugin-commonjs cannot bundle it properly
-          ['postcss']
+        ? []
         : // normal browser builds - non-browser only imports are tree-shaken,
           // they are only listed here to suppress warnings.
           ['source-map', '@babel/parser', 'estree-walker']
@@ -141,14 +139,11 @@ function createConfig(format, output, plugins = []) {
   const nodePlugins =
     packageOptions.enableNonBrowserBranches && format !== 'cjs'
       ? [
-          require('@rollup/plugin-node-resolve').nodeResolve({
-            preferBuiltins: true
-          }),
           require('@rollup/plugin-commonjs')({
             sourceMap: false
           }),
-          require('rollup-plugin-node-builtins')(),
-          require('rollup-plugin-node-globals')()
+          require('rollup-plugin-polyfill-node')(),
+          require('@rollup/plugin-node-resolve').nodeResolve()
         ]
       : []
 

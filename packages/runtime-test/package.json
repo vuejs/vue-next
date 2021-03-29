@@ -1,6 +1,6 @@
 {
   "name": "@vue/runtime-test",
-  "version": "3.0.8",
+  "version": "3.0.9",
   "description": "@vue/runtime-test",
   "private": true,
   "main": "index.js",
@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/vuejs/vue-next/tree/master/packages/runtime-test#readme",
   "dependencies": {
-    "@vue/shared": "3.0.8",
-    "@vue/runtime-core": "3.0.8"
+    "@vue/shared": "3.0.9",
+    "@vue/runtime-core": "3.0.9"
   }
 }

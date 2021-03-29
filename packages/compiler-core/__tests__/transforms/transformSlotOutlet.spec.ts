@@ -16,7 +16,6 @@ import { transformSlotOutlet } from '../../src/transforms/transformSlotOutlet'
 function parseWithSlots(template: string, options: CompilerOptions = {}) {
   const ast = parse(template)
   transform(ast, {
-    slotted: false,
     nodeTransforms: [
       ...(options.prefixIdentifiers ? [transformExpression] : []),
       transformSlotOutlet,
@@ -340,8 +339,8 @@ describe('compiler: transform <slot> outlets', () => {
     })
   })
 
-  test('slot with slotted: true', async () => {
-    const ast = parseWithSlots(`<slot/>`, { slotted: true })
+  test('slot with slotted: false', async () => {
+    const ast = parseWithSlots(`<slot/>`, { slotted: false, scopeId: 'foo' })
     expect((ast.children[0] as ElementNode).codegenNode).toMatchObject({
       type: NodeTypes.JS_CALL_EXPRESSION,
       callee: RENDER_SLOT,

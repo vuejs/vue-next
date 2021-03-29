@@ -780,9 +780,6 @@ export function createSetupContext(
     // We use getters in dev in case libs like test-utils overwrite instance
     // properties (overwrites should not be done in prod)
     return Object.freeze({
-      get props() {
-        return instance.props
-      },
       get attrs() {
         return new Proxy(instance.attrs, attrHandlers)
       },

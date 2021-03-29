@@ -4,10 +4,6 @@
 
 This package contains lower level utilities that you can use if you are writing a plugin / transform for a bundler or module system that compiles Vue Single File Components (SFCs) into JavaScript. It is used in [vue-loader](https://github.com/vuejs/vue-loader), [rollup-plugin-vue](https://github.com/vuejs/rollup-plugin-vue) and [vite](https://github.com/vitejs/vite).
 
-## Browser Build Notes
-
-The browser build relies on a browser-bundled build of `postcss` to be available under the global `postcss` (since it can't be properly bundled by Rollup).
-
 ## API
 
 The API is intentionally low-level due to the various considerations when integrating Vue SFCs in a build system:

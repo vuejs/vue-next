@@ -623,7 +623,7 @@ function parseAttribute(
 
     if (match[2]) {
       const isSlot = dirName === 'slot'
-      const startOffset = name.indexOf(match[2])
+      const startOffset = name.lastIndexOf(match[2])
       const loc = getSelection(
         context,
         getNewPosition(context, start, startOffset),

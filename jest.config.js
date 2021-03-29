@@ -20,6 +20,7 @@ module.exports = {
     'packages/*/src/**/*.ts',
     '!packages/runtime-test/src/utils/**',
     '!packages/template-explorer/**',
+    '!packages/sfc-playground/**',
     '!packages/size-check/**',
     '!packages/runtime-core/src/profiling.ts',
     '!packages/runtime-core/src/customFormatter.ts',

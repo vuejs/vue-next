@@ -1,6 +1,6 @@
 {
   "name": "@vue/reactivity",
-  "version": "3.0.8",
+  "version": "3.0.9",
   "description": "@vue/reactivity",
   "main": "index.js",
   "module": "dist/reactivity.esm-bundler.js",
@@ -36,6 +36,6 @@
   },
   "homepage": "https://github.com/vuejs/vue-next/tree/master/packages/reactivity#readme",
   "dependencies": {
-    "@vue/shared": "3.0.8"
+    "@vue/shared": "3.0.9"
   }
 }

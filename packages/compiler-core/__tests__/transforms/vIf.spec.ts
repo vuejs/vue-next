@@ -404,13 +404,7 @@ describe('compiler: v-if', () => {
       expect(codegenNode.consequent).toMatchObject({
         type: NodeTypes.JS_CALL_EXPRESSION,
         callee: RENDER_SLOT,
-        arguments: [
-          '$slots',
-          '"default"',
-          createObjectMatcher({ key: `[0]` }),
-          'undefined',
-          'true'
-        ]
+        arguments: ['$slots', '"default"', createObjectMatcher({ key: `[0]` })]
       })
       expect(generate(root).code).toMatchSnapshot()
     })
@@ -423,13 +417,7 @@ describe('compiler: v-if', () => {
       expect(codegenNode.consequent).toMatchObject({
         type: NodeTypes.JS_CALL_EXPRESSION,
         callee: RENDER_SLOT,
-        arguments: [
-          '$slots',
-          '"default"',
-          createObjectMatcher({ key: `[0]` }),
-          'undefined',
-          'true'
-        ]
+        arguments: ['$slots', '"default"', createObjectMatcher({ key: `[0]` })]
       })
       expect(generate(root).code).toMatchSnapshot()
     })
