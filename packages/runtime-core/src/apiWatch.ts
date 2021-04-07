@@ -223,9 +223,18 @@ function doWatch(
   }
 
   let cleanup: () => void
+  const registeredInvalidateCbs = new Set<() => void>()
   let onInvalidate: InvalidateCbRegistrator = (fn: () => void) => {
-    cleanup = runner.options.onStop = () => {
-      callWithErrorHandling(fn, instance, ErrorCodes.WATCH_CLEANUP)
+    registeredInvalidateCbs.add(fn)
+    if (!cleanup) {
+      cleanup = runner.options.onStop = () => {
+        callWithAsyncErrorHandling(
+          [...registeredInvalidateCbs],
+          instance,
+          ErrorCodes.WATCH_CLEANUP
+        )
+        registeredInvalidateCbs.clear()
+      }
     }
   }
 

@@ -915,4 +915,19 @@ describe('api: watch', () => {
     // should not track b as dependency of Child
     expect(updated).toHaveBeenCalledTimes(1)
   })
+
+  test('use onInvalidate to register multiple invalidate callbacks', () => {
+    const fn1 = jest.fn()
+    const fn2 = jest.fn()
+    const stop = watchEffect(onInvalidate => {
+      onInvalidate(fn1)
+      onInvalidate(fn1)
+      onInvalidate(fn2)
+      onInvalidate(fn2)
+    })
+    stop()
+
+    expect(fn1).toHaveBeenCalledTimes(1)
+    expect(fn2).toHaveBeenCalledTimes(1)
+  })
 })
