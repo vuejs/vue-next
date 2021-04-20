@@ -11,7 +11,12 @@ import { warn } from './warning'
 import { toHandlerKey } from '@vue/shared'
 import { DebuggerEvent, pauseTracking, resetTracking } from '@vue/reactivity'
 
-export { onActivated, onDeactivated } from './components/KeepAlive'
+export {
+  onActivated,
+  onDeactivated,
+  onBeforeActivate,
+  onBeforeDeactivate
+} from './components/KeepAlive'
 
 export function injectHook(
   type: LifecycleHooks,

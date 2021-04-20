@@ -16,7 +16,11 @@ import {
   cloneVNode,
   provide
 } from '@vue/runtime-test'
-import { KeepAliveProps } from '../../src/components/KeepAlive'
+import {
+  KeepAliveProps,
+  KeepAliveCache,
+  Cache
+} from '../../src/components/KeepAlive'
 
 describe('KeepAlive', () => {
   let one: ComponentOptions
@@ -34,7 +38,9 @@ describe('KeepAlive', () => {
       },
       created: jest.fn(),
       mounted: jest.fn(),
+      beforeActivate: jest.fn(),
       activated: jest.fn(),
+      beforeDeactivate: jest.fn(),
       deactivated: jest.fn(),
       unmounted: jest.fn()
     }
@@ -46,7 +52,9 @@ describe('KeepAlive', () => {
       },
       created: jest.fn(),
       mounted: jest.fn(),
+      beforeActivate: jest.fn(),
       activated: jest.fn(),
+      beforeDeactivate: jest.fn(),
       deactivated: jest.fn(),
       unmounted: jest.fn()
     }
@@ -60,7 +68,9 @@ describe('KeepAlive', () => {
     expect([
       component.created.mock.calls.length,
       component.mounted.mock.calls.length,
+      component.beforeActivate.mock.calls.length,
       component.activated.mock.calls.length,
+      component.beforeDeactivate.mock.calls.length,
       component.deactivated.mock.calls.length,
       component.unmounted.mock.calls.length
     ]).toEqual(callCounts)
@@ -100,34 +110,34 @@ describe('KeepAlive', () => {
     render(h(App), root)
 
     expect(serializeInner(root)).toBe(`<div>one</div>`)
-    assertHookCalls(one, [1, 1, 1, 0, 0])
-    assertHookCalls(two, [0, 0, 0, 0, 0])
+    assertHookCalls(one, [1, 1, 1, 1, 0, 0, 0])
+    assertHookCalls(two, [0, 0, 0, 0, 0, 0, 0])
 
     // toggle kept-alive component
     viewRef.value = 'two'
     await nextTick()
     expect(serializeInner(root)).toBe(`<div>two</div>`)
-    assertHookCalls(one, [1, 1, 1, 1, 0])
-    assertHookCalls(two, [1, 1, 1, 0, 0])
+    assertHookCalls(one, [1, 1, 1, 1, 1, 1, 0])
+    assertHookCalls(two, [1, 1, 1, 1, 0, 0, 0])
 
     viewRef.value = 'one'
     await nextTick()
     expect(serializeInner(root)).toBe(`<div>one</div>`)
-    assertHookCalls(one, [1, 1, 2, 1, 0])
-    assertHookCalls(two, [1, 1, 1, 1, 0])
+    assertHookCalls(one, [1, 1, 2, 2, 1, 1, 0])
+    assertHookCalls(two, [1, 1, 1, 1, 1, 1, 0])
 
     viewRef.value = 'two'
     await nextTick()
     expect(serializeInner(root)).toBe(`<div>two</div>`)
-    assertHookCalls(one, [1, 1, 2, 2, 0])
-    assertHookCalls(two, [1, 1, 2, 1, 0])
+    assertHookCalls(one, [1, 1, 2, 2, 2, 2, 0])
+    assertHookCalls(two, [1, 1, 2, 2, 1, 1, 0])
 
     // teardown keep-alive, should unmount all components including cached
     toggle.value = false
     await nextTick()
     expect(serializeInner(root)).toBe(`<!---->`)
-    assertHookCalls(one, [1, 1, 2, 2, 1])
-    assertHookCalls(two, [1, 1, 2, 2, 1])
+    assertHookCalls(one, [1, 1, 2, 2, 2, 2, 1])
+    assertHookCalls(two, [1, 1, 2, 2, 2, 2, 1])
   })
 
   test('should call correct lifecycle hooks when toggle the KeepAlive first', async () => {
@@ -141,35 +151,35 @@ describe('KeepAlive', () => {
     render(h(App), root)
 
     expect(serializeInner(root)).toBe(`<div>one</div>`)
-    assertHookCalls(one, [1, 1, 1, 0, 0])
-    assertHookCalls(two, [0, 0, 0, 0, 0])
+    assertHookCalls(one, [1, 1, 1, 1, 0, 0, 0])
+    assertHookCalls(two, [0, 0, 0, 0, 0, 0, 0])
 
     // should unmount 'one' component when toggle the KeepAlive first
     toggle.value = false
     await nextTick()
     expect(serializeInner(root)).toBe(`<!---->`)
-    assertHookCalls(one, [1, 1, 1, 1, 1])
-    assertHookCalls(two, [0, 0, 0, 0, 0])
+    assertHookCalls(one, [1, 1, 1, 1, 1, 1, 1])
+    assertHookCalls(two, [0, 0, 0, 0, 0, 0, 0])
 
     toggle.value = true
     await nextTick()
     expect(serializeInner(root)).toBe(`<div>one</div>`)
-    assertHookCalls(one, [2, 2, 2, 1, 1])
-    assertHookCalls(two, [0, 0, 0, 0, 0])
+    assertHookCalls(one, [2, 2, 2, 2, 1, 1, 1])
+    assertHookCalls(two, [0, 0, 0, 0, 0, 0, 0])
 
     // 1. the first time toggle kept-alive component
     viewRef.value = 'two'
     await nextTick()
     expect(serializeInner(root)).toBe(`<div>two</div>`)
-    assertHookCalls(one, [2, 2, 2, 2, 1])
-    assertHookCalls(two, [1, 1, 1, 0, 0])
+    assertHookCalls(one, [2, 2, 2, 2, 2, 2, 1])
+    assertHookCalls(two, [1, 1, 1, 1, 0, 0, 0])
 
     // 2. should unmount all components including cached
     toggle.value = false
     await nextTick()
     expect(serializeInner(root)).toBe(`<!---->`)
-    assertHookCalls(one, [2, 2, 2, 2, 2])
-    assertHookCalls(two, [1, 1, 1, 1, 1])
+    assertHookCalls(one, [2, 2, 2, 2, 2, 2, 2])
+    assertHookCalls(two, [1, 1, 1, 1, 1, 1, 1])
   })
 
   test('should call lifecycle hooks on nested components', async () => {
@@ -184,26 +194,26 @@ describe('KeepAlive', () => {
     render(h(App), root)
 
     expect(serializeInner(root)).toBe(`<div>two</div>`)
-    assertHookCalls(one, [1, 1, 1, 0, 0])
-    assertHookCalls(two, [1, 1, 1, 0, 0])
+    assertHookCalls(one, [1, 1, 1, 1, 0, 0, 0])
+    assertHookCalls(two, [1, 1, 1, 1, 0, 0, 0])
 
     toggle.value = false
     await nextTick()
     expect(serializeInner(root)).toBe(`<!---->`)
-    assertHookCalls(one, [1, 1, 1, 1, 0])
-    assertHookCalls(two, [1, 1, 1, 1, 0])
+    assertHookCalls(one, [1, 1, 1, 1, 1, 1, 0])
+    assertHookCalls(two, [1, 1, 1, 1, 1, 1, 0])
 
     toggle.value = true
     await nextTick()
     expect(serializeInner(root)).toBe(`<div>two</div>`)
-    assertHookCalls(one, [1, 1, 2, 1, 0])
-    assertHookCalls(two, [1, 1, 2, 1, 0])
+    assertHookCalls(one, [1, 1, 2, 2, 1, 1, 0])
+    assertHookCalls(two, [1, 1, 2, 2, 1, 1, 0])
 
     toggle.value = false
     await nextTick()
     expect(serializeInner(root)).toBe(`<!---->`)
-    assertHookCalls(one, [1, 1, 2, 2, 0])
-    assertHookCalls(two, [1, 1, 2, 2, 0])
+    assertHookCalls(one, [1, 1, 2, 2, 2, 2, 0])
+    assertHookCalls(two, [1, 1, 2, 2, 2, 2, 0])
   })
 
   // #1742
@@ -249,113 +259,124 @@ describe('KeepAlive', () => {
     render(h(App), root)
 
     expect(serializeInner(root)).toBe(`<div>two</div>`)
-    assertHookCalls(one, [1, 1, 1, 0, 0])
-    assertHookCalls(two, [1, 1, 1, 0, 0])
+    assertHookCalls(one, [1, 1, 1, 1, 0, 0, 0])
+    assertHookCalls(two, [1, 1, 1, 1, 0, 0, 0])
 
     toggle1.value = false
     await nextTick()
     expect(serializeInner(root)).toBe(`<!---->`)
-    assertHookCalls(one, [1, 1, 1, 1, 0])
-    assertHookCalls(two, [1, 1, 1, 1, 0])
+    assertHookCalls(one, [1, 1, 1, 1, 1, 1, 0])
+    assertHookCalls(two, [1, 1, 1, 1, 1, 1, 0])
 
     toggle1.value = true
     await nextTick()
     expect(serializeInner(root)).toBe(`<div>two</div>`)
-    assertHookCalls(one, [1, 1, 2, 1, 0])
-    assertHookCalls(two, [1, 1, 2, 1, 0])
+    assertHookCalls(one, [1, 1, 2, 2, 1, 1, 0])
+    assertHookCalls(two, [1, 1, 2, 2, 1, 1, 0])
 
     // toggle nested instance
     toggle2.value = false
     await nextTick()
     expect(serializeInner(root)).toBe(`<!---->`)
-    assertHookCalls(one, [1, 1, 2, 1, 0])
-    assertHookCalls(two, [1, 1, 2, 2, 0])
+    assertHookCalls(one, [1, 1, 2, 2, 1, 1, 0])
+    assertHookCalls(two, [1, 1, 2, 2, 2, 2, 0])
 
     toggle2.value = true
     await nextTick()
     expect(serializeInner(root)).toBe(`<div>two</div>`)
-    assertHookCalls(one, [1, 1, 2, 1, 0])
-    assertHookCalls(two, [1, 1, 3, 2, 0])
+    assertHookCalls(one, [1, 1, 2, 2, 1, 1, 0])
+    assertHookCalls(two, [1, 1, 3, 3, 2, 2, 0])
 
     toggle1.value = false
     await nextTick()
     expect(serializeInner(root)).toBe(`<!---->`)
-    assertHookCalls(one, [1, 1, 2, 2, 0])
-    assertHookCalls(two, [1, 1, 3, 3, 0])
+    assertHookCalls(one, [1, 1, 2, 2, 2, 2, 0])
+    assertHookCalls(two, [1, 1, 3, 3, 3, 3, 0])
 
     // toggle nested instance when parent is deactivated
     toggle2.value = false
     await nextTick()
     expect(serializeInner(root)).toBe(`<!---->`)
-    assertHookCalls(one, [1, 1, 2, 2, 0])
-    assertHookCalls(two, [1, 1, 3, 3, 0]) // should not be affected
+    assertHookCalls(one, [1, 1, 2, 2, 2, 2, 0])
+    assertHookCalls(two, [1, 1, 3, 3, 3, 3, 0]) // should not be affected
 
     toggle2.value = true
     await nextTick()
     expect(serializeInner(root)).toBe(`<!---->`)
-    assertHookCalls(one, [1, 1, 2, 2, 0])
-    assertHookCalls(two, [1, 1, 3, 3, 0]) // should not be affected
+    assertHookCalls(one, [1, 1, 2, 2, 2, 2, 0])
+    assertHookCalls(two, [1, 1, 3, 3, 3, 3, 0]) // should not be affected
 
     toggle1.value = true
     await nextTick()
     expect(serializeInner(root)).toBe(`<div>two</div>`)
-    assertHookCalls(one, [1, 1, 3, 2, 0])
-    assertHookCalls(two, [1, 1, 4, 3, 0])
+    assertHookCalls(one, [1, 1, 3, 3, 2, 2, 0])
+    assertHookCalls(two, [1, 1, 4, 4, 3, 3, 0])
 
     toggle1.value = false
     toggle2.value = false
     await nextTick()
     expect(serializeInner(root)).toBe(`<!---->`)
-    assertHookCalls(one, [1, 1, 3, 3, 0])
-    assertHookCalls(two, [1, 1, 4, 4, 0])
+    assertHookCalls(one, [1, 1, 3, 3, 3, 3, 0])
+    assertHookCalls(two, [1, 1, 4, 4, 4, 4, 0])
 
     toggle1.value = true
     await nextTick()
     expect(serializeInner(root)).toBe(`<!---->`)
-    assertHookCalls(one, [1, 1, 4, 3, 0])
-    assertHookCalls(two, [1, 1, 4, 4, 0]) // should remain inactive
+    assertHookCalls(one, [1, 1, 4, 4, 3, 3, 0])
+    assertHookCalls(two, [1, 1, 4, 4, 4, 4, 0]) // should remain inactive
   })
 
-  async function assertNameMatch(props: KeepAliveProps) {
+  async function assertNameMatch(
+    props: KeepAliveProps,
+    useKey: boolean = false
+  ) {
+    if (useKey) {
+      delete one.name
+      delete two.name
+    }
     const outerRef = ref(true)
     const viewRef = ref('one')
     const App = {
       render() {
         return outerRef.value
-          ? h(KeepAlive, props, () => h(views[viewRef.value]))
+          ? h(KeepAlive, props, () =>
+              h(views[viewRef.value], {
+                key: useKey ? viewRef.value : undefined
+              })
+            )
           : null
       }
     }
     render(h(App), root)
 
     expect(serializeInner(root)).toBe(`<div>one</div>`)
-    assertHookCalls(one, [1, 1, 1, 0, 0])
-    assertHookCalls(two, [0, 0, 0, 0, 0])
+    assertHookCalls(one, [1, 1, 1, 1, 0, 0, 0])
+    assertHookCalls(two, [0, 0, 0, 0, 0, 0, 0])
 
     viewRef.value = 'two'
     await nextTick()
     expect(serializeInner(root)).toBe(`<div>two</div>`)
-    assertHookCalls(one, [1, 1, 1, 1, 0])
-    assertHookCalls(two, [1, 1, 0, 0, 0])
+    assertHookCalls(one, [1, 1, 1, 1, 1, 1, 0])
+    assertHookCalls(two, [1, 1, 0, 0, 0, 0, 0])
 
     viewRef.value = 'one'
     await nextTick()
     expect(serializeInner(root)).toBe(`<div>one</div>`)
-    assertHookCalls(one, [1, 1, 2, 1, 0])
-    assertHookCalls(two, [1, 1, 0, 0, 1])
+    assertHookCalls(one, [1, 1, 2, 2, 1, 1, 0])
+    assertHookCalls(two, [1, 1, 0, 0, 0, 0, 1])
 
     viewRef.value = 'two'
     await nextTick()
     expect(serializeInner(root)).toBe(`<div>two</div>`)
-    assertHookCalls(one, [1, 1, 2, 2, 0])
-    assertHookCalls(two, [2, 2, 0, 0, 1])
+    assertHookCalls(one, [1, 1, 2, 2, 2, 2, 0])
+    assertHookCalls(two, [2, 2, 0, 0, 0, 0, 1])
 
     // teardown
     outerRef.value = false
     await nextTick()
     expect(serializeInner(root)).toBe(`<!---->`)
-    assertHookCalls(one, [1, 1, 2, 2, 1])
-    assertHookCalls(two, [2, 2, 0, 0, 2])
+    assertHookCalls(one, [1, 1, 2, 2, 2, 2, 1])
+    assertHookCalls(two, [2, 2, 0, 0, 0, 0, 2])
   }
 
   describe('props', () => {
@@ -387,13 +408,50 @@ describe('KeepAlive', () => {
       await assertNameMatch({ include: 'one,two', exclude: 'two' })
     })
 
+    test('include (string) w/ matchBy key', async () => {
+      await assertNameMatch({ include: 'one', matchBy: 'key' }, true)
+    })
+
+    test('include (regex) w/ matchBy key', async () => {
+      await assertNameMatch({ include: /^one$/, matchBy: 'key' }, true)
+    })
+
+    test('include (array) w/ matchBy key', async () => {
+      await assertNameMatch({ include: ['one'], matchBy: 'key' }, true)
+    })
+
+    test('exclude (string) w/ matchBy key', async () => {
+      await assertNameMatch({ exclude: 'two', matchBy: 'key' }, true)
+    })
+
+    test('exclude (regex) w/ matchBy key', async () => {
+      await assertNameMatch({ exclude: /^two$/, matchBy: 'key' }, true)
+    })
+
+    test('exclude (array) w/ matchBy key', async () => {
+      await assertNameMatch({ exclude: ['two'], matchBy: 'key' }, true)
+    })
+
+    test('include + exclude w/ matchBy key', async () => {
+      await assertNameMatch(
+        { include: 'one,two', exclude: 'two', matchBy: 'key' },
+        true
+      )
+    })
+
     test('max', async () => {
       const spyAC = jest.fn()
       const spyBC = jest.fn()
       const spyCC = jest.fn()
+      const spyABA = jest.fn()
+      const spyBBA = jest.fn()
+      const spyCBA = jest.fn()
       const spyAA = jest.fn()
       const spyBA = jest.fn()
       const spyCA = jest.fn()
+      const spyABDA = jest.fn()
+      const spyBBDA = jest.fn()
+      const spyCBDA = jest.fn()
       const spyADA = jest.fn()
       const spyBDA = jest.fn()
       const spyCDA = jest.fn()
@@ -404,15 +462,21 @@ describe('KeepAlive', () => {
       function assertCount(calls: number[]) {
         expect([
           spyAC.mock.calls.length,
+          spyABA.mock.calls.length,
           spyAA.mock.calls.length,
+          spyABDA.mock.calls.length,
           spyADA.mock.calls.length,
           spyAUM.mock.calls.length,
           spyBC.mock.calls.length,
+          spyBBA.mock.calls.length,
           spyBA.mock.calls.length,
+          spyBBDA.mock.calls.length,
           spyBDA.mock.calls.length,
           spyBUM.mock.calls.length,
           spyCC.mock.calls.length,
+          spyCBA.mock.calls.length,
           spyCA.mock.calls.length,
+          spyCBDA.mock.calls.length,
           spyCDA.mock.calls.length,
           spyCUM.mock.calls.length
         ]).toEqual(calls)
@@ -423,21 +487,27 @@ describe('KeepAlive', () => {
         a: {
           render: () => `one`,
           created: spyAC,
+          beforeActivate: spyABA,
           activated: spyAA,
+          beforeDeactivate: spyABDA,
           deactivated: spyADA,
           unmounted: spyAUM
         },
         b: {
           render: () => `two`,
           created: spyBC,
+          beforeActivate: spyBBA,
           activated: spyBA,
+          beforeDeactivate: spyBBDA,
           deactivated: spyBDA,
           unmounted: spyBUM
         },
         c: {
           render: () => `three`,
           created: spyCC,
+          beforeActivate: spyCBA,
           activated: spyCA,
+          beforeDeactivate: spyCBDA,
           deactivated: spyCDA,
           unmounted: spyCUM
         }
@@ -451,26 +521,26 @@ describe('KeepAlive', () => {
         }
       }
       render(h(App), root)
-      assertCount([1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+      assertCount([1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
       viewRef.value = 'b'
       await nextTick()
-      assertCount([1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0])
+      assertCount([1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
       viewRef.value = 'c'
       await nextTick()
       // should prune A because max cache reached
-      assertCount([1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0])
+      assertCount([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0])
 
       viewRef.value = 'b'
       await nextTick()
       // B should be reused, and made latest
-      assertCount([1, 1, 1, 1, 1, 2, 1, 0, 1, 1, 1, 0])
+      assertCount([1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 0, 1, 1, 1, 1, 1, 0])
 
       viewRef.value = 'a'
       await nextTick()
       // C should be pruned because B was used last so C is the oldest cached
-      assertCount([2, 2, 1, 1, 1, 2, 2, 0, 1, 1, 1, 1])
+      assertCount([2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1])
     })
   })
 
@@ -516,18 +586,18 @@ describe('KeepAlive', () => {
 
       viewRef.value = 'two'
       await nextTick()
-      assertHookCalls(one, [1, 1, 1, 1, 0])
-      assertHookCalls(two, [1, 1, 1, 0, 0])
+      assertHookCalls(one, [1, 1, 1, 1, 1, 1, 0])
+      assertHookCalls(two, [1, 1, 1, 1, 0, 0, 0])
 
       includeRef.value = 'two'
       await nextTick()
-      assertHookCalls(one, [1, 1, 1, 1, 1])
-      assertHookCalls(two, [1, 1, 1, 0, 0])
+      assertHookCalls(one, [1, 1, 1, 1, 1, 1, 1])
+      assertHookCalls(two, [1, 1, 1, 1, 0, 0, 0])
 
       viewRef.value = 'one'
       await nextTick()
-      assertHookCalls(one, [2, 2, 1, 1, 1])
-      assertHookCalls(two, [1, 1, 1, 1, 0])
+      assertHookCalls(one, [2, 2, 1, 1, 1, 1, 1])
+      assertHookCalls(two, [1, 1, 1, 1, 1, 1, 0])
     })
 
     test('on exclude change', async () => {
@@ -535,18 +605,18 @@ describe('KeepAlive', () => {
 
       viewRef.value = 'two'
       await nextTick()
-      assertHookCalls(one, [1, 1, 1, 1, 0])
-      assertHookCalls(two, [1, 1, 1, 0, 0])
+      assertHookCalls(one, [1, 1, 1, 1, 1, 1, 0])
+      assertHookCalls(two, [1, 1, 1, 1, 0, 0, 0])
 
       excludeRef.value = 'one'
       await nextTick()
-      assertHookCalls(one, [1, 1, 1, 1, 1])
-      assertHookCalls(two, [1, 1, 1, 0, 0])
+      assertHookCalls(one, [1, 1, 1, 1, 1, 1, 1])
+      assertHookCalls(two, [1, 1, 1, 1, 0, 0, 0])
 
       viewRef.value = 'one'
       await nextTick()
-      assertHookCalls(one, [2, 2, 1, 1, 1])
-      assertHookCalls(two, [1, 1, 1, 1, 0])
+      assertHookCalls(one, [2, 2, 1, 1, 1, 1, 1])
+      assertHookCalls(two, [1, 1, 1, 1, 1, 1, 0])
     })
 
     test('on include change + view switch', async () => {
@@ -554,15 +624,15 @@ describe('KeepAlive', () => {
 
       viewRef.value = 'two'
       await nextTick()
-      assertHookCalls(one, [1, 1, 1, 1, 0])
-      assertHookCalls(two, [1, 1, 1, 0, 0])
+      assertHookCalls(one, [1, 1, 1, 1, 1, 1, 0])
+      assertHookCalls(two, [1, 1, 1, 1, 0, 0, 0])
 
       includeRef.value = 'one'
       viewRef.value = 'one'
       await nextTick()
-      assertHookCalls(one, [1, 1, 2, 1, 0])
+      assertHookCalls(one, [1, 1, 2, 2, 1, 1, 0])
       // two should be pruned
-      assertHookCalls(two, [1, 1, 1, 1, 1])
+      assertHookCalls(two, [1, 1, 1, 1, 1, 1, 1])
     })
 
     test('on exclude change + view switch', async () => {
@@ -570,15 +640,15 @@ describe('KeepAlive', () => {
 
       viewRef.value = 'two'
       await nextTick()
-      assertHookCalls(one, [1, 1, 1, 1, 0])
-      assertHookCalls(two, [1, 1, 1, 0, 0])
+      assertHookCalls(one, [1, 1, 1, 1, 1, 1, 0])
+      assertHookCalls(two, [1, 1, 1, 1, 0, 0, 0])
 
       excludeRef.value = 'two'
       viewRef.value = 'one'
       await nextTick()
-      assertHookCalls(one, [1, 1, 2, 1, 0])
+      assertHookCalls(one, [1, 1, 2, 2, 1, 1, 0])
       // two should be pruned
-      assertHookCalls(two, [1, 1, 1, 1, 1])
+      assertHookCalls(two, [1, 1, 1, 1, 1, 1, 1])
     })
 
     test('should not prune current active instance', async () => {
@@ -586,13 +656,13 @@ describe('KeepAlive', () => {
 
       includeRef.value = 'two'
       await nextTick()
-      assertHookCalls(one, [1, 1, 1, 0, 0])
-      assertHookCalls(two, [0, 0, 0, 0, 0])
+      assertHookCalls(one, [1, 1, 1, 1, 0, 0, 0])
+      assertHookCalls(two, [0, 0, 0, 0, 0, 0, 0])
 
       viewRef.value = 'two'
       await nextTick()
-      assertHookCalls(one, [1, 1, 1, 0, 1])
-      assertHookCalls(two, [1, 1, 1, 0, 0])
+      assertHookCalls(one, [1, 1, 1, 1, 0, 0, 1])
+      assertHookCalls(two, [1, 1, 1, 1, 0, 0, 0])
     })
 
     async function assertAnonymous(include: boolean) {
@@ -822,5 +892,207 @@ describe('KeepAlive', () => {
     viewRef.value = 'one'
     await nextTick()
     expect(serializeInner(root)).toBe(`<div foo>changed</div>`)
+  })
+
+  test('reuse vnode', async () => {
+    const Comp = {
+      render() {
+        return 'one'
+      },
+      activated: jest.fn()
+    }
+    const reused = h(Comp)
+
+    const App = {
+      render() {
+        return [
+          reused, // `reused.el` will exist, it will be cloned in subsequent rendering
+          h(KeepAlive, null, {
+            // reuse here
+            default: () => h(reused)
+          })
+        ]
+      }
+    }
+
+    render(h(App), root)
+    await nextTick()
+    expect(serializeInner(root)).toBe(`oneone`)
+    expect(Comp.activated).toHaveBeenCalledTimes(1)
+  })
+
+  test('custom caching strategy', async () => {
+    const _cache = new Map()
+    const cache: KeepAliveCache = {
+      get(key) {
+        _cache.get(key)
+      },
+      set(key, value) {
+        _cache.set(key, value)
+      },
+      delete(key) {
+        _cache.delete(key)
+      },
+      forEach(fn) {
+        _cache.forEach(fn)
+      }
+    }
+
+    const viewRef = ref('one')
+    const toggle = ref(true)
+    const instanceRef = ref<any>(null)
+    const App = {
+      render: () => {
+        return toggle.value
+          ? h(
+              KeepAlive,
+              { cache },
+              {
+                default: () => h(views[viewRef.value], { ref: instanceRef })
+              }
+            )
+          : null
+      }
+    }
+
+    render(h(App), root)
+    expect(cache.pruneCacheEntry).toBeDefined()
+    await nextTick()
+    expect(serializeInner(root)).toBe(`<div>one</div>`)
+    expect(_cache.size).toBe(1)
+    expect([..._cache.keys()]).toEqual([one])
+    assertHookCalls(one, [1, 1, 1, 1, 0, 0, 0])
+    assertHookCalls(two, [0, 0, 0, 0, 0, 0, 0])
+
+    instanceRef.value.msg = 'changed'
+    await nextTick()
+    expect(serializeInner(root)).toBe(`<div>changed</div>`)
+
+    viewRef.value = 'two'
+    await nextTick()
+    expect(serializeInner(root)).toBe(`<div>two</div>`)
+    expect(_cache.size).toBe(2)
+    expect([..._cache.keys()]).toEqual([one, two])
+    assertHookCalls(one, [1, 1, 1, 1, 1, 1, 0])
+    assertHookCalls(two, [1, 1, 1, 1, 0, 0, 0])
+
+    // delete the cache manually
+    const itr = _cache.keys()
+    const key1 = itr.next().value
+    cache.pruneCacheEntry!(_cache.get(key1))
+    _cache.delete(key1)
+    await nextTick()
+    assertHookCalls(one, [1, 1, 1, 1, 1, 1, 1])
+
+    viewRef.value = 'one'
+    await nextTick()
+    expect(serializeInner(root)).toBe(`<div>one</div>`)
+    expect(_cache.size).toBe(2)
+    expect([..._cache.keys()]).toEqual([two, one])
+    assertHookCalls(one, [2, 2, 2, 2, 1, 1, 1])
+    assertHookCalls(two, [1, 1, 1, 1, 1, 1, 0])
+
+    toggle.value = false
+    await nextTick()
+    expect(_cache.size).toBe(0)
+    assertHookCalls(one, [2, 2, 2, 2, 2, 2, 2])
+    assertHookCalls(two, [1, 1, 1, 1, 1, 1, 1])
+  })
+
+  test('warn custom cache with the `max` prop', () => {
+    const _cache = new Map()
+    const cache: KeepAliveCache = {
+      get(key) {
+        _cache.get(key)
+      },
+      set(key, value) {
+        _cache.set(key, value)
+      },
+      delete(key) {
+        _cache.delete(key)
+      },
+      forEach(fn) {
+        _cache.forEach(fn)
+      }
+    }
+    render(
+      h({
+        render: () => {
+          return h(
+            KeepAlive,
+            { cache, max: 10 },
+            {
+              default: () => h(one)
+            }
+          )
+        }
+      }),
+      root
+    )
+
+    expect(
+      'The `max` prop will be ignored if you provide a custom caching strategy'
+    ).toHaveBeenWarned()
+  })
+
+  test('dynamic key changes', async () => {
+    const cache = new Cache()
+    const dynamicKey = ref(0)
+    const toggle = ref(true)
+    const Comp = {
+      mounted: jest.fn(),
+      beforeActivate: jest.fn(),
+      activated: jest.fn(),
+      beforeDeactivate: jest.fn(),
+      deactivated: jest.fn(),
+      unmounted: jest.fn(),
+      render() {
+        return 'one'
+      }
+    }
+    function assertCount(calls: number[]) {
+      expect([
+        Comp.mounted.mock.calls.length,
+        Comp.beforeActivate.mock.calls.length,
+        Comp.activated.mock.calls.length,
+        Comp.beforeDeactivate.mock.calls.length,
+        Comp.deactivated.mock.calls.length,
+        Comp.unmounted.mock.calls.length
+      ]).toEqual(calls)
+    }
+
+    const App = {
+      render: () => {
+        return toggle.value
+          ? h(
+              KeepAlive,
+              { cache, matchBy: 'key' },
+              {
+                default: () => h(Comp, { key: dynamicKey.value })
+              }
+            )
+          : null
+      }
+    }
+
+    render(h(App), root)
+    await nextTick()
+    expect(serializeInner(root)).toBe(`one`)
+    assertCount([1, 1, 1, 0, 0, 0])
+    expect((cache as any)._cache.size).toBe(1)
+    expect([...(cache as any)._cache.keys()]).toEqual([0])
+
+    dynamicKey.value = 1
+    await nextTick()
+    expect(serializeInner(root)).toBe(`one`)
+    assertCount([2, 2, 2, 1, 1, 0])
+    expect((cache as any)._cache.size).toBe(2)
+    expect([...(cache as any)._cache.keys()]).toEqual([0, 1])
+
+    toggle.value = false
+    await nextTick()
+    expect(serializeInner(root)).toBe(`<!---->`)
+    assertCount([2, 2, 2, 2, 2, 2])
+    expect((cache as any)._cache.size).toBe(0)
   })
 })
