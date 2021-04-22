@@ -34,6 +34,7 @@ import {
 } from '../renderer'
 import { setTransitionHooks } from './BaseTransition'
 import { ComponentRenderContext } from '../componentPublicInstance'
+import { isSuspense } from './Suspense'
 
 type MatchPattern = string | RegExp | string[] | RegExp[]
 
@@ -293,7 +294,7 @@ const KeepAliveImpl = {
       vnode.shapeFlag |= ShapeFlags.COMPONENT_SHOULD_KEEP_ALIVE
 
       current = vnode
-      return rawVNode
+      return isSuspense(rawVNode.type) ? rawVNode : vnode
     }
   }
 }
