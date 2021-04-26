@@ -25,6 +25,7 @@ import {
   CreateComponentPublicInstance,
   ComponentPublicInstanceConstructor
 } from './componentPublicInstance'
+import { Slots } from './componentSlots'
 
 export type PublicProps = VNodeProps &
   AllowedComponentProps &
@@ -40,6 +41,7 @@ export type DefineComponent<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   E extends EmitsOptions = Record<string, any>,
   EE extends string = string,
+  S = any,
   PP = PublicProps,
   Props = Readonly<ExtractPropTypes<PropsOrPropOptions>>,
   Defaults = ExtractDefaultPropTypes<PropsOrPropOptions>
@@ -53,6 +55,7 @@ export type DefineComponent<
     Mixin,
     Extends,
     E,
+    S,
     PP & Props,
     Defaults,
     true
@@ -69,6 +72,7 @@ export type DefineComponent<
     Extends,
     E,
     EE,
+    S,
     Defaults
   > &
   PP
@@ -80,12 +84,12 @@ export type DefineComponent<
 
 // overload 1: direct setup function
 // (uses user defined props interface)
-export function defineComponent<Props, RawBindings = object>(
+export function defineComponent<Props, RawBindings = object, S = {}>(
   setup: (
     props: Readonly<Props>,
-    ctx: SetupContext
+    ctx: SetupContext<EmitsOptions, Slots<S>>
   ) => RawBindings | RenderFunction
-): DefineComponent<Props, RawBindings>
+): DefineComponent<Props, RawBindings, {}, any, any, any, any, any, string, S>
 
 // overload 2: object format with no props
 // (uses user defined props interface)
@@ -99,7 +103,8 @@ export function defineComponent<
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   E extends EmitsOptions = EmitsOptions,
-  EE extends string = string
+  EE extends string = string,
+  S = any
 >(
   options: ComponentOptionsWithoutProps<
     Props,
@@ -110,9 +115,10 @@ export function defineComponent<
     Mixin,
     Extends,
     E,
-    EE
+    EE,
+    S
   >
-): DefineComponent<Props, RawBindings, D, C, M, Mixin, Extends, E, EE>
+): DefineComponent<Props, RawBindings, D, C, M, Mixin, Extends, E, EE, S>
 
 // overload 3: object format with array props declaration
 // props inferred as { [key in PropNames]?: any }
@@ -126,7 +132,8 @@ export function defineComponent<
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   E extends EmitsOptions = Record<string, any>,
-  EE extends string = string
+  EE extends string = string,
+  S = any
 >(
   options: ComponentOptionsWithArrayProps<
     PropNames,
@@ -137,7 +144,8 @@ export function defineComponent<
     Mixin,
     Extends,
     E,
-    EE
+    EE,
+    S
   >
 ): DefineComponent<
   Readonly<{ [key in PropNames]?: any }>,
@@ -148,7 +156,8 @@ export function defineComponent<
   Mixin,
   Extends,
   E,
-  EE
+  EE,
+  S
 >
 
 // overload 4: object format with object props declaration
@@ -164,7 +173,8 @@ export function defineComponent<
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   E extends EmitsOptions = Record<string, any>,
-  EE extends string = string
+  EE extends string = string,
+  S = any
 >(
   options: ComponentOptionsWithObjectProps<
     PropsOptions,
@@ -175,7 +185,8 @@ export function defineComponent<
     Mixin,
     Extends,
     E,
-    EE
+    EE,
+    S
   >
 ): DefineComponent<PropsOptions, RawBindings, D, C, M, Mixin, Extends, E, EE>
 

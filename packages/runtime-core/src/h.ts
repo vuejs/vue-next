@@ -68,11 +68,11 @@ type RawChildren =
   | (() => any)
 
 // fake constructor type returned from `defineComponent`
-interface Constructor<P = any> {
+interface Constructor<P = any, S = any> {
   __isFragment?: never
   __isTeleport?: never
   __isSuspense?: never
-  new (...args: any[]): { $props: P }
+  new (...args: any[]): { $props: P; $slots?: S }
 }
 
 // The following is a series of overloads for providing props validation of
@@ -156,10 +156,10 @@ export function h<P>(
 
 // fake constructor type returned by `defineComponent` or class component
 export function h(type: Constructor, children?: RawChildren): VNode
-export function h<P>(
-  type: Constructor<P>,
+export function h<P, S>(
+  type: Constructor<P, S>,
   props?: (RawProps & P) | ({} extends P ? null : never),
-  children?: RawChildren | RawSlots
+  children?: (RawChildren & S) | ({} extends S ? RawSlots : S)
 ): VNode
 
 // fake constructor type returned by `defineComponent`

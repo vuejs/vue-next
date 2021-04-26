@@ -1038,6 +1038,74 @@ describe('async setup', () => {
   vm.a = 2
 })
 
+describe('typed slots', () => {
+  const Comp = defineComponent({
+    slots: {
+      test: null,
+      item: Object as () => { item: { value: number }; i: number }
+    },
+
+    setup(_, { slots }) {
+      slots.test!()
+      slots.item!({
+        i: 22,
+        item: {
+          value: 22
+        }
+      })
+      // @ts-expect-error missing item prop
+      expectError(slots.item!({ i: 22 }))
+    }
+  })
+
+  h(
+    Comp,
+    {},
+    {
+      // @ts-expect-error no argument expected
+      test(x) {},
+      item(s) {
+        expectType<number>(s.i)
+        expectType<{ value: number }>(s.item)
+      }
+    }
+  )
+})
+
+describe('typed slots just type', () => {
+  const Comp = defineComponent({
+    slots: {} as {
+      test: null
+      item: { item: { value: number }; i: number }
+    },
+
+    setup(_, { slots }) {
+      slots.test!()
+      slots.item!({
+        i: 22,
+        item: {
+          value: 22
+        }
+      })
+      // @ts-expect-error missing item prop
+      expectError(slots.item!({ i: 22 }))
+    }
+  })
+
+  h(
+    Comp,
+    {},
+    {
+      // @ts-expect-error no argument expected
+      test(x) {},
+      item(s) {
+        expectType<number>(s.i)
+        expectType<{ value: number }>(s.item)
+      }
+    }
+  )
+})
+
 // check if defineComponent can be exported
 export default {
   // function components

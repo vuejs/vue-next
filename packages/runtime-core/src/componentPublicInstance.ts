@@ -82,6 +82,7 @@ type MixinToOptionTypes<T> = T extends ComponentOptionsBase<
   infer Extends,
   any,
   any,
+  any,
   infer Defaults
 >
   ? OptionTypesType<P & {}, B & {}, D & {}, C & {}, M & {}, Defaults & {}> &
@@ -134,6 +135,7 @@ export type CreateComponentPublicInstance<
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   E extends EmitsOptions = {},
+  S = any,
   PublicProps = P,
   Defaults = {},
   MakeDefaultsOptional extends boolean = false,
@@ -154,10 +156,11 @@ export type CreateComponentPublicInstance<
   PublicC,
   PublicM,
   E,
+  S,
   PublicProps,
   PublicDefaults,
   MakeDefaultsOptional,
-  ComponentOptionsBase<P, B, D, C, M, Mixin, Extends, E, string, Defaults>
+  ComponentOptionsBase<P, B, D, C, M, Mixin, Extends, E, string, S, Defaults>
 >
 
 // public properties exposed on the proxy, which is used as the render context
@@ -169,10 +172,22 @@ export type ComponentPublicInstance<
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
   E extends EmitsOptions = {},
+  S = any,
   PublicProps = P,
   Defaults = {},
   MakeDefaultsOptional extends boolean = false,
-  Options = ComponentOptionsBase<any, any, any, any, any, any, any, any, any>
+  Options = ComponentOptionsBase<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >
 > = {
   $: ComponentInternalInstance
   $data: D
@@ -181,7 +196,7 @@ export type ComponentPublicInstance<
     : P & PublicProps
   $attrs: Data
   $refs: Data
-  $slots: Slots
+  $slots: Slots<S>
   $root: ComponentPublicInstance | null
   $parent: ComponentPublicInstance | null
   $emit: EmitFn<E>
