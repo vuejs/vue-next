@@ -214,6 +214,10 @@ export interface TransformOptions extends SharedTransformCodegenOptions {
    */
   ssrCssVars?: string
   onError?: (error: CompilerError) => void
+  /**
+   * Custom globals, which will not be prefixed
+   */
+  globalsWhitelist?: string[] | null
 }
 
 export interface CodegenOptions extends SharedTransformCodegenOptions {

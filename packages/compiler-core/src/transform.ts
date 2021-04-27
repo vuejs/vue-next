@@ -26,7 +26,8 @@ import {
   PatchFlagNames,
   EMPTY_OBJ,
   capitalize,
-  camelize
+  camelize,
+  registerGlobalsWhiteList
 } from '@vue/shared'
 import { defaultOnError } from './errors'
 import {
@@ -114,6 +115,7 @@ export interface TransformContext
   hoist(exp: JSChildNode): SimpleExpressionNode
   cache<T extends JSChildNode>(exp: T, isVNode?: boolean): CacheExpression | T
   constantCache: Map<TemplateChildNode, ConstantTypes>
+  globalsWhitelist: string[] | null
 }
 
 export function createTransformContext(
@@ -136,7 +138,8 @@ export function createTransformContext(
     bindingMetadata = EMPTY_OBJ,
     inline = false,
     isTS = false,
-    onError = defaultOnError
+    onError = defaultOnError,
+    globalsWhitelist = null
   }: TransformOptions
 ): TransformContext {
   const nameMatch = filename.replace(/\?.*$/, '').match(/([^/\\]+)\.\w+$/)
@@ -181,6 +184,7 @@ export function createTransformContext(
     parent: null,
     currentNode: root,
     childIndex: 0,
+    globalsWhitelist,
 
     // methods
     helper(name) {
@@ -298,6 +302,9 @@ export function createTransformContext(
 
 export function transform(root: RootNode, options: TransformOptions) {
   const context = createTransformContext(root, options)
+  if (context.globalsWhitelist) {
+    registerGlobalsWhiteList(context.globalsWhitelist)
+  }
   traverseNode(root, context)
   if (options.hoistStatic) {
     hoistStatic(root, context)

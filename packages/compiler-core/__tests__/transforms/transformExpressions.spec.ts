@@ -189,6 +189,16 @@ describe('compiler: expression transform', () => {
     })
   })
 
+  test('should not prefix whitelisted globals (registered by users)', () => {
+    const node = parseWithExpressionTransform(`{{ CUSTOM_GLOBAL }}`, {
+      globalsWhitelist: ['CUSTOM_GLOBAL']
+    }) as InterpolationNode
+    expect(node.content).toMatchObject({
+      type: NodeTypes.SIMPLE_EXPRESSION,
+      content: 'CUSTOM_GLOBAL'
+    })
+  })
+
   test('should not prefix reserved literals', () => {
     function assert(exp: string) {
       const node = parseWithExpressionTransform(
