@@ -96,7 +96,7 @@ describe('object props', () => {
         // default + type casting
         ggg: {
           type: String as PropType<'foo' | 'bar'>,
-          default: 'foo'
+          default: 'foo' as const
         },
         // default + function
         ffff: {

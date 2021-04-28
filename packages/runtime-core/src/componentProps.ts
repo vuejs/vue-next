@@ -1,3 +1,4 @@
+import { extend } from './../../shared/src/index'
 import {
   toRaw,
   shallowReactive,
@@ -19,8 +20,7 @@ import {
   makeMap,
   isReservedProp,
   EMPTY_ARR,
-  def,
-  extend
+  def
 } from '@vue/shared'
 import { warn } from './warning'
 import {
@@ -50,6 +50,22 @@ export type Prop<T, D = T> = PropOptions<T, D> | PropType<T>
 
 type DefaultFactory<T> = (props: Data) => T | null | undefined
 
+type DefaultValueFactoryType<T> = T | (() => T)
+type DefaultValueTypeType<T, K extends keyof T> = T[K] extends {
+  type: infer TType
+}
+  ? TType
+  : never
+type DefaultValueType<T, K extends keyof T> = DefaultValueFactoryType<
+  T[K] extends undefined | null
+    ? never
+    : DefaultValueTypeType<T, K> extends PropType<infer TInner>
+      ? TInner
+      : DefaultValueTypeType<T, K> extends { new (...args: any): any }
+        ? InstanceType<DefaultValueTypeType<T, K>>
+        : never
+>
+
 interface PropOptions<T = any, D = T> {
   type?: PropType<T> | true | null
   required?: boolean
@@ -71,7 +87,7 @@ type PropMethod<T, TConstructor = any> = [T] extends [(...args: any) => any] // 
 type RequiredKeys<T> = {
   [K in keyof T]: T[K] extends
     | { required: true }
-    | { default: any }
+    | { default: DefaultValueType<T, K> }
     // don't mark Boolean props as undefined
     | BooleanConstructor
     | { type: BooleanConstructor }
@@ -83,7 +99,7 @@ type OptionalKeys<T> = Exclude<keyof T, RequiredKeys<T>>
 
 type DefaultKeys<T> = {
   [K in keyof T]: T[K] extends
-    | { default: any }
+    | { default: DefaultValueType<T, K> }
     // Boolean implicitly defaults to false
     | BooleanConstructor
     | { type: BooleanConstructor }
