@@ -11,8 +11,12 @@ import {
   ComponentPublicInstance,
   ComponentOptions,
   SetupContext,
-  IsUnion,
-  h
+  h,
+  Directive,
+  KeepAliveProps,
+  TransitionProps,
+  vShow,
+  IsUnion
 } from './index'
 
 describe('with object props', () => {
@@ -1036,6 +1040,75 @@ describe('async setup', () => {
 
   // setup context properties should be mutable
   vm.a = 2
+})
+
+// #3367 expose components types
+describe('expose component types', () => {
+  const child = defineComponent({
+    props: {
+      a: String
+    }
+  })
+
+  const parent = defineComponent({
+    components: {
+      child
+    }
+  })
+
+  expectType<typeof child>(parent.components!.child)
+
+  // global components
+  expectType<KeepAliveProps>(new parent.components!.KeepAlive().$props)
+  expectType<KeepAliveProps>(new child.components!.KeepAlive().$props)
+
+  // runtime-dom components
+  expectType<TransitionProps>(new parent.components!.Transition().$props)
+  expectType<TransitionProps>(new parent.components!.Transition().$props)
+})
+
+describe('directive typing', () => {
+  const customDirective: Directive = {
+    created(el) {}
+  }
+
+  const comp = defineComponent({
+    props: {
+      a: String
+    },
+    directives: {
+      customDirective
+    }
+  })
+
+  expectType<typeof customDirective>(comp.directives!.customDirective)
+
+  // global directive
+  expectType<typeof vShow>(comp.directives!.vShow)
+})
+
+describe('expose typing', () => {
+  const Comp = defineComponent({
+    expose: ['a', 'b'],
+    props: {
+      some: String
+    },
+    data() {
+      return { a: 1, b: '2', c: 1 }
+    }
+  })
+
+  expect<Array<'a' | 'b'>>(Comp.expose!)
+
+  const vm = new Comp()
+  // internal should still be exposed
+  vm.$props
+
+  expectType<number>(vm.a)
+  expectType<string>(vm.b)
+
+  // @ts-expect-error shouldn't be exposed
+  vm.c
 })
 
 // check if defineComponent can be exported

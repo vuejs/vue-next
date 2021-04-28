@@ -8,17 +8,33 @@ import {
   HydrationRenderer,
   App,
   RootHydrateFunction,
-  isRuntimeOnly
+  isRuntimeOnly,
+  DefineComponent
 } from '@vue/runtime-core'
 import { nodeOps } from './nodeOps'
 import { patchProp, forcePatchProp } from './patchProp'
 // Importing from the compiler, will be tree-shaken in prod
 import { isFunction, isString, isHTMLTag, isSVGTag, extend } from '@vue/shared'
+import { TransitionProps } from './components/Transition'
+import { TransitionGroupProps } from './components/TransitionGroup'
+import { vShow } from './directives/vShow'
 
 declare module '@vue/reactivity' {
   export interface RefUnwrapBailTypes {
     // Note: if updating this, also update `types/refBail.d.ts`.
     runtimeDOMBailTypes: Node | Window
+  }
+}
+
+declare module '@vue/runtime-core' {
+  interface GlobalComponents {
+    // Note: if updating this, also update `types/globalComponents.d.ts`.
+    Transition: DefineComponent<TransitionProps>
+    TransitionGroup: DefineComponent<TransitionGroupProps>
+  }
+
+  interface GlobalDirectives {
+    vShow: typeof vShow
   }
 }
 

@@ -11,7 +11,10 @@ import {
 import {
   SetupContext,
   AllowedComponentProps,
-  ComponentCustomProps
+  ComponentCustomProps,
+  Component,
+  GlobalDirectives,
+  GlobalComponents
 } from './component'
 import {
   ExtractPropTypes,
@@ -25,6 +28,7 @@ import {
   CreateComponentPublicInstance,
   ComponentPublicInstanceConstructor
 } from './componentPublicInstance'
+import { Directive } from './directives'
 
 export type PublicProps = VNodeProps &
   AllowedComponentProps &
@@ -40,6 +44,9 @@ export type DefineComponent<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   E extends EmitsOptions = Record<string, any>,
   EE extends string = string,
+  LC extends Record<string, Component> = {},
+  Directives extends Record<string, Directive> = {},
+  Exposed extends string = string,
   PP = PublicProps,
   Props = Readonly<ExtractPropTypes<PropsOrPropOptions>>,
   Defaults = ExtractDefaultPropTypes<PropsOrPropOptions>
@@ -55,7 +62,10 @@ export type DefineComponent<
     E,
     PP & Props,
     Defaults,
-    true
+    true,
+    LC & GlobalComponents,
+    Directives & GlobalDirectives,
+    Exposed
   > &
     Props
 > &
@@ -69,6 +79,9 @@ export type DefineComponent<
     Extends,
     E,
     EE,
+    LC & GlobalComponents,
+    Directives & GlobalDirectives,
+    Exposed,
     Defaults
   > &
   PP
@@ -99,7 +112,10 @@ export function defineComponent<
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   E extends EmitsOptions = EmitsOptions,
-  EE extends string = string
+  EE extends string = string,
+  LC extends Record<string, Component> = {},
+  Directives extends Record<string, Directive> = {},
+  Exposed extends string = string
 >(
   options: ComponentOptionsWithoutProps<
     Props,
@@ -110,9 +126,25 @@ export function defineComponent<
     Mixin,
     Extends,
     E,
-    EE
+    EE,
+    LC,
+    Directives,
+    Exposed
   >
-): DefineComponent<Props, RawBindings, D, C, M, Mixin, Extends, E, EE>
+): DefineComponent<
+  Props,
+  RawBindings,
+  D,
+  C,
+  M,
+  Mixin,
+  Extends,
+  E,
+  EE,
+  LC,
+  Directives,
+  Exposed
+>
 
 // overload 3: object format with array props declaration
 // props inferred as { [key in PropNames]?: any }
@@ -126,7 +158,10 @@ export function defineComponent<
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   E extends EmitsOptions = Record<string, any>,
-  EE extends string = string
+  EE extends string = string,
+  LC extends Record<string, Component> = {},
+  Directives extends Record<string, Directive> = {},
+  Exposed extends string = string
 >(
   options: ComponentOptionsWithArrayProps<
     PropNames,
@@ -137,7 +172,10 @@ export function defineComponent<
     Mixin,
     Extends,
     E,
-    EE
+    EE,
+    LC,
+    Directives,
+    Exposed
   >
 ): DefineComponent<
   Readonly<{ [key in PropNames]?: any }>,
@@ -148,7 +186,10 @@ export function defineComponent<
   Mixin,
   Extends,
   E,
-  EE
+  EE,
+  LC,
+  Directives,
+  Exposed
 >
 
 // overload 4: object format with object props declaration
@@ -164,7 +205,10 @@ export function defineComponent<
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   E extends EmitsOptions = Record<string, any>,
-  EE extends string = string
+  EE extends string = string,
+  LC extends Record<string, Component> = {},
+  Directives extends Record<string, Directive> = {},
+  Exposed extends string = string
 >(
   options: ComponentOptionsWithObjectProps<
     PropsOptions,
@@ -175,9 +219,25 @@ export function defineComponent<
     Mixin,
     Extends,
     E,
-    EE
+    EE,
+    LC,
+    Directives,
+    Exposed
   >
-): DefineComponent<PropsOptions, RawBindings, D, C, M, Mixin, Extends, E, EE>
+): DefineComponent<
+  PropsOptions,
+  RawBindings,
+  D,
+  C,
+  M,
+  Mixin,
+  Extends,
+  E,
+  EE,
+  LC,
+  Directives,
+  Exposed
+>
 
 // implementation, close to no-op
 export function defineComponent(options: unknown) {

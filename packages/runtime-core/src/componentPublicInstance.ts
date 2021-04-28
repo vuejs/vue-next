@@ -1,4 +1,5 @@
 import {
+  Component,
   ComponentInternalInstance,
   Data,
   isStatefulComponent
@@ -40,6 +41,7 @@ import { markAttrsAccessed } from './componentRenderUtils'
 import { currentRenderingInstance } from './componentRenderContext'
 import { warn } from './warning'
 import { UnionToIntersection } from './helpers/typeUtils'
+import { Directive } from './directives'
 
 /**
  * Custom properties added to component instances in any way and can be accessed through `this`
@@ -80,6 +82,9 @@ type MixinToOptionTypes<T> = T extends ComponentOptionsBase<
   infer M,
   infer Mixin,
   infer Extends,
+  any,
+  any,
+  any,
   any,
   any,
   infer Defaults
@@ -137,6 +142,9 @@ export type CreateComponentPublicInstance<
   PublicProps = P,
   Defaults = {},
   MakeDefaultsOptional extends boolean = false,
+  LC extends Record<string, Component> = {},
+  Directives extends Record<string, Directive> = {},
+  Exposed extends string = string,
   PublicMixin = IntersectionMixin<Mixin> & IntersectionMixin<Extends>,
   PublicP = UnwrapMixinsType<PublicMixin, 'P'> & EnsureNonVoid<P>,
   PublicB = UnwrapMixinsType<PublicMixin, 'B'> & EnsureNonVoid<B>,
@@ -157,8 +165,28 @@ export type CreateComponentPublicInstance<
   PublicProps,
   PublicDefaults,
   MakeDefaultsOptional,
-  ComponentOptionsBase<P, B, D, C, M, Mixin, Extends, E, string, Defaults>
+  ComponentOptionsBase<
+    P,
+    B,
+    D,
+    C,
+    M,
+    Mixin,
+    Extends,
+    E,
+    string,
+    LC,
+    Directives,
+    Exposed,
+    Defaults
+  >,
+  Exposed
 >
+
+export type ExposedKeys<
+  T,
+  Exposed extends string & keyof T
+> = '' extends Exposed ? T : Pick<T, Exposed>
 
 // public properties exposed on the proxy, which is used as the render context
 // in templates (as `this` in the render option)
@@ -172,7 +200,8 @@ export type ComponentPublicInstance<
   PublicProps = P,
   Defaults = {},
   MakeDefaultsOptional extends boolean = false,
-  Options = ComponentOptionsBase<any, any, any, any, any, any, any, any, any>
+  Options = ComponentOptionsBase<any, any, any, any, any, any, any, any, any>,
+  Exposed extends string = ''
 > = {
   $: ComponentInternalInstance
   $data: D
@@ -194,12 +223,15 @@ export type ComponentPublicInstance<
     cb: Function,
     options?: WatchOptions
   ): WatchStopHandle
-} & P &
-  ShallowUnwrapRef<B> &
-  UnwrapNestedRefs<D> &
-  ExtractComputedReturns<C> &
-  M &
-  ComponentCustomProperties
+} & ExposedKeys<
+  P &
+    ShallowUnwrapRef<B> &
+    UnwrapNestedRefs<D> &
+    ExtractComputedReturns<C> &
+    M &
+    ComponentCustomProperties,
+  Exposed
+>
 
 type PublicPropertiesMap = Record<string, (i: ComponentInternalInstance) => any>
 
