@@ -238,7 +238,12 @@ type UnmountFn = (
   optimized?: boolean
 ) => void
 
-type RemoveFn = (vnode: VNode) => void
+type RemoveFn = (
+  vnode: VNode,
+  parentComponent: ComponentInternalInstance | null,
+  parentSuspense: SuspenseBoundary | null,
+  optimized?: boolean
+) => void
 
 type UnmountChildrenFn = (
   children: VNode[],
@@ -2133,7 +2138,7 @@ function baseCreateRenderer(
       }
 
       if (doRemove) {
-        remove(vnode)
+        remove(vnode, parentComponent, parentSuspense, optimized)
       }
     }
 
@@ -2146,10 +2151,23 @@ function baseCreateRenderer(
     }
   }
 
-  const remove: RemoveFn = vnode => {
-    const { type, el, anchor, transition } = vnode
+  const remove: RemoveFn = (
+    vnode,
+    parentComponent,
+    parentSuspense,
+    optimized
+  ) => {
+    const { type, el, anchor, children, transition } = vnode
     if (type === Fragment) {
-      removeFragment(el!, anchor!)
+      hostRemove(el!)
+      unmountChildren(
+        children as VNode[],
+        parentComponent,
+        parentSuspense,
+        true,
+        optimized
+      )
+      hostRemove(anchor!)
       return
     }
 
@@ -2180,18 +2198,6 @@ function baseCreateRenderer(
     } else {
       performRemove()
     }
-  }
-
-  const removeFragment = (cur: RendererNode, end: RendererNode) => {
-    // For fragments, directly remove all contained DOM nodes.
-    // (fragment child nodes cannot have transition)
-    let next
-    while (cur !== end) {
-      next = hostNextSibling(cur)!
-      hostRemove(cur)
-      cur = next
-    }
-    hostRemove(end)
   }
 
   const unmountComponent = (

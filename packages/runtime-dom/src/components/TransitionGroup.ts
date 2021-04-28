@@ -22,7 +22,7 @@ import {
   SetupContext,
   toRaw
 } from '@vue/runtime-core'
-import { extend } from '@vue/shared'
+import { extend, PatchFlags } from '@vue/shared'
 
 interface Position {
   top: number
@@ -97,22 +97,38 @@ const TransitionGroupImpl = {
     })
 
     return () => {
+      const slotContent = slots.default && slots.default()
       const rawProps = toRaw(props)
       const cssTransitionProps = resolveTransitionProps(rawProps)
       const tag = rawProps.tag || Fragment
+
+      const keyedChildren: VNode[] = []
+      if (slotContent) {
+        for (let j = 0; j < slotContent.length; j++) {
+          const child = slotContent[j]
+          if (child.type === Fragment) {
+            keyedChildren.push(...(child.children as VNode[]))
+            if (__DEV__ && !(child.patchFlag & PatchFlags.KEYED_FRAGMENT)) {
+              warn(`<TransitionGroup> children must be keyed.`)
+            }
+          } else {
+            keyedChildren.push(child)
+            if (__DEV__ && child.key == null) {
+              warn(`<TransitionGroup> children must be keyed.`)
+            }
+          }
+        }
+      }
+
       prevChildren = children
-      children = slots.default ? getTransitionRawChildren(slots.default()) : []
+      children = getTransitionRawChildren(keyedChildren)
 
       for (let i = 0; i < children.length; i++) {
         const child = children[i]
-        if (child.key != null) {
-          setTransitionHooks(
-            child,
-            resolveTransitionHooks(child, cssTransitionProps, state, instance)
-          )
-        } else if (__DEV__) {
-          warn(`<TransitionGroup> children must be keyed.`)
-        }
+        setTransitionHooks(
+          child,
+          resolveTransitionHooks(child, cssTransitionProps, state, instance)
+        )
       }
 
       if (prevChildren) {
@@ -125,8 +141,7 @@ const TransitionGroupImpl = {
           positionMap.set(child, (child.el as Element).getBoundingClientRect())
         }
       }
-
-      return createVNode(tag, null, children)
+      return createVNode(tag, null, keyedChildren)
     }
   }
 }
