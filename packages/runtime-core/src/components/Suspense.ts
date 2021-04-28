@@ -82,13 +82,15 @@ export const SuspenseImpl = {
   create: createSuspenseBoundary
 }
 
-// Force-casted public typing for h and TSX props inference
-export const Suspense = ((__FEATURE_SUSPENSE__
-  ? SuspenseImpl
-  : null) as any) as {
+export type SuspenseComponentType = {
   __isSuspense: true
   new (): { $props: VNodeProps & SuspenseProps }
 }
+
+// Force-casted public typing for h and TSX props inference
+export const Suspense = ((__FEATURE_SUSPENSE__
+  ? SuspenseImpl
+  : null) as any) as SuspenseComponentType
 
 function mountSuspense(
   vnode: VNode,

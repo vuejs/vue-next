@@ -9,7 +9,11 @@ import {
   expectType,
   ShallowUnwrapRef,
   FunctionalComponent,
-  ComponentPublicInstance
+  ComponentPublicInstance,
+  createBlock,
+  createVNode,
+  Teleport,
+  Suspense
 } from './index'
 
 declare function extractComponentOptions<Props, RawBindings>(
@@ -427,4 +431,11 @@ describe('class', () => {
   const { props } = extractComponentOptions(MyComponent)
 
   expectType<number>(props.foo)
+})
+
+describe('createBlock & createVNode', () => {
+  createBlock(Teleport)
+  createBlock(Suspense)
+  createVNode(Teleport)
+  createVNode(Suspense)
 })

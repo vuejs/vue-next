@@ -27,16 +27,18 @@ import {
   SuspenseImpl,
   isSuspense,
   SuspenseBoundary,
-  normalizeSuspenseChildren
+  normalizeSuspenseChildren,
+  SuspenseComponentType
 } from './components/Suspense'
 import { DirectiveBinding } from './directives'
 import { TransitionHooks } from './components/BaseTransition'
 import { warn } from './warning'
-import { TeleportImpl, isTeleport } from './components/Teleport'
 import {
-  currentRenderingInstance,
-  currentScopeId
-} from './componentRenderContext'
+  TeleportImpl,
+  isTeleport,
+  TeleportComponentType
+} from './components/Teleport'
+import { currentRenderingInstance, currentScopeId } from './componentRenderContext'
 import { RendererNode, RendererElement } from './renderer'
 import { NULL_DYNAMIC_COMPONENT } from './helpers/resolveAssets'
 import { hmrDirtyComponents } from './hmr'
@@ -241,7 +243,11 @@ export function setBlockTracking(value: number) {
  * @private
  */
 export function createBlock(
-  type: VNodeTypes | ClassComponent,
+  type:
+    | VNodeTypes
+    | ClassComponent
+    | TeleportComponentType
+    | SuspenseComponentType,
   props?: Record<string, any> | null,
   children?: any,
   patchFlag?: number,
@@ -328,7 +334,12 @@ export const createVNode = (__DEV__
   : _createVNode) as typeof _createVNode
 
 function _createVNode(
-  type: VNodeTypes | ClassComponent | typeof NULL_DYNAMIC_COMPONENT,
+  type:
+    | VNodeTypes
+    | ClassComponent
+    | TeleportComponentType
+    | SuspenseComponentType
+    | typeof NULL_DYNAMIC_COMPONENT,
   props: (Data & VNodeProps) | null = null,
   children: unknown = null,
   patchFlag: number = 0,
@@ -406,7 +417,7 @@ function _createVNode(
   const vnode: VNode = {
     __v_isVNode: true,
     [ReactiveFlags.SKIP]: true,
-    type,
+    type: type as VNodeTypes,
     props,
     key: props && normalizeKey(props),
     ref: props && normalizeRef(props),
