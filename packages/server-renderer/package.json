@@ -10,7 +10,8 @@
   ],
   "buildOptions": {
     "formats": [
-      "cjs"
+      "cjs",
+      "basic-cjs"
     ]
   },
   "repository": {

@@ -36,6 +36,12 @@ const outputConfigs = {
     format: `iife`
   },
 
+  // basic builds, for 'server-renderer' package only
+  'basic-cjs': {
+    file: resolve(`dist/${name}.basic-cjs.js`),
+    format: `cjs`
+  },
+
   // runtime-only builds, for main "vue" package only
   'esm-bundler-runtime': {
     file: resolve(`dist/${name}.runtime.esm-bundler.js`),
@@ -50,7 +56,7 @@ const outputConfigs = {
     format: 'iife'
   }
 }
-
+const isCjs = format => /^(basic-)?cjs$/.test(format)
 const defaultFormats = ['esm-bundler', 'cjs']
 const inlineFormats = process.env.FORMATS && process.env.FORMATS.split(',')
 const packageFormats = inlineFormats || packageOptions.formats || defaultFormats
@@ -63,7 +69,7 @@ if (process.env.NODE_ENV === 'production') {
     if (packageOptions.prod === false) {
       return
     }
-    if (format === 'cjs') {
+    if (isCjs(format)) {
       packageConfigs.push(createProductionConfig(format))
     }
     if (/^(global|esm-browser)(-runtime)?/.test(format)) {
@@ -87,7 +93,7 @@ function createConfig(format, output, plugins = []) {
     process.env.__DEV__ === 'false' || /\.prod\.js$/.test(output.file)
   const isBundlerESMBuild = /esm-bundler/.test(format)
   const isBrowserESMBuild = /esm-browser/.test(format)
-  const isNodeBuild = format === 'cjs'
+  const isNodeBuild = isCjs(format)
   const isGlobalBuild = /global/.test(format)
 
   if (isGlobalBuild) {
@@ -114,7 +120,11 @@ function createConfig(format, output, plugins = []) {
   // during a single build.
   hasTSChecked = true
 
-  const entryFile = /runtime$/.test(format) ? `src/runtime.ts` : `src/index.ts`
+  const entryFile = /^basic-/.test(format)
+    ? `src/basic.ts`
+    : /runtime$/.test(format)
+      ? `src/runtime.ts`
+      : `src/index.ts`
 
   const external =
     isGlobalBuild || isBrowserESMBuild
@@ -137,7 +147,7 @@ function createConfig(format, output, plugins = []) {
   }
 
   const nodePlugins =
-    packageOptions.enableNonBrowserBranches && format !== 'cjs'
+    packageOptions.enableNonBrowserBranches && !isCjs(format)
       ? [
           require('@rollup/plugin-commonjs')({
             sourceMap: false
