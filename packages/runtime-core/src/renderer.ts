@@ -797,12 +797,10 @@ function baseCreateRenderer(
     }
     if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
       Object.defineProperty(el, '__vnode', {
-        value: vnode,
-        enumerable: false
+        value: vnode
       })
       Object.defineProperty(el, '__vueParentComponent', {
-        value: parentComponent,
-        enumerable: false
+        value: parentComponent
       })
     }
     if (dirs) {

@@ -376,8 +376,7 @@ describe('api: createApp', () => {
       const app = createApp(Root)
 
       Object.defineProperty(app.config, 'isNativeTag', {
-        value: isNativeTag,
-        writable: false
+        value: isNativeTag
       })
 
       app.mount(nodeOps.createElement('div'))
@@ -398,8 +397,7 @@ describe('api: createApp', () => {
 
       const app = createApp(Root)
       Object.defineProperty(app.config, 'isNativeTag', {
-        value: isNativeTag,
-        writable: false
+        value: isNativeTag
       })
 
       app.mount(nodeOps.createElement('div'))
@@ -420,8 +418,7 @@ describe('api: createApp', () => {
 
       const app = createApp(Root)
       Object.defineProperty(app.config, 'isNativeTag', {
-        value: isNativeTag,
-        writable: false
+        value: isNativeTag
       })
 
       app.mount(nodeOps.createElement('div'))
@@ -436,8 +433,7 @@ describe('api: createApp', () => {
       })
 
       Object.defineProperty(app.config, 'isNativeTag', {
-        value: isNativeTag,
-        writable: false
+        value: isNativeTag
       })
 
       app.component('div', () => 'div')

@@ -103,8 +103,7 @@ function injectNativeTagCheck(app: App) {
   // Inject `isNativeTag`
   // this is used for component name validation (dev only)
   Object.defineProperty(app.config, 'isNativeTag', {
-    value: (tag: string) => isHTMLTag(tag) || isSVGTag(tag),
-    writable: false
+    value: (tag: string) => isHTMLTag(tag) || isSVGTag(tag)
   })
 }
 
