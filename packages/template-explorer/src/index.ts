@@ -122,7 +122,7 @@ window.init = () => {
 
   const output = monaco.editor.create(document.getElementById('output')!, {
     value: '',
-    language: 'javascript',
+    language: compilerOptions.isTS ? 'typescript' : 'javascript',
     readOnly: true,
     ...sharedEditorOptions
   })
@@ -225,7 +225,13 @@ window.init = () => {
   )
 
   initOptions()
-  watchEffect(reCompile)
+  watchEffect(() => {
+    monaco.editor.setModelLanguage(
+      output.getModel()!,
+      compilerOptions.isTS ? 'typescript' : 'javascript'
+    )
+    reCompile()
+  })
 }
 
 function debounce<T extends (...args: any[]) => any>(

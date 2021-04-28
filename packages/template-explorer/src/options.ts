@@ -14,6 +14,7 @@ export const compilerOptions: CompilerOptions = reactive({
   scopeId: null,
   inline: false,
   ssrCssVars: `{ color }`,
+  isTS: false,
   bindingMetadata: {
     TestComponent: BindingTypes.SETUP_CONST,
     setupRef: BindingTypes.SETUP_REF,
@@ -182,6 +183,19 @@ const App = {
                 }
               }),
               h('label', { for: 'optimize-imports' }, 'optimizeImports')
+            ]),
+
+            // toggle language
+            h('li', [
+              h('input', {
+                type: 'checkbox',
+                id: 'typescript',
+                checked: compilerOptions.isTS,
+                onChange(e: Event) {
+                  compilerOptions.isTS = (e.target as HTMLInputElement).checked
+                }
+              }),
+              h('label', { for: 'typescript' }, 'typescript')
             ])
           ])
         ])
