@@ -478,7 +478,7 @@ describe('compiler: transform v-on', () => {
           type: NodeTypes.COMPOUND_EXPRESSION,
           children: [
             `(...args) => (`,
-            { content: `_ctx.foo && _ctx.foo(...args)` },
+            { content: `_ctx.foo ? _ctx.foo(...args) : void 0` },
             `)`
           ]
         }
@@ -508,11 +508,11 @@ describe('compiler: transform v-on', () => {
                 { content: `_ctx.foo` },
                 `.`,
                 { content: `bar` },
-                ` && `,
+                ` ? `,
                 { content: `_ctx.foo` },
                 `.`,
                 { content: `bar` },
-                `(...args)`
+                `(...args) : void 0`
               ]
             },
             `)`

@@ -1,4 +1,4 @@
-import { hyphenate } from '@vue/shared'
+import { hyphenate, isFunction } from '@vue/shared'
 
 const systemModifiers = ['ctrl', 'shift', 'alt', 'meta']
 
@@ -25,13 +25,13 @@ const modifierGuards: Record<
 /**
  * @private
  */
-export const withModifiers = (fn: Function, modifiers: string[]) => {
+export const withModifiers = (fn: unknown, modifiers: string[]) => {
   return (event: Event, ...args: unknown[]) => {
     for (let i = 0; i < modifiers.length; i++) {
       const guard = modifierGuards[modifiers[i]]
       if (guard && guard(event, modifiers)) return
     }
-    return fn(event, ...args)
+    return isFunction(fn) ? fn(event, ...args) : void 0
   }
 }
 

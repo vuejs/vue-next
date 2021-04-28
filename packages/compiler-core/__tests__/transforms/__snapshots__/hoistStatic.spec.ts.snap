@@ -209,7 +209,7 @@ export function render(_ctx, _cache) {
   return (_openBlock(), _createBlock(\\"div\\", null, [
     _createVNode(\\"div\\", null, [
       _createVNode(\\"div\\", {
-        onClick: _cache[1] || (_cache[1] = (...args) => (_ctx.foo && _ctx.foo(...args)))
+        onClick: _cache[1] || (_cache[1] = (...args) => (_ctx.foo ? _ctx.foo(...args) : void 0))
       })
     ])
   ]))
