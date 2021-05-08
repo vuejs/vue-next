@@ -97,7 +97,8 @@ function createConfig(format, output, plugins = []) {
     output.name = packageOptions.name
   }
 
-  const shouldEmitDeclarations = process.env.TYPES != null && !hasTSChecked
+  const shouldEmitDeclarations =
+    process.env.EMIT_DECLARATIONS != null && !hasTSChecked
 
   const tsPlugin = ts({
     check: process.env.NODE_ENV === 'production' && !hasTSChecked,

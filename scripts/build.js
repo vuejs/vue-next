@@ -33,6 +33,104 @@ const buildTypes = args.t || args.types || isRelease
 const buildAllMatching = args.all || args.a
 const commit = execa.sync('git', ['rev-parse', 'HEAD']).stdout.slice(0, 7)
 
+let shouldEmitDeclarations = buildTypes
+
+class ApiExtractor {
+  static entryPoints = []
+  static apiExtractorTempPath = path.resolve(__dirname, '../api-extractor-temp')
+  static compilerState
+  static compilerStateTarget
+  static runQueue = []
+
+  static async make() {
+    if (!buildTypes) return
+    if (!ApiExtractor.compilerStateTarget) {
+      console.warn('not find compilerStateTarget')
+      return
+    }
+    const target = ApiExtractor.compilerStateTarget
+    const pkgDir = path.resolve(`packages/${target}`)
+    const extractorConfigPath = path.resolve(pkgDir, `api-extractor.json`)
+
+    await fs.remove(ApiExtractor.apiExtractorTempPath)
+    await fs.move(
+      `${pkgDir}/dist/packages`,
+      path.resolve(ApiExtractor.apiExtractorTempPath, 'packages')
+    )
+    const {
+      CompilerState,
+      ExtractorConfig
+    } = require('@microsoft/api-extractor')
+    const extractorConfig = ExtractorConfig.loadFileAndPrepare(
+      extractorConfigPath
+    )
+    ApiExtractor.compilerState = CompilerState.create(extractorConfig, {
+      additionalEntryPoints: ApiExtractor.entryPoints
+    })
+
+    const promises = ApiExtractor.runQueue.map(runner => runner())
+    return await Promise.all(promises)
+  }
+
+  static async use(target, pkgDir, pkg) {
+    if (!buildTypes || !pkg.types) return
+    ApiExtractor.runQueue.push(async () => {
+      const extractorConfigPath = path.resolve(pkgDir, `api-extractor.json`)
+      console.log()
+      console.log(
+        chalk.bold(chalk.yellow(`Rolling up type definitions for ${target}...`))
+      )
+      const { Extractor, ExtractorConfig } = require('@microsoft/api-extractor')
+      const extractorConfig = ExtractorConfig.loadFileAndPrepare(
+        extractorConfigPath
+      )
+      const extractorResult = Extractor.invoke(extractorConfig, {
+        localBuild: true,
+        showVerboseMessages: true,
+        compilerState: ApiExtractor.compilerState
+      })
+
+      if (extractorResult.succeeded) {
+        // concat additional d.ts to rolled-up dts
+        const typesDir = path.resolve(pkgDir, 'types')
+        if (await fs.exists(typesDir)) {
+          const dtsPath = path.resolve(pkgDir, pkg.types)
+          const existing = await fs.readFile(dtsPath, 'utf-8')
+          const typeFiles = await fs.readdir(typesDir)
+          const toAdd = await Promise.all(
+            typeFiles.map(file => {
+              return fs.readFile(path.resolve(typesDir, file), 'utf-8')
+            })
+          )
+          await fs.writeFile(dtsPath, existing + '\n' + toAdd.join('\n'))
+        }
+        console.log(
+          chalk.bold(chalk.green(`API Extractor completed successfully.`))
+        )
+      } else {
+        console.error(
+          `API Extractor completed with ${extractorResult.errorCount} errors` +
+            ` and ${extractorResult.warningCount} warnings`
+        )
+        process.exitCode = 1
+      }
+
+      await fs.remove(`${pkgDir}/dist/packages`)
+    })
+  }
+
+  static makeEntryPoints(targets) {
+    if (!buildTypes) return
+    for (const target of targets) {
+      const entryPoint = path.resolve(
+        ApiExtractor.apiExtractorTempPath,
+        `packages/${target}/src/index.d.ts`
+      )
+      ApiExtractor.entryPoints.push(entryPoint)
+    }
+  }
+}
+
 run()
 
 async function run() {
@@ -50,7 +148,9 @@ async function run() {
 }
 
 async function buildAll(targets) {
+  ApiExtractor.makeEntryPoints(targets)
   await runParallel(require('os').cpus().length, targets, build)
+  await ApiExtractor.make()
 }
 
 async function runParallel(maxConcurrency, source, iteratorFn) {
@@ -88,9 +188,18 @@ async function build(target) {
   const env =
     (pkg.buildOptions && pkg.buildOptions.env) ||
     (devOnly ? 'development' : 'production')
+
+  let emitDeclarations = ''
+  if (shouldEmitDeclarations) {
+    emitDeclarations = 'EMIT_DECLARATIONS:true'
+    shouldEmitDeclarations = false
+    ApiExtractor.compilerStateTarget = target
+  }
+
   await execa(
-    'rollup',
+    'npx',
     [
+      'rollup',
       '-c',
       '--environment',
       [
@@ -100,7 +209,8 @@ async function build(target) {
         formats ? `FORMATS:${formats}` : ``,
         buildTypes ? `TYPES:true` : ``,
         prodOnly ? `PROD_ONLY:true` : ``,
-        sourceMap ? `SOURCE_MAP:true` : ``
+        sourceMap ? `SOURCE_MAP:true` : ``,
+        emitDeclarations
       ]
         .filter(Boolean)
         .join(',')
@@ -108,51 +218,7 @@ async function build(target) {
     { stdio: 'inherit' }
   )
 
-  if (buildTypes && pkg.types) {
-    console.log()
-    console.log(
-      chalk.bold(chalk.yellow(`Rolling up type definitions for ${target}...`))
-    )
-
-    // build types
-    const { Extractor, ExtractorConfig } = require('@microsoft/api-extractor')
-
-    const extractorConfigPath = path.resolve(pkgDir, `api-extractor.json`)
-    const extractorConfig = ExtractorConfig.loadFileAndPrepare(
-      extractorConfigPath
-    )
-    const extractorResult = Extractor.invoke(extractorConfig, {
-      localBuild: true,
-      showVerboseMessages: true
-    })
-
-    if (extractorResult.succeeded) {
-      // concat additional d.ts to rolled-up dts
-      const typesDir = path.resolve(pkgDir, 'types')
-      if (await fs.exists(typesDir)) {
-        const dtsPath = path.resolve(pkgDir, pkg.types)
-        const existing = await fs.readFile(dtsPath, 'utf-8')
-        const typeFiles = await fs.readdir(typesDir)
-        const toAdd = await Promise.all(
-          typeFiles.map(file => {
-            return fs.readFile(path.resolve(typesDir, file), 'utf-8')
-          })
-        )
-        await fs.writeFile(dtsPath, existing + '\n' + toAdd.join('\n'))
-      }
-      console.log(
-        chalk.bold(chalk.green(`API Extractor completed successfully.`))
-      )
-    } else {
-      console.error(
-        `API Extractor completed with ${extractorResult.errorCount} errors` +
-          ` and ${extractorResult.warningCount} warnings`
-      )
-      process.exitCode = 1
-    }
-
-    await fs.remove(`${pkgDir}/dist/packages`)
-  }
+  await ApiExtractor.use(target, pkgDir, pkg)
 }
 
 function checkAllSizes(targets) {
