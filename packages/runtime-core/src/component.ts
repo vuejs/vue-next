@@ -172,12 +172,15 @@ export const enum LifecycleHooks {
   SERVER_PREFETCH = 'sp'
 }
 
-export interface SetupContext<E = EmitsOptions> {
-  attrs: Data
-  slots: Slots
-  emit: EmitFn<E>
-  expose: (exposed: Record<string, any>) => void
-}
+// use `E extends any` to force evaluating type to fix #2362
+export type SetupContext<E = EmitsOptions> = E extends any
+  ? {
+      attrs: Data
+      slots: Slots
+      emit: EmitFn<E>
+      expose: (exposed: Record<string, any>) => void
+    }
+  : never
 
 /**
  * @internal
