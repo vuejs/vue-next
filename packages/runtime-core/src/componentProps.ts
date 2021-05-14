@@ -70,14 +70,19 @@ type PropMethod<T, TConstructor = any> = [T] extends [(...args: any) => any] // 
   : never
 
 type RequiredKeys<T> = {
-  [K in keyof T]: T[K] extends
-    | { required: true }
-    | { default: any }
-    // don't mark Boolean props as undefined
-    | BooleanConstructor
-    | { type: BooleanConstructor }
-    ? K
-    : never
+  [K in keyof T]: T[K] extends Prop<unknown, infer D>
+  // if D isn't unknown then T either has default or was defined explicitly as Prop<something>
+  ? unknown extends D
+    ? T[K] extends
+      | { required: true }
+      | { default: any }
+      // don't mark Boolean props as undefined
+      | BooleanConstructor
+      | { type: BooleanConstructor }
+      ? K
+      : never
+    : K
+  : never
 }[keyof T]
 
 type OptionalKeys<T> = Exclude<keyof T, RequiredKeys<T>>
