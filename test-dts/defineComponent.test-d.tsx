@@ -43,6 +43,71 @@ describe('with object props', () => {
     date?: Date
   }
 
+  type ExpectedPropsType = {
+    a: NumberConstructor
+    b: {
+      type: StringConstructor
+      required: true
+    }
+    e: FunctionConstructor
+    h: BooleanConstructor
+    bb: { default: string }
+    bbb: { default: (props: any) => string }
+    bbbb: {
+      type: StringConstructor
+      default: undefined
+    }
+    bbbbb: {
+      type: StringConstructor
+      default: () => undefined
+    }
+    cc: PropType<string[]>
+    dd: {
+      type: PropType<{ n: 1 }>
+      required: true
+    }
+    ee: PropType<() => string>
+    ff: PropType<(a: number, b: string) => { a: boolean }>
+    ccc: () => string[]
+    ddd: {
+      type: () => string[]
+      required: true
+    }
+    eee: {
+      type: PropType<() => { a: string }>
+      required: true
+    }
+    fff: {
+      type: PropType<(a: number, b: string) => { a: boolean }>
+      required: true
+    }
+    hhh: {
+      type: BooleanConstructor
+      required: true
+    }
+    ggg: {
+      type: PropType<'foo' | 'bar'>
+      default: string
+    }
+    ffff: {
+      type: PropType<(a: number, b: string) => { a: boolean }>
+      default: (a: number, b: string) => { a: boolean }
+    }
+    iii: PropType<(() => string) | (() => number)>
+    jjj: {
+      type: PropType<
+        ((arg1: string) => string) | ((arg1: string, arg2: string) => string)
+      >
+      required: true
+    }
+    kkk: null
+    validated: {
+      type: StringConstructor
+      validator: (val: unknown) => boolean
+    }
+    date: DateConstructor
+  }
+
   type GT = string & { __brand: unknown }
 
   const MyComponent = defineComponent({
@@ -245,6 +310,8 @@ describe('with object props', () => {
   })
 
   expectType<Component>(MyComponent)
+
+  expectType<ExpectedPropsType>(MyComponent.props)
 
   // Test TSX
   expectType<JSX.Element>(
