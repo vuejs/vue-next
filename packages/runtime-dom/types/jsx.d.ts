@@ -457,6 +457,7 @@ export interface ImgHTMLAttributes extends HTMLAttributes {
   srcset?: string
   usemap?: string
   width?: number | string
+  loading?: "lazy" | "eager" | "auto";
 }
 
 export interface InsHTMLAttributes extends HTMLAttributes {
