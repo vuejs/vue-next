@@ -4,7 +4,9 @@ import {
   h,
   nodeOps,
   nextTick,
-  getCurrentInstance
+  getCurrentInstance,
+  SetupContext,
+  withCtx
 } from '@vue/runtime-test'
 import { normalizeVNode } from '../src/vnode'
 import { createSlots } from '../src/helpers/createSlots'
@@ -237,5 +239,43 @@ describe('component: slots', () => {
     flag2.value++
     await nextTick()
     expect(spy).toHaveBeenCalledTimes(2)
+  })
+
+  test('warning for calling the slot function outside of render function', () => {
+    const Comp = {
+      setup(props: any, { slots }: SetupContext) {
+        slots.default!()
+
+        return () => null
+      }
+    }
+
+    render(h(Comp, () => h('div')), nodeOps.createElement('div'))
+
+    expect(
+      '[Vue warn]: Slot "default" invoked outside of the render function'
+    ).toHaveBeenWarned()
+  })
+
+  test('warning for calling the compiled slot function outside of render function', () => {
+    const Comp = {
+      setup(props: any, { slots }: SetupContext) {
+        slots.default!()
+
+        return () => null
+      }
+    }
+
+    render(
+      h(Comp, null, {
+        default: withCtx(() => [h('div')]),
+        _: 1
+      }),
+      nodeOps.createElement('div')
+    )
+
+    expect(
+      '[Vue warn]: Slot "default" invoked outside of the render function'
+    ).toHaveBeenWarned()
   })
 })

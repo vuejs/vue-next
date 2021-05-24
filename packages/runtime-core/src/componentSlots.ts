@@ -57,21 +57,28 @@ const normalizeSlotValue = (value: unknown): VNode[] =>
     ? value.map(normalizeVNode)
     : [normalizeVNode(value as VNodeChild)]
 
-const normalizeSlot = (
-  key: string,
-  rawSlot: Function,
-  ctx: ComponentInternalInstance | null | undefined
-): Slot =>
-  withCtx((props: any) => {
-    if (__DEV__ && currentInstance) {
+function withWarning(key: string, fn: Slot) {
+  return (...args: any[]) => {
+    if (currentInstance) {
       warn(
         `Slot "${key}" invoked outside of the render function: ` +
           `this will not track dependencies used in the slot. ` +
           `Invoke the slot function inside the render function instead.`
       )
     }
-    return normalizeSlotValue(rawSlot(props))
-  }, ctx) as Slot
+    return fn(...args)
+  }
+}
+
+const normalizeSlot = (
+  key: string,
+  rawSlot: Function,
+  ctx: ComponentInternalInstance | null | undefined
+): Slot => {
+  let slot = (props: any) => normalizeSlotValue(rawSlot(props))
+  __DEV__ && (slot = withWarning(key, slot))
+  return withCtx(slot, ctx) as Slot
+}
 
 const normalizeObjectSlots = (
   rawSlots: RawSlots,
@@ -131,6 +138,11 @@ export const initSlots = (
       instance.slots = children as InternalSlots
       // make compiler marker non-enumerable
       def(children as InternalSlots, '_', type)
+      if (__DEV__) {
+        for (const key in instance.slots) {
+          instance.slots[key] = withWarning(key, instance.slots[key]!)
+        }
+      }
     } else {
       normalizeObjectSlots(
         children as RawSlots,
