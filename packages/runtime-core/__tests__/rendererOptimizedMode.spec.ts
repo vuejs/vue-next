@@ -18,7 +18,10 @@ import {
   onBeforeUnmount,
   createTextVNode,
   SetupContext,
-  createApp
+  createApp,
+  resolveDynamicComponent,
+  createCommentVNode,
+  computed
 } from '@vue/runtime-test'
 import { PatchFlags, SlotFlags } from '@vue/shared'
 
@@ -575,5 +578,46 @@ describe('renderer: optimized mode', () => {
     state.value = 1
     await nextTick()
     expect(inner(root)).toBe('<div>World</div>')
+  })
+
+  test('the call of the `h` fucntion should not mess up the tracking of dynamic children', async () => {
+    const Comp = {
+      render() {
+        return h('h1', 'Comp')
+      }
+    }
+
+    const show = ref(true)
+    const app = createApp({
+      setup() {
+        // when reading the value of computed in the render function,
+        // the h function is called indirectly
+        const dynamicComp = computed(() => h(Comp))
+
+        return () => {
+          return show.value
+            ? (openBlock(),
+              (block = createBlock('div', { key: 0 }, [
+                // calling h for the first time
+                dynamicComp.value
+                  ? (openBlock(),
+                    createBlock(
+                      // calling h for the second time
+                      resolveDynamicComponent(dynamicComp.value)
+                    ))
+                  : createCommentVNode('v-if', true)
+              ])))
+            : createCommentVNode('v-if', true)
+        }
+      }
+    })
+
+    app.mount(root)
+    expect(block!.dynamicChildren!.length).toBe(1)
+    expect(inner(root)).toBe(`<div><h1>Comp</h1></div>`)
+
+    show.value = false
+    await nextTick()
+    expect(inner(root)).toBe(`<!--v-if-->`)
   })
 })
