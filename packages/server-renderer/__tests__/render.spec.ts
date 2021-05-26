@@ -180,6 +180,19 @@ function testRender(type: string, render: typeof renderToString) {
         ).toBe(`<div>parent<div>hello</div></div>`)
       })
 
+      test('component tag with v-bind', async () => {
+        const app = createApp({
+          data() {
+            return {
+              obj: { is: 'p' }
+            }
+          },
+          template: `<component v-bind="obj">hello</component>`
+        })
+        const html = await renderToString(app)
+        expect(html).toBe(`<p>hello</p>`)
+      })
+
       test('nested optimized components', async () => {
         const Child = {
           props: ['msg'],

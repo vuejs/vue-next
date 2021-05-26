@@ -33,7 +33,9 @@ import {
   TELEPORT,
   TRANSITION_GROUP,
   CREATE_VNODE,
-  CallExpression
+  CallExpression,
+  toValidAssetId,
+  RESOLVE_DYNAMIC_COMPONENT
 } from '@vue/compiler-dom'
 import { SSR_RENDER_COMPONENT, SSR_RENDER_VNODE } from '../runtimeHelpers'
 import {
@@ -83,6 +85,9 @@ export const ssrTransformComponent: NodeTransform = (node, context) => {
   const component = resolveComponentType(node, context, true /* ssr */)
   componentTypeMap.set(node, component)
 
+  const isDynamicComponent =
+    isObject(component) && component.callee === RESOLVE_DYNAMIC_COMPONENT
+
   if (isSymbol(component)) {
     if (component === SUSPENSE) {
       return ssrTransformSuspense(node, context)
@@ -109,12 +114,12 @@ export const ssrTransformComponent: NodeTransform = (node, context) => {
         return createFunctionExpression(undefined)
       })
     }
-
     const props =
       node.props.length > 0
         ? // note we are not passing ssr: true here because for components, v-on
           // handlers should still be passed
-          buildProps(node, context).props || `null`
+          buildProps(node, context, undefined, false, isDynamicComponent)
+            .props || `null`
         : `null`
 
     const wipEntries: WIPSlotEntry[] = []
@@ -141,7 +146,10 @@ export const ssrTransformComponent: NodeTransform = (node, context) => {
       ? buildSlots(node, context, buildSSRSlotFn).slots
       : `null`
 
-    if (typeof component !== 'string') {
+    if (
+      typeof component !== 'string' ||
+      component === toValidAssetId('component', 'component')
+    ) {
       // dynamic component that resolved to a `resolveDynamicComponent` call
       // expression - since the resolved result may be a plain element (string)
       // or a VNode, handle it with `renderVNode`.
@@ -203,13 +211,15 @@ export function ssrProcessComponent(
         vnodeBranch
       )
     }
-
     // component is inside a slot, inherit slot scope Id
     if (context.withSlotScopeId) {
       node.ssrCodegenNode!.arguments.push(`_scopeId`)
     }
 
-    if (typeof component === 'string') {
+    if (
+      typeof component === 'string' &&
+      component !== toValidAssetId('component', 'component')
+    ) {
       // static component
       context.pushStatement(
         createCallExpression(`_push`, [node.ssrCodegenNode])

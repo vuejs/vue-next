@@ -50,7 +50,8 @@ import {
   isCoreComponent,
   isBindKey,
   findDir,
-  isStaticExp
+  isStaticExp,
+  hasDynamicKeyVBind
 } from '../utils'
 import { buildSlots } from './vSlot'
 import { getConstantType } from './hoistStatic'
@@ -119,7 +120,13 @@ export const transformElement: NodeTransform = (node, context) => {
 
     // props
     if (props.length > 0) {
-      const propsBuildResult = buildProps(node, context)
+      const propsBuildResult = buildProps(
+        node,
+        context,
+        node.props,
+        false,
+        isDynamicComponent
+      )
       vnodeProps = propsBuildResult.props
       patchFlag = propsBuildResult.patchFlag
       dynamicPropNames = propsBuildResult.dynamicPropNames
@@ -242,7 +249,16 @@ export function resolveComponentType(
   const isExplicitDynamic = isComponentTag(tag)
   const isProp =
     findProp(node, 'is') || (!isExplicitDynamic && findDir(node, 'is'))
-  if (isProp) {
+  const dynamicKeyVBind = hasDynamicKeyVBind(node)
+  // if the component tag has the v-bind with dynamic key, it may potentially overwrite the `is` prop,
+  // we do not treat it as a dynamic component, but as a normal component,
+  // and leave it to the runtime to process.
+  if (
+    isProp &&
+    (!dynamicKeyVBind ||
+      // priority
+      node.props.indexOf(isProp) > node.props.indexOf(dynamicKeyVBind!))
+  ) {
     if (!isExplicitDynamic && isProp.type === NodeTypes.ATTRIBUTE) {
       // <button is="vue:xxx">
       // if not <component>, only is value that starts with "vue:" will be
@@ -347,7 +363,8 @@ export function buildProps(
   node: ElementNode,
   context: TransformContext,
   props: ElementNode['props'] = node.props,
-  ssr = false
+  ssr = false,
+  isDynamicComponent = false
 ): {
   props: PropsExpression | undefined
   directives: DirectiveNode[]
@@ -414,7 +431,6 @@ export function buildProps(
       hasDynamicKeys = true
     }
   }
-
   for (let i = 0; i < props.length; i++) {
     // static attribute
     const prop = props[i]
@@ -430,10 +446,17 @@ export function buildProps(
           isStatic = false
         }
       }
-      // skip is on <component>, or is="vue:xxx"
+      // skip :is on <component>
       if (
         name === 'is' &&
-        (isComponentTag(tag) || (value && value.content.startsWith('vue:')))
+        (
+          isComponentTag(tag) &&
+          // <component is="xxx">  -->  dynamic component  -->  RESOLVE_DYNAMIC_COMPONENT
+          // <component is="xxx" v-bind="xxx">  -->  non-dynamic component  --> RESOLVE_COMPONENT
+          // for non-dynamic components, we need to retain the `is` prop,
+          // so that we can merge it with the dynamic key bindings.
+          isDynamicComponent
+        ) || (value && value.content.startsWith('vue:'))
       ) {
         continue
       }
@@ -473,7 +496,7 @@ export function buildProps(
       // skip v-is and :is on <component>
       if (
         name === 'is' ||
-        (isVBind && isComponentTag(tag) && isBindKey(arg, 'is'))
+        (isVBind && isComponentTag(tag) && isBindKey(arg, 'is') && isDynamicComponent)
       ) {
         continue
       }

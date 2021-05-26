@@ -176,15 +176,17 @@ export function isBindKey(arg: DirectiveNode['arg'], name: string): boolean {
   return !!(arg && isStaticExp(arg) && arg.content === name)
 }
 
-export function hasDynamicKeyVBind(node: ElementNode): boolean {
-  return node.props.some(
+export function hasDynamicKeyVBind(
+  node: ElementNode
+): DirectiveNode | undefined {
+  return node.props.find(
     p =>
       p.type === NodeTypes.DIRECTIVE &&
       p.name === 'bind' &&
       (!p.arg || // v-bind="obj"
       p.arg.type !== NodeTypes.SIMPLE_EXPRESSION || // v-bind:[_ctx.foo]
         !p.arg.isStatic) // v-bind:[foo]
-  )
+  ) as DirectiveNode | undefined
 }
 
 export function isText(

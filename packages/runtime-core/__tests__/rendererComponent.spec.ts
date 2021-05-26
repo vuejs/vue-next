@@ -296,4 +296,24 @@ describe('renderer: component', () => {
       expect(serializeInner(root)).toBe(`<h1>1</h1>`)
     })
   })
+  // #2279
+  test('component tag with the `is` prop', () => {
+    const Comp = {
+      components: {
+        one: {
+          render() {
+            return h('h1', 'Comp')
+          }
+        }
+      },
+      setup() {
+        return () => h('component', { is: 'one' })
+      }
+    }
+
+    const root = nodeOps.createElement('div')
+    render(h(Comp), root)
+
+    expect(serializeInner(root)).toBe('<h1>Comp</h1>')
+  })
 })
