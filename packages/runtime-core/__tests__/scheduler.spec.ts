@@ -568,4 +568,25 @@ describe('scheduler', () => {
     await nextTick()
     expect(count).toBe(1)
   })
+
+  // #3385
+  test('dedupe rendering jobs that are enqueued in a pre-flush job', async () => {
+    // prev cb, e.g. the watch callback
+    const job = () => {
+      // enqueue a render job
+      queueJob(renderJob)
+    }
+    job.allowRecurse = true
+
+    let count = 0
+    const renderJob = () => {
+      count++
+    }
+    renderJob.allowRecurse = true
+
+    queuePreFlushCb(job)
+    queueJob(renderJob)
+    await nextTick()
+    expect(count).toBe(1)
+  })
 })

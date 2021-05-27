@@ -86,12 +86,34 @@ export function queueJob(job: SchedulerJob) {
   // if the job is a watch() callback, the search will start with a +1 index to
   // allow it recursively trigger itself - it is the user's responsibility to
   // ensure it doesn't end up in an infinite loop.
+
+  /**
+   * some jobs are allowed to be executed recursively when flushing, e.g.
+   *  1. a watch() callback
+   *  2. a render effect
+   * these jobs have the `job.allowRecurse` with the `true` value,
+   * consider the job flush order is pre --> job --> post,
+   * some pre-jobs may enqueue a job that allows recursive execution, for example,
+   * changing the reactivity data in the watch callback:
+   *
+   * ```
+   * watch(refA, () => refB.value = xxx)
+   * ```
+   *
+   * this will cause the rendering effect of that component to be repeatedly enqueued(see #3385),
+   * so we need to ensure that there is no `activePreFlushCbs` before the recursive job is enqueued,
+   * however, some pre-jobs of the child component may indirectly change the reactivity data of the parent component,
+   * this usually occurs when the props changes caused by the update of the child component, see `updateComponentPreRender`,
+   * in this case, the `currentPreFlushParentJob` exists, so we can enqueue jobs that can be executed recursively.
+   */
+
+  const allowRecurse =
+    isFlushing &&
+    job.allowRecurse &&
+    (!activePreFlushCbs || currentPreFlushParentJob)
   if (
     (!queue.length ||
-      !queue.includes(
-        job,
-        isFlushing && job.allowRecurse ? flushIndex + 1 : flushIndex
-      )) &&
+      !queue.includes(job, allowRecurse ? flushIndex + 1 : flushIndex)) &&
     job !== currentPreFlushParentJob
   ) {
     const pos = findInsertionIndex(job)
