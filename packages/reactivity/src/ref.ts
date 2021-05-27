@@ -219,7 +219,7 @@ type UnwrapRefSimple<T> = T extends
   | Ref
   | RefUnwrapBailTypes[keyof RefUnwrapBailTypes]
   ? T
-  : T extends Array<any>
+  : T extends ReadonlyArray<any>
     ? { [K in keyof T]: UnwrapRefSimple<T[K]> }
     : T extends object ? UnwrappedObject<T> : T
 
