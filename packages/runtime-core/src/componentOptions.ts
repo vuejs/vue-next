@@ -746,7 +746,10 @@ export function applyOptions(
       const provides = isFunction(provideOptions)
         ? provideOptions.call(publicThis)
         : provideOptions
-      Reflect.ownKeys(provides).forEach(key => {
+      ;[
+        ...Object.keys(provides),
+        ...Object.getOwnPropertySymbols(provides)
+      ].forEach(key => {
         provide(key, provides[key])
       })
     })
