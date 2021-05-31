@@ -213,7 +213,7 @@ export type PublicPropertiesMap = Record<
  * they exist in the internal parent chain. For code that relies on traversing
  * public $parent chains, skip functional ones and go to the parent instead.
  */
-const getPublicInstance = (
+export const getPublicInstance = (
   i: ComponentInternalInstance | null
 ): ComponentPublicInstance | ComponentInternalInstance['exposed'] | null => {
   if (!i) return null

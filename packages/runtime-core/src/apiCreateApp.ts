@@ -5,7 +5,10 @@ import {
   Component
 } from './component'
 import { ComponentOptions, RuntimeCompilerOptions } from './componentOptions'
-import { ComponentPublicInstance } from './componentPublicInstance'
+import {
+  ComponentPublicInstance,
+  getPublicInstance
+} from './componentPublicInstance'
 import { Directive, validateDirectiveName } from './directives'
 import { RootRenderFunction } from './renderer'
 import { InjectionKey } from './apiInject'
@@ -16,6 +19,7 @@ import { devtoolsInitApp, devtoolsUnmountApp } from './devtools'
 import { isFunction, NO, isObject } from '@vue/shared'
 import { version } from '.'
 import { installAppCompatProperties } from './compat/global'
+import { isAsyncWrapper } from './apiAsyncComponent'
 
 export interface App<HostElement = any> {
   version: string
@@ -30,7 +34,7 @@ export interface App<HostElement = any> {
     rootContainer: HostElement | string,
     isHydrate?: boolean,
     isSVG?: boolean
-  ): ComponentPublicInstance
+  ): ComponentPublicInstance | null
   unmount(): void
   provide<T>(key: InjectionKey<T> | string, value: T): this
 
@@ -287,7 +291,9 @@ export function createAppAPI<HostElement>(
             devtoolsInitApp(app, version)
           }
 
-          return vnode.component!.proxy
+          return isAsyncWrapper(vnode)
+            ? null
+            : getPublicInstance(vnode.component)
         } else if (__DEV__) {
           warn(
             `App has already been mounted.\n` +

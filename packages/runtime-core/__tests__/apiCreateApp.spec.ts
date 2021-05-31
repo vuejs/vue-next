@@ -11,7 +11,8 @@ import {
   Plugin,
   ref,
   getCurrentInstance,
-  defineComponent
+  defineComponent,
+  defineAsyncComponent
 } from '@vue/runtime-test'
 
 describe('api: createApp', () => {
@@ -360,6 +361,30 @@ describe('api: createApp', () => {
     app.config.warnHandler = handler
     app.mount(nodeOps.createElement('div'))
     expect(handler).toHaveBeenCalledTimes(1)
+  })
+
+  describe('instance returned by the mount function', () => {
+    test('return public instance when stateful component is the root of the app', () => {
+      const app = createApp({ render: () => h('h1') })
+      expect(app.mount(nodeOps.createElement('div'))).toBeDefined()
+    })
+
+    test('return null when functional component is the root of the app', () => {
+      const app = createApp(() => h('h1'))
+      expect(app.mount(nodeOps.createElement('div'))).toBe(null)
+    })
+
+    test('return null when async component wrapper is the root of the app', () => {
+      const app = createApp(
+        defineAsyncComponent(
+          () =>
+            new Promise(resolve => {
+              resolve({ render: () => h('h1') })
+            })
+        )
+      )
+      expect(app.mount(nodeOps.createElement('div'))).toBe(null)
+    })
   })
 
   describe('config.isNativeTag', () => {

@@ -21,7 +21,7 @@ function mountWithHydration(html: string, render: () => any) {
     render
   })
   return {
-    vnode: app.mount(container).$.subTree as VNode<Node, Element> & {
+    vnode: app.mount(container)!.$.subTree as VNode<Node, Element> & {
       el: Element
     },
     container
@@ -755,7 +755,7 @@ describe('SSR hydration', () => {
     })
 
     expect(
-      (app.mount(svgContainer).$.subTree as VNode<Node, Element> & {
+      (app.mount(svgContainer)!.$.subTree as VNode<Node, Element> & {
         el: Element
       }).el instanceof SVGElement
     )
