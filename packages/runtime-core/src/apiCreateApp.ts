@@ -27,7 +27,7 @@ import { ObjectEmitsOptions } from './componentEmits'
 export interface App<HostElement = any> {
   version: string
   config: AppConfig
-  use(plugin: Plugin, ...options: any[]): this
+  use<Option>(plugin: Plugin<Option>, ...options: Option[]): this
   mixin(mixin: ComponentOptions): this
   component(name: string): Component | undefined
   component(name: string, component: Component): this
@@ -130,12 +130,12 @@ export interface AppContext {
   filters?: Record<string, Function>
 }
 
-type PluginInstallFunction = (app: App, ...options: any[]) => any
+type PluginInstallFunction<Option> = (app: App, ...options: Option[]) => any
 
-export type Plugin =
-  | PluginInstallFunction & { install?: PluginInstallFunction }
+export type Plugin<Option = any> =
+  | PluginInstallFunction<Option> & { install?: PluginInstallFunction<Option> }
   | {
-      install: PluginInstallFunction
+      install: PluginInstallFunction<Option>
     }
 
 export function createAppContext(): AppContext {
