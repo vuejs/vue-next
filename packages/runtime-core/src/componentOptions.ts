@@ -58,7 +58,8 @@ import { EmitsOptions } from './componentEmits'
 import { Directive } from './directives'
 import {
   CreateComponentPublicInstance,
-  ComponentPublicInstance
+  ComponentPublicInstance,
+  isReservedPrefix
 } from './componentPublicInstance'
 import { warn } from './warning'
 import { VNodeChild } from './vnode'
@@ -660,7 +661,7 @@ export function applyOptions(instance: ComponentInternalInstance) {
         for (const key in data) {
           checkDuplicateProperties!(OptionTypes.DATA, key)
           // expose data on ctx during dev
-          if (key[0] !== '$' && key[0] !== '_') {
+          if (!isReservedPrefix(key[0])) {
             Object.defineProperty(ctx, key, {
               configurable: true,
               enumerable: true,
