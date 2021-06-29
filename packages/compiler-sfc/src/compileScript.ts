@@ -177,12 +177,17 @@ export function compileScript(
   const defaultTempVar = `__default__`
   const bindingMetadata: BindingMetadata = {}
   const helperImports: Set<string> = new Set()
+  enum LocatedType {
+    SCRIPT = 1,
+    SETUP_SCRIPT = 1 << 1
+  }
   const userImports: Record<
     string,
     {
       isType: boolean
       imported: string
       source: string
+      located: LocatedType
     }
   > = Object.create(null)
   const userImportAlias: Record<string, string> = Object.create(null)
@@ -254,7 +259,8 @@ export function compileScript(
     source: string,
     local: string,
     imported: string | false,
-    isType: boolean
+    isType: boolean,
+    located: LocatedType
   ) {
     if (source === 'vue' && imported) {
       userImportAlias[imported] = local
@@ -262,7 +268,8 @@ export function compileScript(
     userImports[local] = {
       isType,
       imported: imported || 'default',
-      source
+      source,
+      located
     }
   }
 
@@ -635,7 +642,8 @@ export function compileScript(
             node.source.value,
             specifier.local.name,
             imported,
-            node.importKind === 'type'
+            node.importKind === 'type',
+            LocatedType.SCRIPT
           )
         }
       } else if (node.type === 'ExportDefaultDeclaration') {
@@ -787,6 +795,7 @@ export function compileScript(
           if (existing.source === source && existing.imported === imported) {
             // already imported in <script setup>, dedupe
             removeSpecifier(i)
+            existing.located |= LocatedType.SETUP_SCRIPT
           } else {
             error(`different imports aliased to same local name.`, specifier)
           }
@@ -795,7 +804,8 @@ export function compileScript(
             source,
             local,
             imported,
-            node.importKind === 'type'
+            node.importKind === 'type',
+            LocatedType.SETUP_SCRIPT
           )
         }
       }
@@ -1123,7 +1133,10 @@ export function compileScript(
     // return bindings from setup
     const allBindings: Record<string, any> = { ...setupBindings }
     for (const key in userImports) {
-      if (!userImports[key].isType) {
+      if (
+        !userImports[key].isType &&
+        userImports[key].located & LocatedType.SETUP_SCRIPT
+      ) {
         allBindings[key] = true
       }
     }

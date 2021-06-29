@@ -218,6 +218,23 @@ return { x }
 }"
 `;
 
+exports[`SFC compile <script setup> imports imports in <script> should not be exposed 1`] = `
+"import { b } from './bar'
+      
+      import { foo } from './foo'
+      import { a } from './bar'
+      
+export default {
+  expose: [],
+  setup(__props) {
+
+      
+return { b }
+}
+
+}"
+`;
+
 exports[`SFC compile <script setup> imports should allow defineProps/Emit at the start of imports 1`] = `
 "import { ref } from 'vue'
       
