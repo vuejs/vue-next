@@ -188,6 +188,7 @@ export const transformFor = createStructuralDirectiveTransform(
         renderExp.arguments.push(createFunctionExpression(
           createForLoopParams(forNode.parseResult),
           childBlock,
+          undefined,
           true /* force newline */
         ) as ForIteratorExpression)
       }

@@ -94,6 +94,18 @@ return function render(_ctx, _cache) {
 }"
 `;
 
+exports[`compiler: codegen custom gen 1`] = `
+"
+return function render(_ctx, _cache) {
+  with (_ctx) {
+    return (obj) => {
+      const count = obj.foo
+      return count
+    }
+  }
+}"
+`;
+
 exports[`compiler: codegen forNode 1`] = `
 "
 return function render(_ctx, _cache) {

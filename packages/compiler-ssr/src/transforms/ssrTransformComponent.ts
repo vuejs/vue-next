@@ -123,7 +123,8 @@ export const ssrTransformComponent: NodeTransform = (node, context) => {
     const buildSSRSlotFn: SlotFnBuilder = (props, children, loc) => {
       const fn = createFunctionExpression(
         [props || `_`, `_push`, `_parent`, `_scopeId`],
-        undefined, // no return, assign body later
+        undefined, // no return
+        undefined, // assign body later
         true, // newline
         true, // isSlot
         loc

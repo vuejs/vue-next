@@ -53,6 +53,7 @@ export function ssrProcessTeleport(
 
   const contentRenderFn = createFunctionExpression(
     [`_push`],
+    undefined, // no return
     undefined, // Body is added later
     true, // newline
     false, // isSlot

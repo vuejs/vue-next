@@ -1,4 +1,10 @@
-import { ElementNode, Namespace, TemplateChildNode, ParentNode } from './ast'
+import {
+  ElementNode,
+  Namespace,
+  TemplateChildNode,
+  ParentNode,
+  Node
+} from './ast'
 import { TextModes } from './parse'
 import { CompilerError } from './errors'
 import {
@@ -8,6 +14,7 @@ import {
 } from './transform'
 import { CompilerCompatOptions } from './compat/compatConfig'
 import { ParserPlugin } from '@babel/parser'
+import { CodegenContext } from '@vue/compiler-dom/src'
 
 export interface ErrorHandlingOptions {
   onWarn?: (warning: CompilerError) => void
@@ -266,6 +273,13 @@ export interface CodegenOptions extends SharedTransformCodegenOptions {
    * @default 'Vue'
    */
   runtimeGlobalName?: string
+  /**
+   * Since the AST of the generated code is only a subset of JS AST,
+   * and the `genNode` function can only process nodes of the types contained in this subset,
+   * however, some compiler plugins may extend the type of JS AST nodes,
+   * for these nodes, they will be passed as parameters to the `customGen` function
+   */
+  customGen?: (node: Node & { type: any }, context: CodegenContext) => void
 }
 
 export type CompilerOptions = ParserOptions & TransformOptions & CodegenOptions

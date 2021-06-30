@@ -39,7 +39,8 @@ export function ssrTransformSuspense(
       wipEntry.slotsExp = buildSlots(node, context, (_props, children, loc) => {
         const fn = createFunctionExpression(
           [],
-          undefined, // no return, assign body later
+          undefined, // no return
+          undefined, // assign body later
           true, // newline
           false, // suspense slots are not treated as normal slots
           loc

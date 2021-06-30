@@ -21,7 +21,7 @@ export {
   StructuralDirectiveTransform,
   DirectiveTransform
 } from './transform'
-export { generate, CodegenContext, CodegenResult } from './codegen'
+export { generate, CodegenContext, CodegenResult, genNode } from './codegen'
 export {
   ErrorCodes,
   CoreCompilerError,

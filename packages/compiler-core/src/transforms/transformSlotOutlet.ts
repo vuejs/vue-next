@@ -31,7 +31,9 @@ export const transformSlotOutlet: NodeTransform = (node, context) => {
       if (!slotProps) {
         slotArgs.push(`{}`)
       }
-      slotArgs.push(createFunctionExpression([], children, false, false, loc))
+      slotArgs.push(
+        createFunctionExpression([], children, undefined, false, false, loc)
+      )
     }
 
     if (context.scopeId && !context.slotted) {

@@ -1,6 +1,7 @@
 import {
   locStub,
   generate,
+  genNode,
   NodeTypes,
   RootNode,
   createSimpleExpression,
@@ -21,7 +22,10 @@ import {
   createVNodeCall,
   VNodeCall,
   DirectiveArguments,
-  ConstantTypes
+  ConstantTypes,
+  JSChildNode,
+  createFunctionExpression,
+  SourceLocation
 } from '../src'
 import {
   CREATE_VNODE,
@@ -782,5 +786,55 @@ describe('compiler: codegen', () => {
          "
       `)
     })
+  })
+
+  test('custom gen', () => {
+    interface VariableDecl {
+      type: 'VariableDecl'
+      id: string
+      init: JSChildNode
+      kind: 'const' | 'let'
+      loc: SourceLocation
+    }
+    function createVariableDecl(
+      id: VariableDecl['id'],
+      init: VariableDecl['init'],
+      kind: VariableDecl['kind'] = 'const'
+    ) {
+      return ({
+        type: 'VariableDecl',
+        id,
+        init,
+        kind,
+        loc: locStub
+      } as unknown) as JSChildNode
+    }
+    const { code } = generate(
+      createRoot({
+        codegenNode: createFunctionExpression(
+          'obj',
+          createSimpleExpression('count', false),
+          createBlockStatement([
+            createVariableDecl(
+              'count',
+              createSimpleExpression('obj.foo', false)
+            )
+          ]),
+          true /* newline */
+        )
+      }),
+      {
+        customGen(node, context) {
+          if (node.type === 'VariableDecl') {
+            const { push, newline } = context
+            const { id, init, kind } = (node as unknown) as VariableDecl
+            push(`${kind} ${id} = `)
+            genNode(init, context)
+            newline()
+          }
+        }
+      }
+    )
+    expect(code).toMatchSnapshot()
   })
 })
