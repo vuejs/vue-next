@@ -108,10 +108,18 @@ type InferPropType<T> = [T] extends [null]
             ? (unknown extends V ? D : V)
             : T
 
-export type ExtractPropTypes<O> = O extends object
+type ExtractFullPropTypes<O> = O extends object
   ? { [K in RequiredKeys<O>]: InferPropType<O[K]> } &
       { [K in OptionalKeys<O>]?: InferPropType<O[K]> }
   : { [K in string]: any }
+
+export type ExtractPropTypes<
+  O,
+  MakeDefaultsOptional = false
+> = MakeDefaultsOptional extends true
+  ? Partial<ExtractDefaultPropTypes<O>> &
+      Omit<ExtractFullPropTypes<O>, DefaultKeys<O>>
+  : ExtractFullPropTypes<O>
 
 const enum BooleanFlags {
   shouldCast,
