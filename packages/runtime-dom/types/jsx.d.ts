@@ -1298,8 +1298,22 @@ export interface Events {
 
 type StringKeyOf<T> = Extract<keyof T, string>
 
-type EventHandlers<E> = {
-  [K in StringKeyOf<E>]?: E[K] extends Function ? E[K] : (payload: E[K]) => void
+type ExtendBaseEventName<T> = T extends `on${string}`
+  ? T | `${T}Capture` | `${T}Once` | `${T}OnceCapture`
+  : unknown
+type ExtractBaseEventName<T> = T extends `${infer OC}OnceCapture`
+  ? OC
+  : T extends `${infer O}Once`
+  ? O
+  : T extends `${infer C}Capture`
+  ? C
+  : T
+type EventNames = ExtendBaseEventName<StringKeyOf<Events>>
+
+type EventHandlers<E extends Record<string, any>> = {
+  [K in EventNames]?: E[ExtractBaseEventName<K>] extends Function
+    ? E[ExtractBaseEventName<K>]
+    : (payload: E[ExtractBaseEventName<K>]) => void
 }
 
 // use namespace import to avoid collision with generated types which use
