@@ -212,6 +212,22 @@ export type UnwrapRef<T> = T extends Ref<infer V>
   ? UnwrapRefSimple<V>
   : UnwrapRefSimple<T>
 
+// #3116
+// use interface so that IDE will not display redundant information
+interface ReactiveArray<T> {
+  push(...items: T[]): number
+  unshift(...items: T[]): number
+  concat(...items: ConcatArray<T>[]): T[]
+  concat(...items: (T | ConcatArray<T>)[]): T[]
+  fill(value: T, start?: number, end?: number): this
+  indexOf(searchElement: T, fromIndex?: number): number
+  lastIndexOf(searchElement: T, fromIndex?: number): number
+  splice(start: number, deleteCount?: number): T[]
+  splice(start: number, deleteCount: number, ...items: T[]): T[]
+  includes(searchElement: T, fromIndex?: number): boolean
+  flat<D extends number = 1>(depth?: D): FlatArray<UnwrapRefSimple<T[]>, D>[]
+}
+
 type UnwrapRefSimple<T> = T extends
   | Function
   | CollectionTypes
@@ -219,8 +235,8 @@ type UnwrapRefSimple<T> = T extends
   | Ref
   | RefUnwrapBailTypes[keyof RefUnwrapBailTypes]
   ? T
-  : T extends Array<any>
-    ? { [K in keyof T]: UnwrapRefSimple<T[K]> }
+  : T extends Array<infer Item>
+    ? ReactiveArray<Item> & { [K in keyof T]: UnwrapRefSimple<T[K]> }
     : T extends object ? UnwrappedObject<T> : T
 
 // Extract all known symbols from an object

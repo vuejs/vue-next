@@ -10,7 +10,8 @@ import {
   toRef,
   toRefs,
   ToRefs,
-  watch
+  watch,
+  UnwrapRef
 } from './index'
 
 function plainType(arg: number | Ref<number>) {
@@ -202,4 +203,86 @@ switch (data.state.value) {
   case 'state3':
     data.state.value = 'state1'
     break
+}
+
+// #3116 ref or reactive Array
+type Item = {
+  foo: Ref<boolean>
+}
+type ExpectedItem = UnwrapRef<Item>
+const refArr = ref<Item[]>([])
+const reactiveArr = reactive<Item[]>([])
+const item = { foo: true }
+const itemWithRef = { foo: ref(false) }
+
+testArrayMethods(refArr)
+testArrayMethods(reactiveArr)
+
+function testArrayMethods(arr: typeof refArr | typeof reactiveArr) {
+  if (isRef(arr)) arr = arr.value
+  // basic
+  expectType<ExpectedItem>(arr[0])
+  // mutable methods
+  arr.push(item)
+  arr.push(itemWithRef)
+  arr.unshift(item)
+  arr.unshift(itemWithRef)
+  arr.splice(1, 1, item)
+  arr.splice(1, 1, itemWithRef)
+  expectType<ExpectedItem | undefined>(arr.pop())
+  expectType<ExpectedItem | undefined>(arr.shift())
+
+  // Iterable & Iterator
+  expectType<IterableIterator<[number, ExpectedItem]>>(arr.entries())
+  expectType<IterableIterator<ExpectedItem>>(arr.values())
+
+  arr.forEach(item => expectType<ExpectedItem>(item))
+  arr.every(item => expectType<ExpectedItem>(item))
+  arr.filter(item => expectType<ExpectedItem>(item))
+  arr.some(item => expectType<ExpectedItem>(item))
+  arr.map(item => expectType<ExpectedItem>(item))
+  arr.find(item => expectType<ExpectedItem>(item))
+  arr.findIndex(item => expectType<ExpectedItem>(item))
+  arr.includes(item)
+  arr.includes(itemWithRef)
+  arr.indexOf(item)
+  arr.indexOf(itemWithRef)
+  arr.lastIndexOf(item)
+  arr.lastIndexOf(itemWithRef)
+
+  expectType<ExpectedItem[]>(arr.flat())
+  expectType<ExpectedItem[]>(
+    arr.flatMap((value, index, a) => {
+      expectType<ExpectedItem>(value)
+      expectType<ExpectedItem[]>(a)
+      return item
+    })
+  )
+
+  arr.reduce((prev, cur, i, a) => {
+    expectType<ExpectedItem>(prev)
+    expectType<ExpectedItem>(cur)
+    expectType<ExpectedItem[]>(a)
+    return prev
+  })
+  arr.reduceRight((prev, cur, i, a) => {
+    expectType<ExpectedItem>(prev)
+    expectType<ExpectedItem>(cur)
+    expectType<ExpectedItem[]>(a)
+    return prev
+  })
+  arr.sort((e1, e2) => {
+    expectType<ExpectedItem>(e1)
+    expectType<ExpectedItem>(e2)
+    return 1
+  })
+
+  arr.concat(item)
+  arr.concat(itemWithRef)
+  arr.concat([itemWithRef])
+  expectType<ExpectedItem[]>(arr.fill(item))
+  expectType<ExpectedItem[]>(arr.fill(itemWithRef))
+
+  expectType<ExpectedItem[]>(arr.reverse())
+  expectType<ExpectedItem[]>(arr.slice())
 }
