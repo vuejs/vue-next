@@ -7,8 +7,9 @@ export function patchClass(el: Element, value: string | null, isSVG: boolean) {
     value = ''
   }
   if (isSVG) {
-    el.setAttribute('class', value)
+    value ? el.setAttribute('class', value) : el.removeAttribute('class')
   } else {
+    if (!el.className && !value) return
     // directly setting className should be faster than setAttribute in theory
     // if this is an element during a transition, take the temporary transition
     // classes into account.
@@ -18,6 +19,10 @@ export function patchClass(el: Element, value: string | null, isSVG: boolean) {
         ? [value, ...transitionClasses]
         : [...transitionClasses]
       ).join(' ')
+    }
+    if (!value) {
+      el.removeAttribute('class')
+      return
     }
     el.className = value
   }
