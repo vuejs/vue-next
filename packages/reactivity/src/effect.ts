@@ -101,7 +101,6 @@ function createReactiveEffect<T = any>(
     if (!effect.active) {
       return fn()
     }
-    if (!effectStack.includes(effect)) {
       cleanup(effect)
       try {
         enableTracking()
@@ -113,7 +112,6 @@ function createReactiveEffect<T = any>(
         resetTracking()
         activeEffect = effectStack[effectStack.length - 1]
       }
-    }
   } as ReactiveEffect
   effect.id = uid++
   effect.allowRecurse = !!options.allowRecurse
