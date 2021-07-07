@@ -1,4 +1,4 @@
-import { patchProp } from '../src/patchProp'
+import { patchProp } from '../src/propOps'
 import { render, h } from '../src'
 
 describe('runtime-dom: props patching', () => {

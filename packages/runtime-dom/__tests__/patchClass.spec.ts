@@ -1,4 +1,4 @@
-import { patchProp } from '../src/patchProp'
+import { patchProp } from '../src/propOps'
 import { ElementWithTransition } from '../src/components/Transition'
 import { svgNS } from '../src/nodeOps'
 

@@ -47,7 +47,10 @@ type ModelDirective<T> = ObjectDirective<T & { _assign: AssignerFn }>
 export const vModelText: ModelDirective<
   HTMLInputElement | HTMLTextAreaElement
 > = {
-  created(el, { modifiers: { lazy, trim, number } }, vnode) {
+  created(el, { value, modifiers: { lazy, trim, number } }, vnode) {
+    // set value by props. #2325
+    // vnode.props at least contains onUpdate:modelValue
+    vnode.props!['value'] = value == null ? '' : value
     el._assign = getModelAssigner(vnode)
     const castToNumber = number || el.type === 'number'
     addEventListener(el, lazy ? 'change' : 'input', e => {
@@ -74,10 +77,6 @@ export const vModelText: ModelDirective<
       // fires "change" instead of "input" on autocomplete.
       addEventListener(el, 'change', onCompositionEnd)
     }
-  },
-  // set value on mounted so it's after min/max for type="range"
-  mounted(el, { value }) {
-    el.value = value == null ? '' : value
   },
   beforeUpdate(el, { value, modifiers: { trim, number } }, vnode) {
     el._assign = getModelAssigner(vnode)

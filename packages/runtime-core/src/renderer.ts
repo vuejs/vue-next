@@ -120,24 +120,40 @@ export interface RendererOptions<
     parentSuspense?: SuspenseBoundary | null,
     unmountChildren?: UnmountChildrenFn
   ): void
+
   forcePatchProp?(el: HostElement, key: string): boolean
+
+  delayInitProp?(el: HostElement, key: string): number | boolean
+
   insert(el: HostNode, parent: HostElement, anchor?: HostNode | null): void
+
   remove(el: HostNode): void
+
   createElement(
     type: string,
     isSVG?: boolean,
     isCustomizedBuiltIn?: string,
     vnodeProps?: (VNodeProps & { [key: string]: any }) | null
   ): HostElement
+
   createText(text: string): HostNode
+
   createComment(text: string): HostNode
+
   setText(node: HostNode, text: string): void
+
   setElementText(node: HostElement, text: string): void
+
   parentNode(node: HostNode): HostElement | null
+
   nextSibling(node: HostNode): HostNode | null
+
   querySelector?(selector: string): HostElement | null
+
   setScopeId?(el: HostElement, id: string): void
+
   cloneNode?(node: HostNode): HostNode
+
   insertStaticContent?(
     content: string,
     parent: HostElement,
@@ -465,6 +481,7 @@ function baseCreateRenderer(
     remove: hostRemove,
     patchProp: hostPatchProp,
     forcePatchProp: hostForcePatchProp,
+    delayInitProp: hostDelayInitProp,
     createElement: hostCreateElement,
     createText: hostCreateText,
     createComment: hostCreateComment,
@@ -792,21 +809,66 @@ function baseCreateRenderer(
       }
       // props
       if (props) {
-        for (const key in props) {
-          if (!isReservedProp(key)) {
-            hostPatchProp(
-              el,
-              key,
-              null,
-              props[key],
-              isSVG,
-              vnode.children as VNode[],
-              parentComponent,
-              parentSuspense,
-              unmountChildren
-            )
+        if (!hostDelayInitProp) {
+          for (const key in props) {
+            if (!isReservedProp(key)) {
+              hostPatchProp(
+                el,
+                key,
+                null,
+                props[key],
+                isSVG,
+                vnode.children as VNode[],
+                parentComponent,
+                parentSuspense,
+                unmountChildren
+              )
+            }
+          }
+        } else {
+          let delayed: string[] | undefined
+          let priority
+          for (const key in props) {
+            if (!isReservedProp(key)) {
+              if ((priority = hostDelayInitProp(el, key))) {
+                !delayed && (delayed = [])
+                if (priority > 0 || priority === true) {
+                  delayed.push(key)
+                } else {
+                  delayed.unshift(key)
+                }
+              } else {
+                hostPatchProp(
+                  el,
+                  key,
+                  null,
+                  props[key],
+                  isSVG,
+                  vnode.children as VNode[],
+                  parentComponent,
+                  parentSuspense,
+                  unmountChildren
+                )
+              }
+            }
+          }
+          if (delayed) {
+            for (const key of delayed) {
+              hostPatchProp(
+                el,
+                key,
+                null,
+                props[key],
+                isSVG,
+                vnode.children as VNode[],
+                parentComponent,
+                parentSuspense,
+                unmountChildren
+              )
+            }
           }
         }
+
         if ((vnodeHook = props.onVnodeBeforeMount)) {
           invokeVNodeHook(vnodeHook, parentComponent, vnode)
         }

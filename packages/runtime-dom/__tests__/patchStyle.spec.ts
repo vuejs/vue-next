@@ -1,4 +1,4 @@
-import { patchProp } from '../src/patchProp'
+import { patchProp } from '../src/propOps'
 
 describe(`runtime-dom: style patching`, () => {
   it('string', () => {

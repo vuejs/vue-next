@@ -13,7 +13,7 @@ import {
   compatUtils
 } from '@vue/runtime-core'
 import { nodeOps } from './nodeOps'
-import { patchProp, forcePatchProp } from './patchProp'
+import { patchProp, forcePatchProp, delayInitProp } from './propOps'
 // Importing from the compiler, will be tree-shaken in prod
 import { isFunction, isString, isHTMLTag, isSVGTag, extend } from '@vue/shared'
 
@@ -24,7 +24,10 @@ declare module '@vue/reactivity' {
   }
 }
 
-const rendererOptions = extend({ patchProp, forcePatchProp }, nodeOps)
+const rendererOptions = extend(
+  { patchProp, forcePatchProp, delayInitProp },
+  nodeOps
+)
 
 // lazy create the renderer - this makes core renderer logic tree-shakable
 // in case the user only imports reactivity utilities from Vue.

@@ -1,10 +1,12 @@
 import {
+  createRenderer,
   h,
-  render,
   nodeOps,
-  TestElement,
-  serializeInner as inner
+  render,
+  serializeInner as inner,
+  TestElement
 } from '@vue/runtime-test'
+import { extend } from '@vue/shared'
 
 describe('renderer: element', () => {
   let root: TestElement
@@ -47,5 +49,51 @@ describe('renderer: element', () => {
 
     render(h('div', { id: 'baz', class: 'bar' }, ['foo']), root)
     expect(inner(root)).toBe('<div id="baz" class="bar">foo</div>')
+  })
+
+  it('should delay the initializing of specific props', () => {
+    const queue: string[] = []
+    const { render } = createRenderer(
+      extend(
+        {
+          patchProp(
+            el: TestElement,
+            key: string,
+            prevValue: any,
+            nextValue: any
+          ) {
+            el.props[key] = nextValue
+            queue.push(key)
+          },
+          delayInitProp(el: Element, key: string) {
+            return key.startsWith('delay')
+              ? key.startsWith('delay-weak')
+                ? -1
+                : 1
+              : 0
+          }
+        },
+        nodeOps
+      )
+    )
+
+    render(
+      h('div', {
+        'delay-a': 'a',
+        'delay-b': 'b',
+        'delay-weak-a': 'a',
+        id: 'baz'
+      }),
+      root
+    )
+    expect(queue.length).toBe(4)
+    expect(queue[0]).toBe('id')
+    expect(queue[1]).toBe('delay-weak-a')
+    expect(queue[2]).toBe('delay-a')
+    expect(queue[3]).toBe('delay-b')
+
+    expect(inner(root)).toBe(
+      '<div id="baz" delay-weak-a="a" delay-a="a" delay-b="b"></div>'
+    )
   })
 })

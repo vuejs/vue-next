@@ -13,6 +13,9 @@ type DOMRendererOptions = RendererOptions<Node, Element>
 export const forcePatchProp: DOMRendererOptions['forcePatchProp'] = (_, key) =>
   key === 'value'
 
+export const delayInitProp: DOMRendererOptions['delayInitProp'] = (_, key) =>
+  key === 'value'
+
 export const patchProp: DOMRendererOptions['patchProp'] = (
   el,
   key,

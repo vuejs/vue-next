@@ -1,4 +1,4 @@
-import { patchProp } from '../src/patchProp'
+import { patchProp } from '../src/propOps'
 import { xlinkNS } from '../src/modules/attrs'
 
 describe('runtime-dom: attrs patching', () => {
