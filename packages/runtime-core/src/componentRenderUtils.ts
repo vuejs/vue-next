@@ -26,6 +26,7 @@ import {
   isCompatEnabled,
   warnDeprecation
 } from './compat/compatConfig'
+import { shallowReadonly } from '@vue/reactivity'
 
 /**
  * dev only flag to track whether $attrs was used during render.
@@ -75,7 +76,7 @@ export function renderComponentRoot(
           proxyToUse,
           proxyToUse!,
           renderCache,
-          props,
+          __DEV__ ? shallowReadonly(props) : props,
           setupState,
           data,
           ctx

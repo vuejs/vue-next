@@ -77,6 +77,16 @@ export const transformModel: DirectiveTransform = (dir, node, context) => {
         createSimpleExpression(rawExp, false, exp.loc),
         `.value = $event)`
       ])
+    } else if (bindingType === BindingTypes.PROPS) {
+      context.onError(
+        createCompilerError(ErrorCodes.X_V_MODEL_BOUND_TO_PROPS, exp.loc)
+      )
+      assignmentExp = createCompoundExpression([
+        `${eventArg} => (`,
+        `__props.`,
+        createSimpleExpression(rawExp, false, exp.loc),
+        ` = $event)`
+      ])
     } else {
       // v-model used on a potentially ref binding in <script setup> inline mode.
       // the assignment needs to check whether the binding is actually a ref.

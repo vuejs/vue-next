@@ -82,6 +82,7 @@ export const enum ErrorCodes {
   X_V_MODEL_NO_EXPRESSION,
   X_V_MODEL_MALFORMED_EXPRESSION,
   X_V_MODEL_ON_SCOPE_VARIABLE,
+  X_V_MODEL_BOUND_TO_PROPS,
   X_INVALID_EXPRESSION,
   X_KEEP_ALIVE_INVALID_CHILDREN,
 
@@ -162,6 +163,7 @@ export const errorMessages: Record<ErrorCodes, string> = {
   [ErrorCodes.X_V_MODEL_NO_EXPRESSION]: `v-model is missing expression.`,
   [ErrorCodes.X_V_MODEL_MALFORMED_EXPRESSION]: `v-model value must be a valid JavaScript member expression.`,
   [ErrorCodes.X_V_MODEL_ON_SCOPE_VARIABLE]: `v-model cannot be used on v-for or v-slot scope variables because they are not writable.`,
+  [ErrorCodes.X_V_MODEL_BOUND_TO_PROPS]: `v-model value cannot be a prop.`,
   [ErrorCodes.X_INVALID_EXPRESSION]: `Error parsing JavaScript expression: `,
   [ErrorCodes.X_KEEP_ALIVE_INVALID_CHILDREN]: `<KeepAlive> expects exactly one child component.`,
 

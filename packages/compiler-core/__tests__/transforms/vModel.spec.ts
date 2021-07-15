@@ -9,7 +9,8 @@ import {
   PlainElementNode,
   ComponentNode,
   NodeTypes,
-  VNodeCall
+  VNodeCall,
+  BindingTypes
 } from '../../src'
 import { ErrorCodes } from '../../src/errors'
 import { transformModel } from '../../src/transforms/vModel'
@@ -525,6 +526,25 @@ describe('compiler: transform v-model', () => {
       expect(onError).toHaveBeenCalledWith(
         expect.objectContaining({
           code: ErrorCodes.X_V_MODEL_ON_SCOPE_VARIABLE
+        })
+      )
+    })
+
+    test('binding to props', () => {
+      const onError = jest.fn()
+      parseWithVModel('<input v-model="props" />', {
+        onError,
+        prefixIdentifiers: true,
+        bindingMetadata: {
+          props: BindingTypes.PROPS
+        },
+        inline: true
+      })
+
+      expect(onError).toHaveBeenCalledTimes(1)
+      expect(onError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: ErrorCodes.X_V_MODEL_BOUND_TO_PROPS
         })
       )
     })
