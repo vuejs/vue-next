@@ -90,12 +90,16 @@ import { isCompatEnabled } from './compat/compatConfig'
 import { DeprecationTypes } from './compat/compatConfig'
 import { registerLegacyRef } from './compat/ref'
 
-export interface Renderer<HostElement = RendererElement> {
+export interface Renderer<
+  HostElement = RendererElement,
+  RootHostElement = HostElement
+> {
   render: RootRenderFunction<HostElement>
-  createApp: CreateAppFunction<HostElement>
+  createApp: CreateAppFunction<HostElement, RootHostElement>
 }
 
-export interface HydrationRenderer extends Renderer<Element> {
+export interface HydrationRenderer
+  extends Renderer<Element, Element | ShadowRoot> {
   hydrate: RootHydrateFunction
 }
 
@@ -417,9 +421,10 @@ export const setRef = (
  */
 export function createRenderer<
   HostNode = RendererNode,
-  HostElement = RendererElement
+  HostElement = RendererElement,
+  RootHostElement = HostElement
 >(options: RendererOptions<HostNode, HostElement>) {
-  return baseCreateRenderer<HostNode, HostElement>(options)
+  return baseCreateRenderer<HostNode, HostElement, RootHostElement>(options)
 }
 
 // Separate API for creating hydration-enabled renderer.
@@ -434,8 +439,11 @@ export function createHydrationRenderer(
 // overload 1: no hydration
 function baseCreateRenderer<
   HostNode = RendererNode,
-  HostElement = RendererElement
->(options: RendererOptions<HostNode, HostElement>): Renderer<HostElement>
+  HostElement = RendererElement,
+  RootHostElement = HostElement
+>(
+  options: RendererOptions<HostNode, HostElement>
+): Renderer<HostElement, RootHostElement>
 
 // overload 2: with hydration
 function baseCreateRenderer(

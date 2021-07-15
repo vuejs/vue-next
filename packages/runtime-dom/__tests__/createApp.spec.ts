@@ -12,4 +12,16 @@ describe('createApp for dom', () => {
     expect(root.children.length).toBe(1)
     expect(root.children[0] instanceof SVGElement).toBe(true)
   })
+
+  test('mount to shadow DOM container', () => {
+    const shadowHost = document.createElement('div')
+    const shadowRoot = shadowHost.attachShadow({ mode: 'open' })
+    createApp({
+      render() {
+        return h('p', 'shadow DOM')
+      }
+    }).mount(shadowRoot)
+    expect(shadowRoot.children.length).toBe(1)
+    expect(shadowRoot.children[0].textContent).toBe('shadow DOM')
+  })
 })

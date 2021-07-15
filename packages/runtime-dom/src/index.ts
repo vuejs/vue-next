@@ -28,12 +28,17 @@ const rendererOptions = extend({ patchProp, forcePatchProp }, nodeOps)
 
 // lazy create the renderer - this makes core renderer logic tree-shakable
 // in case the user only imports reactivity utilities from Vue.
-let renderer: Renderer<Element> | HydrationRenderer
+let renderer: Renderer<Element, Element | ShadowRoot> | HydrationRenderer
 
 let enabledHydration = false
 
 function ensureRenderer() {
-  return renderer || (renderer = createRenderer<Node, Element>(rendererOptions))
+  return (
+    renderer ||
+    (renderer = createRenderer<Node, Element, Element | ShadowRoot>(
+      rendererOptions
+    ))
+  )
 }
 
 function ensureHydrationRenderer() {
@@ -74,7 +79,7 @@ export const createApp = ((...args) => {
       // rendered by the server, the template should not contain any user data.
       component.template = container.innerHTML
       // 2.x compat check
-      if (__COMPAT__ && __DEV__) {
+      if (__COMPAT__ && __DEV__ && container instanceof Element) {
         for (let i = 0; i < container.attributes.length; i++) {
           const attr = container.attributes[i]
           if (attr.name !== 'v-cloak' && /^(v-|:|@)/.test(attr.name)) {
@@ -99,7 +104,7 @@ export const createApp = ((...args) => {
   }
 
   return app
-}) as CreateAppFunction<Element>
+}) as CreateAppFunction<Element, Element | ShadowRoot>
 
 export const createSSRApp = ((...args) => {
   const app = ensureHydrationRenderer().createApp(...args)
@@ -118,7 +123,7 @@ export const createSSRApp = ((...args) => {
   }
 
   return app
-}) as CreateAppFunction<Element>
+}) as CreateAppFunction<Element, Element | ShadowRoot>
 
 function injectNativeTagCheck(app: App) {
   // Inject `isNativeTag`
@@ -169,7 +174,7 @@ function injectCompilerOptionsCheck(app: App) {
 
 function normalizeContainer(
   container: Element | ShadowRoot | string
-): Element | null {
+): Element | ShadowRoot | null {
   if (isString(container)) {
     const res = document.querySelector(container)
     if (__DEV__ && !res) {
@@ -188,7 +193,7 @@ function normalizeContainer(
       `mounting on a ShadowRoot with \`{mode: "closed"}\` may lead to unpredictable bugs`
     )
   }
-  return container as any
+  return container
 }
 
 // SFC CSS utilities
