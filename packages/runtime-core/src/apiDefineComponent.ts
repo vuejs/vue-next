@@ -58,8 +58,10 @@ export type DefineComponent<
     true
   > &
     Props
-> &
-  ComponentOptionsBase<
+> & /**
+ * just typescript
+ */
+{ __isDefineComponent?: true } & ComponentOptionsBase<
     Props,
     RawBindings,
     D,
@@ -164,7 +166,9 @@ export function defineComponent<
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   E extends EmitsOptions = Record<string, any>,
-  EE extends string = string
+  EE extends string = string,
+  Props = Readonly<ExtractPropTypes<PropsOptions>>,
+  Defaults = ExtractDefaultPropTypes<PropsOptions>
 >(
   options: ComponentOptionsWithObjectProps<
     PropsOptions,
@@ -175,9 +179,24 @@ export function defineComponent<
     Mixin,
     Extends,
     E,
-    EE
+    EE,
+    Props,
+    Defaults
   >
-): DefineComponent<PropsOptions, RawBindings, D, C, M, Mixin, Extends, E, EE>
+): DefineComponent<
+  ExtractPropTypes<PropsOptions>,
+  RawBindings,
+  D,
+  C,
+  M,
+  Mixin,
+  Extends,
+  E,
+  EE,
+  PublicProps,
+  Props,
+  Defaults
+>
 
 // implementation, close to no-op
 export function defineComponent(options: unknown) {

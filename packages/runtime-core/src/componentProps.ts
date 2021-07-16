@@ -95,7 +95,7 @@ type DefaultKeys<T> = {
     : never
 }[keyof T]
 
-type InferPropType<T> = [T] extends [null]
+export type InferPropType<T> = [T] extends [null]
   ? any // null & true would fail to infer
   : [T] extends [{ type: null | true }]
     ? any // As TS issue https://github.com/Microsoft/TypeScript/issues/14829 // somehow `ObjectConstructor` when inferred from { (): T } becomes `any` // `BooleanConstructor` when inferred from PropConstructor(with PropMethod) becomes `Boolean`

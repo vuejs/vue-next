@@ -31,6 +31,7 @@ import { Directive, validateDirectiveName } from './directives'
 import {
   applyOptions,
   ComponentOptions,
+  ComponentOptionsMixin,
   ComputedOptions,
   MethodOptions
 } from './componentOptions'
@@ -104,7 +105,7 @@ export interface ComponentInternalOptions {
 export interface FunctionalComponent<P = {}, E extends EmitsOptions = {}>
   extends ComponentInternalOptions {
   // use of any here is intentional so it can be a valid JSX Element constructor
-  (props: P, ctx: Omit<SetupContext<E>, 'expose'>): any
+  (props: P, ctx: Omit<SetupContext<E, P>, 'expose'>): any
   props?: ComponentPropsOptions<P>
   emits?: E | (keyof E)[]
   inheritAttrs?: boolean
@@ -127,10 +128,13 @@ export type ConcreteComponent<
   RawBindings = any,
   D = any,
   C extends ComputedOptions = ComputedOptions,
-  M extends MethodOptions = MethodOptions
+  M extends MethodOptions = MethodOptions,
+  Mixin extends ComponentOptionsMixin = any,
+  Extends extends ComponentOptionsMixin = any,
+  E extends EmitsOptions = any
 > =
-  | ComponentOptions<Props, RawBindings, D, C, M>
-  | FunctionalComponent<Props, any>
+  | ComponentOptions<Props, RawBindings, D, C, M, Mixin, Extends, E>
+  | FunctionalComponent<Props, E>
 
 /**
  * A type used in public APIs where a component type is expected.
@@ -167,10 +171,10 @@ export const enum LifecycleHooks {
   SERVER_PREFETCH = 'sp'
 }
 
-export interface SetupContext<E = EmitsOptions> {
+export interface SetupContext<E = EmitsOptions, P = {}> {
   attrs: Data
   slots: Slots
-  emit: EmitFn<E>
+  emit: EmitFn<E, P>
   expose: (exposed?: Record<string, any>) => void
 }
 
