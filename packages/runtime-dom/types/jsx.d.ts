@@ -1320,6 +1320,32 @@ type NativeElements = {
   >
 }
 
+type AnyEmits = { [evtName: string]: any; };
+
+/** get jsx attr props object from DefineComponent */
+type ExtractEmitProps<C extends Record<string, any>> = (
+  C['emits'] extends (
+    (infer EmitObj & ThisType<void>) |
+    (Array<infer EvtNames> & ThisType<void>) |
+    undefined
+  )
+    ? Exclude<EmitObj, string[]> extends never
+      ? (
+        // @ts-ignore TODO ts extends covariance
+        { [K in `on${Capitalize<EvtNames>}`]?: (payload?: any) => any; }
+      )
+      : (
+        AnyEmits extends EmitObj
+          ? {}
+          : GetEmitPropsFromEmitOption<Exclude<EmitObj, string[]>>
+      )
+    : {}
+);
+
+type GetEmitPropsFromEmitOption<T extends Record<string, any>> = {
+  [K in keyof T as `on${Capitalize<string &K>}`]?: (...payload: Parameters<T[K]>) => any
+};
+
 declare global {
   namespace JSX {
     interface Element extends VNode {}
@@ -1335,6 +1361,11 @@ declare global {
       [name: string]: any
     }
     interface IntrinsicAttributes extends ReservedProps {}
+
+    type LibraryManagedAttributes<C, P> = P & (
+      // tsx / add emit detaction
+      ExtractEmitProps<C>
+    );
   }
 }
 
