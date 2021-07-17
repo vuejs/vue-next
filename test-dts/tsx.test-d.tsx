@@ -30,6 +30,14 @@ expectError(<div foo="bar" />)
 expectType<JSX.Element>(<div key="foo" />)
 expectType<JSX.Element>(<div ref="bar" />)
 
+// CustomElementAttributes
+declare global {
+  interface CustomElementAttributes {
+    foobar?: number
+  }
+}
+expectType<JSX.Element>(<div foobar={1} />)
+
 expectType<JSX.Element>(
   <input
     onInput={e => {
