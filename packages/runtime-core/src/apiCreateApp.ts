@@ -144,7 +144,7 @@ export function createAppContext(): AppContext {
     config: {
       isNativeTag: NO,
       performance: false,
-      globalProperties: {},
+      globalProperties: __DEV__ ? createGlobalPropertiesProxy() : {},
       optionMergeStrategies: {},
       errorHandler: undefined,
       warnHandler: undefined,
@@ -348,4 +348,26 @@ export function createAppAPI<HostElement>(
 
     return app
   }
+}
+
+// dev only
+function createGlobalPropertiesProxy() {
+  const protectedPropertyNames = ['_'] as Array<string | number | symbol>
+  return new Proxy({} as Record<string, any>, {
+    get(target, key, receiver) {
+      return Reflect.get(target, key, receiver)
+    },
+    set(target, key, value: any, receiver) {
+      if (protectedPropertyNames.includes(key)) {
+        warn(
+          `Property '${String(
+            key
+          )}' can't be set on \`app.config.globalProperties\` as it is a reserved name.
+          Please use another name for this globalProperty entry`
+        )
+        return false
+      }
+      return Reflect.set(target, key, value, receiver)
+    }
+  })
 }
