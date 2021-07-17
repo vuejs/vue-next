@@ -31,6 +31,20 @@ return function render(_ctx, _cache) {
 }"
 `;
 
+exports[`compiler: v-for codegen keyed v-for (stable fragment) 1`] = `
+"const _Vue = Vue
+
+return function render(_ctx, _cache) {
+  with (_ctx) {
+    const { renderList: _renderList, Fragment: _Fragment, openBlock: _openBlock, createBlock: _createBlock, createVNode: _createVNode } = _Vue
+
+    return (_openBlock(), _createBlock(_Fragment, null, _renderList(10, (item) => {
+      return _createVNode(\\"span\\", { key: item })
+    }), 64 /* STABLE_FRAGMENT */))
+  }
+}"
+`;
+
 exports[`compiler: v-for codegen keyed v-for 1`] = `
 "const _Vue = Vue
 
