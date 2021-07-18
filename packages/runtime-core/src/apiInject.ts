@@ -1,6 +1,5 @@
 import { isFunction } from '@vue/shared'
-import { currentInstance } from './component'
-import { currentRenderingInstance } from './componentRenderContext'
+import { currentInstance, getCurrentInstance } from './component'
 import { warn } from './warning'
 
 export interface InjectionKey<T> extends Symbol {}
@@ -45,7 +44,7 @@ export function inject(
 ) {
   // fallback to `currentRenderingInstance` so that this can be called in
   // a functional component
-  const instance = currentInstance || currentRenderingInstance
+  const instance = getCurrentInstance()
   if (instance) {
     // #2400
     // to support `app.use` plugins,
