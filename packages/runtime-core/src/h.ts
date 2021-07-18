@@ -131,7 +131,7 @@ export function h(type: Component, children?: RawChildren): VNode
 
 // concrete component
 export function h<P>(
-  type: ConcreteComponent | string,
+  type: ConcreteComponent<P> | string,
   children?: RawChildren
 ): VNode
 export function h<P>(
