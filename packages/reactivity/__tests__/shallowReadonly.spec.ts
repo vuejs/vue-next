@@ -8,7 +8,7 @@ describe('reactivity/shallowReadonly', () => {
 
   test('should make root level properties readonly', () => {
     const props = shallowReadonly({ n: 1 })
-    // @ts-ignore
+    // @ts-expect-error
     props.n = 2
     expect(props.n).toBe(1)
     expect(
@@ -19,7 +19,7 @@ describe('reactivity/shallowReadonly', () => {
   // to retain 2.x behavior.
   test('should NOT make nested properties readonly', () => {
     const props = shallowReadonly({ n: { foo: 1 } })
-    // @ts-ignore
+
     props.n.foo = 2
     expect(props.n.foo).toBe(2)
     expect(

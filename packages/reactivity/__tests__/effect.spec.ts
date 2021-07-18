@@ -65,22 +65,22 @@ describe('reactivity/effect', () => {
 
   it('should observe delete operations', () => {
     let dummy
-    const obj = reactive({ prop: 'value' })
+    const obj = reactive<{
+      prop?: string
+    }>({ prop: 'value' })
     effect(() => (dummy = obj.prop))
 
     expect(dummy).toBe('value')
-    // @ts-ignore
     delete obj.prop
     expect(dummy).toBe(undefined)
   })
 
   it('should observe has operations', () => {
     let dummy
-    const obj = reactive<{ prop: string | number }>({ prop: 'value' })
+    const obj = reactive<{ prop?: string | number }>({ prop: 'value' })
     effect(() => (dummy = 'prop' in obj))
 
     expect(dummy).toBe(true)
-    // @ts-ignore
     delete obj.prop
     expect(dummy).toBe(false)
     obj.prop = 12
@@ -89,13 +89,12 @@ describe('reactivity/effect', () => {
 
   it('should observe properties on the prototype chain', () => {
     let dummy
-    const counter = reactive({ num: 0 })
+    const counter = reactive<{ num?: number }>({ num: 0 })
     const parentCounter = reactive({ num: 2 })
     Object.setPrototypeOf(counter, parentCounter)
     effect(() => (dummy = counter.num))
 
     expect(dummy).toBe(0)
-    // @ts-ignore
     delete counter.num
     expect(dummy).toBe(2)
     parentCounter.num = 4
@@ -106,16 +105,14 @@ describe('reactivity/effect', () => {
 
   it('should observe has operations on the prototype chain', () => {
     let dummy
-    const counter = reactive({ num: 0 })
-    const parentCounter = reactive({ num: 2 })
+    const counter = reactive<{ num?: number }>({ num: 0 })
+    const parentCounter = reactive<{ num?: number }>({ num: 2 })
     Object.setPrototypeOf(counter, parentCounter)
     effect(() => (dummy = 'num' in counter))
 
     expect(dummy).toBe(true)
-    // @ts-ignore
     delete counter.num
     expect(dummy).toBe(true)
-    // @ts-ignore
     delete parentCounter.num
     expect(dummy).toBe(false)
     counter.num = 3
@@ -219,7 +216,7 @@ describe('reactivity/effect', () => {
   it('should observe symbol keyed properties', () => {
     const key = Symbol('symbol keyed prop')
     let dummy, hasDummy
-    const obj = reactive({ [key]: 'value' })
+    const obj = reactive<{ [key]?: string }>({ [key]: 'value' })
     effect(() => (dummy = obj[key]))
     effect(() => (hasDummy = key in obj))
 
@@ -227,7 +224,6 @@ describe('reactivity/effect', () => {
     expect(hasDummy).toBe(true)
     obj[key] = 'newValue'
     expect(dummy).toBe('newValue')
-    // @ts-ignore
     delete obj[key]
     expect(dummy).toBe(undefined)
     expect(hasDummy).toBe(false)
@@ -751,7 +747,7 @@ describe('reactivity/effect', () => {
     const onTrigger = jest.fn((e: DebuggerEvent) => {
       events.push(e)
     })
-    const obj = reactive({ foo: 1 })
+    const obj = reactive<{ foo?: number }>({ foo: 1 })
     const runner = effect(
       () => {
         dummy = obj.foo
@@ -759,7 +755,7 @@ describe('reactivity/effect', () => {
       { onTrigger }
     )
 
-    obj.foo++
+    obj.foo!++
     expect(dummy).toBe(2)
     expect(onTrigger).toHaveBeenCalledTimes(1)
     expect(events[0]).toEqual({
@@ -771,7 +767,6 @@ describe('reactivity/effect', () => {
       newValue: 2
     })
 
-    // @ts-ignore
     delete obj.foo
     expect(dummy).toBeUndefined()
     expect(onTrigger).toHaveBeenCalledTimes(2)
