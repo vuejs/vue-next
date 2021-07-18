@@ -272,4 +272,83 @@ describe('reactivity/reactive', () => {
     const observed = reactive(original)
     expect(isReactive(observed)).toBe(false)
   })
+
+  describe('with data property', () => {
+    test('should return the original value if a property is non-configurable, non-writable', () => {
+      const obj: any = {}
+      const inner = { foo: 1 }
+      Object.defineProperty(obj, 'foo', {
+        value: inner,
+        writable: false,
+        configurable: false
+      })
+
+      const observed = reactive(obj)
+      expect(isReactive(observed.foo)).toBe(false)
+      expect(observed.foo).toBe(inner)
+    })
+
+    test('should return proxy value if a property is configurable or writable', () => {
+      const obj: any = {}
+      Object.defineProperty(obj, 'foo', {
+        value: { foo: 1 },
+        writable: true,
+        configurable: false
+      })
+      Object.defineProperty(obj, 'bar', {
+        value: { foo: 1 },
+        writable: false,
+        configurable: true
+      })
+      Object.defineProperty(obj, 'baz', {
+        value: { foo: 1 },
+        writable: true,
+        configurable: true
+      })
+
+      const observed = reactive(obj)
+      expect(isReactive(observed.foo)).toBe(true)
+      expect(isReactive(observed.bar)).toBe(true)
+      expect(isReactive(observed.baz)).toBe(true)
+    })
+
+    // https://www.ecma-international.org/ecma-262/11.0/index.html#sec-invariants-of-the-essential-internal-methods
+    // https://www.ecma-international.org/ecma-262/11.0/index.html#sec-samevalue
+    test('should be able to set the value if they are the SameValue', () => {
+      const inner = { foo: 1 }
+      const outer: any = {}
+      Object.defineProperty(outer, 'key', {
+        value: inner,
+        configurable: false,
+        writable: false
+      })
+
+      const observed = reactive(outer)
+
+      observed.key = inner
+
+      expect(() => {
+        observed.key = 'other value'
+      }).toThrow(`'set' on proxy: trap returned falsish for property 'key'`)
+    })
+  })
+
+  describe('with accessor property', () => {
+    test('should return proxy value if a property is an accessor property', () => {
+      const inner = { foo: 1 }
+      const outer: any = {}
+      Object.defineProperty(outer, 'key', {
+        get() {
+          return inner
+        }
+      })
+
+      const observed = reactive(outer)
+      expect(observed).not.toBe(outer)
+      expect(isReactive(observed)).toBe(true)
+      expect(isReactive(outer)).toBe(false)
+
+      expect(isReactive(observed.key)).toBe(true)
+    })
+  })
 })

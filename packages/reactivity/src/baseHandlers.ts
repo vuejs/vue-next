@@ -125,6 +125,19 @@ function createGetter(isReadonly = false, shallow = false) {
     }
 
     if (isObject(res)) {
+      // #3024
+      // https://www.ecma-international.org/ecma-262/11.0/index.html#sec-invariants-of-the-essential-internal-methods
+      const descriptor = Reflect.getOwnPropertyDescriptor(target, key)
+      if (descriptor) {
+        if (
+          // make sure it's a data property
+          !(descriptor.get || descriptor.set) &&
+          // non-configurable, non-writable
+          (!descriptor.configurable && !descriptor.writable)
+        ) {
+          return res
+        }
+      }
       // Convert returned value into a proxy as well. we do the isObject check
       // here to avoid invalid value warning. Also need to lazy access readonly
       // and reactive here to avoid circular dependency.
@@ -146,6 +159,19 @@ function createSetter(shallow = false) {
     receiver: object
   ): boolean {
     let oldValue = (target as any)[key]
+
+    const descriptor = Reflect.getOwnPropertyDescriptor(target, key)
+    if (descriptor) {
+      if (
+        // make sure it's a data property
+        !(descriptor.get || descriptor.set) &&
+        // non-configurable, non-writable
+        (!descriptor.configurable && !descriptor.writable)
+      ) {
+        return Object.is(oldValue, value)
+      }
+    }
+
     if (!shallow) {
       value = toRaw(value)
       oldValue = toRaw(oldValue)
