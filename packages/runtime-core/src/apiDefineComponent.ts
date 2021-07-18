@@ -91,7 +91,6 @@ export function defineComponent<Props, RawBindings = object>(
 // (uses user defined props interface)
 // return type is for Vetur and TSX support
 export function defineComponent<
-  Props = {},
   RawBindings = {},
   D = {},
   C extends ComputedOptions = {},
@@ -102,7 +101,6 @@ export function defineComponent<
   EE extends string = string
 >(
   options: ComponentOptionsWithoutProps<
-    Props,
     RawBindings,
     D,
     C,
@@ -112,7 +110,7 @@ export function defineComponent<
     E,
     EE
   >
-): DefineComponent<Props, RawBindings, D, C, M, Mixin, Extends, E, EE>
+): DefineComponent</* Props */ {}, RawBindings, D, C, M, Mixin, Extends, E, EE>
 
 // overload 3: object format with array props declaration
 // props inferred as { [key in PropNames]?: any }
