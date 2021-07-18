@@ -13,9 +13,7 @@ const preId =
 const isDryRun = args.dry
 const skipTests = args.skipTests
 const skipBuild = args.skipBuild
-const packages = fs
-  .readdirSync(path.resolve(__dirname, '../packages'))
-  .filter(p => !p.endsWith('.ts') && !p.startsWith('.'))
+const { targets: packages } = require('./utils')
 
 const skippedPackages = []
 
@@ -175,11 +173,6 @@ async function publishPackage(pkgName, version, runIfNotDry) {
     return
   }
   const pkgRoot = getPkgRoot(pkgName)
-  const pkgPath = path.resolve(pkgRoot, 'package.json')
-  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
-  if (pkg.private) {
-    return
-  }
 
   // for now (alpha/beta phase), every package except "vue" can be published as
   // `latest`, whereas "vue" will be published under the "next" tag.
