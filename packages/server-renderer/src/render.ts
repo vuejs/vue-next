@@ -182,11 +182,10 @@ function renderComponentSubTree(
         slotScopeId
       )
     } else {
-      warn(
-        `Component ${
-          comp.name ? `${comp.name} ` : ``
-        } is missing template or render function.`
-      )
+      const componentName = comp.name
+        ? `${comp.name}`
+        : `# undefined Component name #`
+      warn(`Component ${componentName} is missing template or render function.`)
       push(`<!---->`)
     }
   }
