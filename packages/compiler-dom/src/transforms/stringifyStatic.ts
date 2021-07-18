@@ -296,7 +296,7 @@ function stringifyElement(
 // here, e.g. `{{ 1 }}` or `{{ 'foo' }}`
 // in addition, constant exps bail on presence of parens so you can't even
 // run JSFuck in here. But we mark it unsafe for security review purposes.
-// (see compiler-core/src/transformExpressions)
+// (see compiler-core/src/transforms/transformExpression)
 function evaluateConstant(exp: ExpressionNode): string {
   if (exp.type === NodeTypes.SIMPLE_EXPRESSION) {
     return new Function(`return ${exp.content}`)()
