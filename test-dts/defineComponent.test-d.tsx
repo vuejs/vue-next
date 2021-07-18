@@ -1069,6 +1069,34 @@ describe('async setup', () => {
   vm.a = 2
 })
 
+// type is correct
+defineComponent<{ a?: string }>({
+  props: {
+    a: String
+  },
+
+  setup(props) {
+    props.a
+  }
+})
+
+// error type is incorrect
+
+//@ts-expect-error invalid type on the prop definition
+defineComponent<{ a: number }>({
+  props: {
+    a: {
+      type: String,
+      required: true
+    }
+  },
+
+  // @ts-expect-error cannot resolve props type because of the mismatch
+  setup(props) {
+    props.a
+  }
+})
+
 // check if defineComponent can be exported
 export default {
   // function components

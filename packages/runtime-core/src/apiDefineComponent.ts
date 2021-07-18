@@ -16,7 +16,8 @@ import {
 import {
   ExtractPropTypes,
   ComponentPropsOptions,
-  ExtractDefaultPropTypes
+  ExtractDefaultPropTypes,
+  Prop
 } from './componentProps'
 import { EmitsOptions } from './componentEmits'
 import { isFunction } from '@vue/shared'
@@ -25,6 +26,12 @@ import {
   CreateComponentPublicInstance,
   ComponentPublicInstanceConstructor
 } from './componentPublicInstance'
+
+export type PropObjectTyped<T extends Record<string, any>> = {
+  [K in keyof T]: undefined extends T[K]
+    ? Prop<T[K], T[K]>
+    : Prop<T[K]> & { required: true }
+}
 
 export type PublicProps = VNodeProps &
   AllowedComponentProps &
@@ -178,6 +185,33 @@ export function defineComponent<
     EE
   >
 ): DefineComponent<PropsOptions, RawBindings, D, C, M, Mixin, Extends, E, EE>
+
+// overload 5: Props interface passed as argument
+// see `ExtractPropTypes` in ./componentProps.ts
+export function defineComponent<
+  Props extends Record<string, any>,
+  RawBindings = {},
+  D = {},
+  C extends ComputedOptions = {},
+  M extends MethodOptions = {},
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
+  E extends EmitsOptions = Record<string, any>,
+  EE extends string = string,
+  PropOptions extends PropObjectTyped<Props> = PropObjectTyped<Props>
+>(
+  options: ComponentOptionsWithObjectProps<
+    PropOptions,
+    RawBindings,
+    D,
+    C,
+    M,
+    Mixin,
+    Extends,
+    E,
+    EE
+  >
+): DefineComponent<Props, RawBindings, D, C, M, Mixin, Extends, E, EE>
 
 // implementation, close to no-op
 export function defineComponent(options: unknown) {
