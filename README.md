@@ -76,6 +76,10 @@ It is recommended to use [VSCode](https://code.visualstudio.com/). There are cur
 - [vue-tsc](https://github.com/johnsoncodehk/vue-tsc) perform TypeScript type checks / diagnostics on Vue SFCs via the command line.
 - [vue-dts-gen](https://github.com/egoist/vue-dts-gen): generate TypeScript definitions from Vue SFCs.
 
+#### Other IDEs with Vue 3 support
+*  [WebStorm](https://www.jetbrains.com/webstorm/) with [Vue.js plugin](https://www.jetbrains.com/help/webstorm/vue-js.html).
+Note: Vue 3 Support in these IDEs is maintained by the respective vendors, not as part of the Vue project.
+
 ### Other Projects
 
 | Project               | NPM                             | Repo                 |
