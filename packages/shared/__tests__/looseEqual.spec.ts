@@ -49,6 +49,18 @@ describe('utils/looseEqual', () => {
     expect(looseEqual(date1, date4)).toBe(false)
   })
 
+  test('compares symbols correctly', () => {
+    const symbol1 = Symbol('a')
+    const symbol2 = Symbol('a')
+    const symbol3 = Symbol('b')
+    const notSymbol = 0
+
+    expect(looseEqual(symbol1, symbol1)).toBe(true)
+    expect(looseEqual(symbol1, symbol2)).toBe(false)
+    expect(looseEqual(symbol1, symbol3)).toBe(false)
+    expect(looseEqual(symbol1, notSymbol)).toBe(false)
+  })
+
   test('compares files correctly', () => {
     const date1 = new Date(2019, 1, 2, 3, 4, 5, 6)
     const date2 = new Date(2019, 1, 2, 3, 4, 5, 7)

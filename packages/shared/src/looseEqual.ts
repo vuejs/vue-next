@@ -1,4 +1,4 @@
-import { isArray, isDate, isObject } from './'
+import { isArray, isDate, isObject, isSymbol } from './'
 
 function looseCompareArrays(a: any[], b: any[]) {
   if (a.length !== b.length) return false
@@ -15,6 +15,11 @@ export function looseEqual(a: any, b: any): boolean {
   let bValidType = isDate(b)
   if (aValidType || bValidType) {
     return aValidType && bValidType ? a.getTime() === b.getTime() : false
+  }
+  aValidType = isSymbol(a)
+  bValidType = isSymbol(b)
+  if (aValidType || bValidType) {
+    return a === b
   }
   aValidType = isArray(a)
   bValidType = isArray(b)
