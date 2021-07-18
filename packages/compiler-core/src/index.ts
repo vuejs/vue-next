@@ -42,7 +42,8 @@ export { processIf } from './transforms/vIf'
 export { processFor, createForLoopParams } from './transforms/vFor'
 export {
   transformExpression,
-  processExpression
+  processExpression,
+  stringifyExpression
 } from './transforms/transformExpression'
 export {
   buildSlots,

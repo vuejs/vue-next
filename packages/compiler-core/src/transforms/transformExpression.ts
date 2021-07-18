@@ -465,7 +465,7 @@ function isInDestructureAssignment(parent: Node, parentStack: Node[]): boolean {
   return false
 }
 
-function stringifyExpression(exp: ExpressionNode | string): string {
+export function stringifyExpression(exp: ExpressionNode | string): string {
   if (isString(exp)) {
     return exp
   } else if (exp.type === NodeTypes.SIMPLE_EXPRESSION) {
