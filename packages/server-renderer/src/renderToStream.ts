@@ -62,7 +62,7 @@ export function renderToStream(
   // provide the ssr context to the tree
   input.provide(ssrContextKey, context)
 
-  const stream = new Readable()
+  const stream = new Readable({ read() {} })
 
   Promise.resolve(renderComponentVNode(vnode))
     .then(buffer => unrollBuffer(buffer, stream))
