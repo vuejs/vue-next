@@ -172,6 +172,8 @@ This repository employs a [monorepo](https://en.wikipedia.org/wiki/Monorepo) set
 
 - `compiler-dom`: Compiler with additional plugins specifically targeting the browser.
 
+- `compiler-sfc`: Lower level utilities for compiling Vue Single File Components.
+
 - `compiler-ssr`: Compiler that produces render functions optimized for server-side rendering.
 
 - `template-explorer`: A development tool for debugging compiler output. You can run `yarn dev template-explorer` and open its `index.html` to get a repl of template compilation based on current source code.
