@@ -133,6 +133,7 @@ describe('resolveAssets', () => {
       }
       let foo, bar, baz // dynamic components
       let dynamicVNode: VNode
+      let dynamicVNode2: VNode
 
       const Child = {
         render(this: any) {
@@ -147,6 +148,7 @@ describe('resolveAssets', () => {
             foo = resolveDynamicComponent('foo') // <component is="foo"/>
             bar = resolveDynamicComponent(dynamicComponents.bar) // <component :is="bar"/>, function
             dynamicVNode = createVNode(resolveDynamicComponent(null)) // <component :is="null"/>
+            dynamicVNode2 = createVNode(resolveDynamicComponent('')) // <component :is="''"/>
             return h(Child, () => {
               // check inside child slots
               baz = resolveDynamicComponent(dynamicComponents.baz) // <component :is="baz"/>, object
@@ -163,6 +165,7 @@ describe('resolveAssets', () => {
       expect(baz).toBe(dynamicComponents.baz)
       // should allow explicit falsy type to remove the component
       expect(dynamicVNode!.type).toBe(Comment)
+      expect(dynamicVNode2!.type).toBe(Comment)
     })
 
     test('resolve dynamic component should fallback to plain element without warning', () => {
