@@ -8,7 +8,7 @@ import {
   isClassComponent
 } from './component'
 import { queueJob, queuePostFlushCb } from './scheduler'
-import { extend } from '@vue/shared'
+import { extend, getGlobalThis } from '@vue/shared'
 import { warn } from './warning'
 
 export let isHmrUpdating = false
@@ -27,16 +27,7 @@ export interface HMRRuntime {
 // Note: for a component to be eligible for HMR it also needs the __hmrId option
 // to be set so that its instances can be registered / removed.
 if (__DEV__) {
-  const globalObject: any =
-    typeof global !== 'undefined'
-      ? global
-      : typeof self !== 'undefined'
-        ? self
-        : typeof window !== 'undefined'
-          ? window
-          : {}
-
-  globalObject.__VUE_HMR_RUNTIME__ = {
+  getGlobalThis().__VUE_HMR_RUNTIME__ = {
     createRecord: tryWrap(createRecord),
     rerender: tryWrap(rerender),
     reload: tryWrap(reload)
