@@ -146,3 +146,192 @@ function patchStopImmediatePropagation(
     return value
   }
 }
+
+export interface SyntheticEvent<T = Element, E = Event> extends Event {
+  target: EventTarget
+  nativeEvent: E
+  currentTarget: T & EventTarget
+}
+
+export interface InputEvent<T = Element> extends SyntheticEvent<T> {
+  target: EventTarget & T
+}
+
+// Event type helpers
+// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/react/index.d.ts
+
+type NativeAnimationEvent = AnimationEvent
+type NativeClipboardEvent = ClipboardEvent
+type NativeCompositionEvent = CompositionEvent
+type NativeDragEvent = DragEvent
+type NativeFocusEvent = FocusEvent
+type NativeKeyboardEvent = KeyboardEvent
+type NativeMouseEvent = MouseEvent
+type NativeTouchEvent = TouchEvent
+type NativePointerEvent = PointerEvent
+type NativeTransitionEvent = TransitionEvent
+type NativeUIEvent = UIEvent
+type NativeWheelEvent = WheelEvent
+
+export interface ClipboardEvent<T = Element>
+  extends SyntheticEvent<T, NativeClipboardEvent> {
+  clipboardData: DataTransfer
+}
+
+export interface CompositionEvent<T = Element>
+  extends SyntheticEvent<T, NativeCompositionEvent> {
+  data: string
+}
+
+export interface DragEvent<T = Element> extends MouseEvent<T, NativeDragEvent> {
+  dataTransfer: DataTransfer
+}
+
+export interface PointerEvent<T = Element>
+  extends MouseEvent<T, NativePointerEvent> {
+  pointerId: number
+  pressure: number
+  tangentialPressure: number
+  tiltX: number
+  tiltY: number
+  twist: number
+  width: number
+  height: number
+  pointerType: 'mouse' | 'pen' | 'touch'
+  isPrimary: boolean
+}
+
+export interface FocusEvent<T = Element>
+  extends SyntheticEvent<T, NativeFocusEvent> {
+  relatedTarget: EventTarget | null
+  target: EventTarget & T
+}
+
+export interface FormEvent<T = Element> extends SyntheticEvent<T> {}
+
+export interface InvalidEvent<T = Element> extends SyntheticEvent<T> {
+  target: EventTarget & T
+}
+
+export interface ChangeEvent<T = Element> extends SyntheticEvent<T> {
+  target: EventTarget & T
+}
+
+export interface KeyboardEvent<T = Element>
+  extends SyntheticEvent<T, NativeKeyboardEvent> {
+  altKey: boolean
+  /** @deprecated */
+  charCode: number
+  ctrlKey: boolean
+  code: string
+  /**
+   * See [DOM Level 3 Events spec](https://www.w3.org/TR/uievents-key/#keys-modifier). for a list of valid (case-sensitive) arguments to this method.
+   */
+  getModifierState(key: string): boolean
+  /**
+   * See the [DOM Level 3 Events spec](https://www.w3.org/TR/uievents-key/#named-key-attribute-values). for possible values
+   */
+  key: string
+  /** @deprecated */
+  keyCode: number
+  locale: string
+  location: number
+  metaKey: boolean
+  repeat: boolean
+  shiftKey: boolean
+  /** @deprecated */
+  which: number
+}
+
+export interface MouseEvent<T = Element, E = NativeMouseEvent>
+  extends UIEvent<T, E> {
+  altKey: boolean
+  button: number
+  buttons: number
+  clientX: number
+  clientY: number
+  ctrlKey: boolean
+  /**
+   * See [DOM Level 3 Events spec](https://www.w3.org/TR/uievents-key/#keys-modifier). for a list of valid (case-sensitive) arguments to this method.
+   */
+  getModifierState(key: string): boolean
+  metaKey: boolean
+  movementX: number
+  movementY: number
+  pageX: number
+  pageY: number
+  relatedTarget: EventTarget | null
+  screenX: number
+  screenY: number
+  shiftKey: boolean
+}
+
+export interface TouchEvent<T = Element> extends UIEvent<T, NativeTouchEvent> {
+  altKey: boolean
+  changedTouches: TouchList
+  ctrlKey: boolean
+  /**
+   * See [DOM Level 3 Events spec](https://www.w3.org/TR/uievents-key/#keys-modifier). for a list of valid (case-sensitive) arguments to this method.
+   */
+  getModifierState(key: string): boolean
+  metaKey: boolean
+  shiftKey: boolean
+  targetTouches: TouchList
+  touches: TouchList
+}
+
+export interface UIEvent<T = Element, E = NativeUIEvent>
+  extends SyntheticEvent<T, E> {
+  detail: number
+  view: AbstractView
+}
+
+export interface WheelEvent<T = Element>
+  extends MouseEvent<T, NativeWheelEvent> {
+  deltaMode: number
+  deltaX: number
+  deltaY: number
+  deltaZ: number
+}
+
+export interface AnimationEvent<T = Element>
+  extends SyntheticEvent<T, NativeAnimationEvent> {
+  animationName: string
+  elapsedTime: number
+  pseudoElement: string
+}
+
+export interface TransitionEvent<T = Element>
+  extends SyntheticEvent<T, NativeTransitionEvent> {
+  elapsedTime: number
+  propertyName: string
+  pseudoElement: string
+}
+
+//
+// Browser Interfaces
+// https://github.com/nikeee/2048-typescript/blob/master/2048/js/touch.d.ts
+// ----------------------------------------------------------------------
+
+interface AbstractView {
+  styleMedia: StyleMedia
+  document: Document
+}
+
+interface Touch {
+  identifier: number
+  target: EventTarget
+  screenX: number
+  screenY: number
+  clientX: number
+  clientY: number
+  pageX: number
+  pageY: number
+}
+
+interface TouchList {
+  [index: number]: Touch
+  length: number
+  item(index: number): Touch
+  identifiedTouch(identifier: number): Touch
+}

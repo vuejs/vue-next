@@ -212,6 +212,9 @@ export {
   TransitionGroupProps
 } from './components/TransitionGroup'
 
+// export all event helpers
+export * from './modules/events'
+
 // **Internal** DOM-only runtime directive helpers
 export {
   vModelText,
