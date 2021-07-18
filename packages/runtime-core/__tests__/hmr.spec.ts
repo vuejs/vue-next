@@ -8,7 +8,9 @@ import {
   serializeInner,
   triggerEvent,
   TestElement,
-  nextTick
+  nextTick,
+  withDirectives,
+  ObjectDirective
 } from '@vue/runtime-test'
 import * as runtimeTest from '@vue/runtime-test'
 import { baseCompile } from '@vue/compiler-core'
@@ -392,5 +394,103 @@ describe('hot module replacement', () => {
     expect(serializeInner(target)).toBe(
       `<div style={}><div>1</div><div>2</div></div>`
     )
+  })
+
+  describe('HMR with directives', () => {
+    function assertHooks(
+      dir: ObjectDirective,
+      calls: Record<keyof ObjectDirective, number>
+    ) {
+      Object.keys(dir).forEach(hookName => {
+        expect(dir[hookName as keyof ObjectDirective]).toHaveBeenCalledTimes(
+          calls[hookName as keyof ObjectDirective]
+        )
+      })
+    }
+
+    test('should invoke the appropriate hooks when patching with HRM', async () => {
+      const root = nodeOps.createElement('div')
+      const dir = {
+        beforeMount: jest.fn(),
+        mounted: jest.fn(),
+        beforeUpdate: jest.fn(),
+        updated: jest.fn(),
+        beforeUnmount: jest.fn(),
+        unmounted: jest.fn()
+      }
+      const compId = 'parentId'
+      const Comp = {
+        __hmrId: compId,
+        name: 'Parent',
+        render() {
+          return withDirectives(h('div', 'foo'), [[dir]])
+        }
+      }
+      createRecord(compId, Comp)
+
+      render(h(Comp), root)
+      expect(serializeInner(root)).toBe(`<div>foo</div>`)
+      assertHooks(dir, {
+        created: 1,
+        beforeMount: 1,
+        mounted: 1,
+        beforeUpdate: 0,
+        updated: 0,
+        beforeUnmount: 0,
+        unmounted: 0,
+        getSSRProps: 0
+      })
+
+      // should invoke the beforeUmount/unmounted hooks when the dir is removed
+      rerender(compId, () => {
+        return h('div', 'bar')
+      })
+      await nextTick()
+      expect(serializeInner(root)).toBe(`<div>bar</div>`)
+      assertHooks(dir, {
+        created: 1,
+        beforeMount: 1,
+        mounted: 1,
+        beforeUpdate: 0,
+        updated: 0,
+        beforeUnmount: 1,
+        unmounted: 1,
+        getSSRProps: 0
+      })
+
+      // should invoke the beforeMount/mounted hooks when the dir is added again
+      rerender(compId, () => {
+        return withDirectives(h('div', 'foo'), [[dir]])
+      })
+      await nextTick()
+      expect(serializeInner(root)).toBe(`<div>foo</div>`)
+      assertHooks(dir, {
+        created: 2,
+        beforeMount: 2,
+        mounted: 2,
+        beforeUpdate: 0,
+        updated: 0,
+        beforeUnmount: 1,
+        unmounted: 1,
+        getSSRProps: 0
+      })
+
+      // should invoke the beforeUpdate/updated hooks when the dir is always there
+      rerender(compId, () => {
+        return withDirectives(h('div', 'bar'), [[dir]])
+      })
+      await nextTick()
+      expect(serializeInner(root)).toBe(`<div>bar</div>`)
+      assertHooks(dir, {
+        created: 2,
+        beforeMount: 2,
+        mounted: 2,
+        beforeUpdate: 1,
+        updated: 1,
+        beforeUnmount: 1,
+        unmounted: 1,
+        getSSRProps: 0
+      })
+    })
   })
 })

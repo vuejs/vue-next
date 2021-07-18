@@ -74,7 +74,11 @@ import {
   callWithAsyncErrorHandling
 } from './errorHandling'
 import { createHydrationFunctions, RootHydrateFunction } from './hydration'
-import { invokeDirectiveHook } from './directives'
+import {
+  DirectiveBinding,
+  invokeDirectiveHook,
+  invokeDirectiveHookByBindings
+} from './directives'
 import { startMeasure, endMeasure } from './profiling'
 import {
   devtoolsComponentAdded,
@@ -908,7 +912,34 @@ function baseCreateRenderer(
     if ((vnodeHook = newProps.onVnodeBeforeUpdate)) {
       invokeVNodeHook(vnodeHook, parentComponent, n2, n1)
     }
-    if (dirs) {
+
+    let normalDirs: DirectiveBinding[] = [],
+      newDirs: DirectiveBinding[] = [],
+      removedDirs: DirectiveBinding[] = []
+    if (__DEV__ && isHmrUpdating) {
+      ;[normalDirs, newDirs, removedDirs] = getPatchedDirectives(n1.dirs, dirs)
+      invokeDirectiveHookByBindings(
+        normalDirs,
+        n2,
+        n1,
+        parentComponent,
+        'beforeUpdate'
+      )
+      invokeDirectiveHookByBindings(
+        newDirs,
+        n2,
+        n1,
+        parentComponent,
+        'beforeMount'
+      )
+      invokeDirectiveHookByBindings(
+        removedDirs,
+        n2,
+        n1,
+        parentComponent,
+        'beforeUnmount'
+      )
+    } else if (dirs) {
       invokeDirectiveHook(n2, n1, parentComponent, 'beforeUpdate')
     }
 
@@ -1032,12 +1063,83 @@ function baseCreateRenderer(
       )
     }
 
-    if ((vnodeHook = newProps.onVnodeUpdated) || dirs) {
+    if (__DEV__ && isHmrUpdating) {
+      queuePostRenderEffect(() => {
+        vnodeHook && invokeVNodeHook(vnodeHook, parentComponent, n2, n1)
+        invokeDirectiveHookByBindings(
+          normalDirs,
+          n2,
+          n1,
+          parentComponent,
+          'updated'
+        )
+        invokeDirectiveHookByBindings(
+          newDirs,
+          n2,
+          n1,
+          parentComponent,
+          'mounted'
+        )
+        invokeDirectiveHookByBindings(
+          removedDirs,
+          n2,
+          n1,
+          parentComponent,
+          'unmounted'
+        )
+      }, parentSuspense)
+    } else if ((vnodeHook = newProps.onVnodeUpdated) || dirs) {
       queuePostRenderEffect(() => {
         vnodeHook && invokeVNodeHook(vnodeHook, parentComponent, n2, n1)
         dirs && invokeDirectiveHook(n2, n1, parentComponent, 'updated')
       }, parentSuspense)
     }
+  }
+
+  // dev/hmr only
+  const getPatchedDirectives = (
+    prevDirs: DirectiveBinding[] | null,
+    nextDirs: DirectiveBinding[] | null
+  ) => {
+    const normalDirs: DirectiveBinding[] = []
+    const removedDirs: DirectiveBinding[] = []
+    const newDirs: DirectiveBinding[] = []
+
+    if (!prevDirs && nextDirs) {
+      newDirs.push(...nextDirs)
+    } else if (prevDirs && !nextDirs) {
+      removedDirs.push(...prevDirs)
+    } else if (prevDirs && nextDirs) {
+      let i
+      for (i = 0; i < nextDirs.length; i++) {
+        const nextBinding = nextDirs[i]
+        if (
+          prevDirs.find(
+            ({ dir }) =>
+              dir === nextBinding.dir || dir.mounted === nextBinding.dir.mounted
+          )
+        ) {
+          normalDirs.push(nextBinding)
+        } else {
+          // new directive
+          newDirs.push(nextBinding)
+        }
+      }
+      // check the dirs that have been removed
+      for (i = 0; i < prevDirs.length; i++) {
+        const prevBinding = prevDirs[i]
+        if (
+          !nextDirs.find(
+            ({ dir }) =>
+              dir === prevBinding.dir || dir.mounted === prevBinding.dir.mounted
+          )
+        ) {
+          removedDirs.push(prevBinding)
+        }
+      }
+    }
+
+    return [normalDirs, newDirs, removedDirs] as const
   }
 
   // The fast path for blocks.

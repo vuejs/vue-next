@@ -126,8 +126,31 @@ export function invokeDirectiveHook(
 ) {
   const bindings = vnode.dirs!
   const oldBindings = prevVNode && prevVNode.dirs!
-  for (let i = 0; i < bindings.length; i++) {
-    const binding = bindings[i]
+  invokeWithBindings(bindings, oldBindings, vnode, prevVNode, instance, name)
+}
+
+// dev only
+export function invokeDirectiveHookByBindings(
+  bindings: DirectiveBinding[],
+  vnode: VNode,
+  prevVNode: VNode | null,
+  instance: ComponentInternalInstance | null,
+  name: keyof ObjectDirective
+) {
+  const oldBindings = prevVNode && prevVNode.dirs!
+  invokeWithBindings(bindings, oldBindings, vnode, prevVNode, instance, name)
+}
+
+function invokeWithBindings(
+  newBindings: DirectiveBinding[],
+  oldBindings: DirectiveBinding[] | null,
+  vnode: VNode,
+  prevVNode: VNode | null,
+  instance: ComponentInternalInstance | null,
+  name: keyof ObjectDirective
+) {
+  for (let i = 0; i < newBindings.length; i++) {
+    const binding = newBindings[i]
     if (oldBindings) {
       binding.oldValue = oldBindings[i].value
     }
