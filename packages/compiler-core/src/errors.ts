@@ -60,6 +60,7 @@ export const enum ErrorCodes {
   UNEXPECTED_SOLIDUS_IN_TAG,
 
   // Vue-specific parse errors
+  X_UNEXPECTED_CHARACTER_IN_START_TAG,
   X_INVALID_END_TAG,
   X_MISSING_END_TAG,
   X_MISSING_INTERPOLATION_END,

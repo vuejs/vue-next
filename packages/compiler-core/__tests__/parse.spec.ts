@@ -2900,4 +2900,47 @@ foo
       })
     }
   })
+
+  describe('Error Recovery', () => {
+    test('incomplete tag followed by closing parent tag', () => {
+      const ast = baseParse('<div><d</div>', { onError() {} })
+
+      expect(ast.children).toHaveLength(1)
+      const div = ast.children[0] as ElementNode
+      expect(div).toEqual(
+        expect.objectContaining({
+          type: NodeTypes.ELEMENT,
+          isSelfClosing: false,
+          tag: 'div'
+        })
+      )
+      expect(div.children).toHaveLength(1)
+      expect(div.children[0]).toEqual(
+        expect.objectContaining({
+          type: NodeTypes.ELEMENT,
+          tag: 'd',
+          isSelfClosing: true
+        })
+      )
+    })
+    test('incomplete tag followed by opening sibling tag', () => {
+      const ast = baseParse('<d<div></div>', { onError() {} })
+
+      expect(ast.children).toHaveLength(2)
+      expect(ast.children).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: NodeTypes.ELEMENT,
+            tag: 'd',
+            isSelfClosing: true
+          }),
+          expect.objectContaining({
+            type: NodeTypes.ELEMENT,
+            isSelfClosing: false,
+            tag: 'div'
+          })
+        ])
+      )
+    })
+  })
 })
