@@ -13,6 +13,7 @@ import { defineComponent } from './apiDefineComponent'
 import { warn } from './warning'
 import { ref } from '@vue/reactivity'
 import { handleError, ErrorCodes } from './errorHandling'
+import { onBeforeUnmount } from './apiLifecycle'
 import { isKeepAlive } from './components/KeepAlive'
 import { queueJob } from './scheduler'
 
@@ -121,6 +122,8 @@ export function defineAsyncComponent<
 
     setup() {
       const instance = currentInstance!
+      let delayTimer: number | null | undefined
+      let timeoutTimer: number | null | undefined
 
       // already resolved
       if (resolvedComp) {
@@ -135,6 +138,15 @@ export function defineAsyncComponent<
           ErrorCodes.ASYNC_COMPONENT_LOADER,
           !errorComponent /* do not throw in dev if user provided error component */
         )
+      }
+
+      const clearTimers = () => {
+        if (delayTimer != null) {
+          clearTimeout(delayTimer)
+        }
+        if (timeoutTimer != null) {
+          clearTimeout(timeoutTimer)
+        }
       }
 
       // suspense-controlled or SSR.
@@ -161,14 +173,16 @@ export function defineAsyncComponent<
       const error = ref()
       const delayed = ref(!!delay)
 
+      onBeforeUnmount(clearTimers)
+
       if (delay) {
-        setTimeout(() => {
+        delayTimer = (setTimeout(() => {
           delayed.value = false
-        }, delay)
+        }, delay) as unknown) as number
       }
 
       if (timeout != null) {
-        setTimeout(() => {
+        timeoutTimer = (setTimeout(() => {
           if (!loaded.value && !error.value) {
             const err = new Error(
               `Async component timed out after ${timeout}ms.`
@@ -176,7 +190,7 @@ export function defineAsyncComponent<
             onError(err)
             error.value = err
           }
-        }, timeout)
+        }, timeout) as unknown) as number
       }
 
       load()
@@ -192,6 +206,7 @@ export function defineAsyncComponent<
           onError(err)
           error.value = err
         })
+        .finally(clearTimers)
 
       return () => {
         if (loaded.value && resolvedComp) {
