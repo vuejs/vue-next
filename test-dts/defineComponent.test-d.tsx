@@ -390,9 +390,12 @@ describe('type inference w/ options API', () => {
       // Limitation: we cannot expose the return result of setup() on `this`
       // here in data() - somehow that would mess up the inference
       expectType<number | undefined>(this.a)
+
+      interface MyArray extends Array<number> {}
       return {
         c: this.a || 123,
-        someRef: ref(0)
+        someRef: ref(0),
+        arr: [] as MyArray
       }
     },
     computed: {
@@ -432,6 +435,7 @@ describe('type inference w/ options API', () => {
       // computed get/set
       expectType<number>(this.e)
       expectType<number>(this.someRef)
+      expectType<number[]>(this.arr)
     },
     methods: {
       doSomething() {
@@ -445,6 +449,7 @@ describe('type inference w/ options API', () => {
         expectType<number>(this.d)
         // computed get/set
         expectType<number>(this.e)
+        expectType<number[]>(this.arr)
       },
       returnSomething() {
         return this.a
@@ -463,6 +468,7 @@ describe('type inference w/ options API', () => {
       expectType<number>(this.e)
       // method
       expectType<() => number | undefined>(this.returnSomething)
+      expectType<number[]>(this.arr)
     }
   })
 })
