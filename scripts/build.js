@@ -57,7 +57,7 @@ async function runParallel(maxConcurrency, source, iteratorFn) {
   const ret = []
   const executing = []
   for (const item of source) {
-    const p = Promise.resolve().then(() => iteratorFn(item, source))
+    const p = Promise.resolve().then(() => iteratorFn(item))
     ret.push(p)
 
     if (maxConcurrency <= source.length) {
