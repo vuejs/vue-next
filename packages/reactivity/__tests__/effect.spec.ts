@@ -7,6 +7,7 @@ import {
   TriggerOpTypes,
   DebuggerEvent,
   markRaw,
+  ref,
   shallowReactive,
   readonly,
   ReactiveEffectRunner
@@ -884,6 +885,40 @@ describe('reactivity/effect', () => {
     expect(record).toBeUndefined()
   })
 
+  it('should track hasOwnProperty when obj call it itself', () => {
+    const obj: any = reactive({})
+    const has = ref(false)
+    const fnSpy = jest.fn()
+
+    effect(() => {
+      fnSpy()
+      has.value = obj.hasOwnProperty('foo')
+    })
+    expect(fnSpy).toHaveBeenCalledTimes(1)
+    expect(has.value).toBe(false)
+
+    obj.foo = 1
+    expect(fnSpy).toHaveBeenCalledTimes(2)
+    expect(has.value).toBe(true)
+  })
+
+  it('should not track hasOwnProperty when Object.prototype.hasOwnProperty.call', () => {
+    const obj: any = reactive({})
+    const has = ref(false)
+    const fnSpy = jest.fn()
+
+    effect(() => {
+      fnSpy()
+      has.value = Object.prototype.hasOwnProperty.call(obj, 'foo')
+    })
+    expect(fnSpy).toHaveBeenCalledTimes(1)
+    expect(has.value).toBe(false)
+
+    obj.foo = 1
+    expect(fnSpy).toHaveBeenCalledTimes(1)
+    expect(has.value).toBe(false)
+  })
+  
   it('should trigger once effect when set the equal proxy', () => {
     const obj = reactive({ foo: 1 })
     const observed: any = reactive({ obj })
