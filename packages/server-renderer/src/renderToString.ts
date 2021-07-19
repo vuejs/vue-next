@@ -47,6 +47,29 @@ function unrollBufferSync(buffer: SSRBuffer): string {
   return ret
 }
 
+/**
+ * Get the rendering context for an app including teleports
+ * https://github.com/vuejs/vue-next/issues/2574
+ */
+export async function renderToContext(
+  input: App,
+  context: SSRContext = {}
+): Promise<{ context: SSRContext; result: string }> {
+  // rendering an app
+  const vnode = createVNode(input._component, input._props)
+  vnode.appContext = input._context
+
+  // provide the ssr context to the tree
+  input.provide(ssrContextKey, context)
+  const buffer = await renderComponentVNode(vnode)
+
+  await resolveTeleports(context)
+
+  const result = await unrollBuffer(buffer)
+
+  return { result, context }
+}
+
 export async function renderToString(
   input: App | VNode,
   context: SSRContext = {}
@@ -56,16 +79,9 @@ export async function renderToString(
     return renderToString(createApp({ render: () => input }), context)
   }
 
-  // rendering an app
-  const vnode = createVNode(input._component, input._props)
-  vnode.appContext = input._context
-  // provide the ssr context to the tree
-  input.provide(ssrContextKey, context)
-  const buffer = await renderComponentVNode(vnode)
+  const { result } = await renderToContext(input, context)
 
-  await resolveTeleports(context)
-
-  return unrollBuffer(buffer as SSRBuffer)
+  return result
 }
 
 async function resolveTeleports(context: SSRContext) {
