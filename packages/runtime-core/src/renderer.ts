@@ -2468,7 +2468,7 @@ export function traverseStaticChildren(n1: VNode, n2: VNode, shallow = false) {
 // https://en.wikipedia.org/wiki/Longest_increasing_subsequence
 function getSequence(arr: number[]): number[] {
   const p = arr.slice()
-  const result = [0]
+  const result = []
   let i, j, u, v, c
   const len = arr.length
   for (i = 0; i < len; i++) {
@@ -2490,12 +2490,10 @@ function getSequence(arr: number[]): number[] {
           v = c
         }
       }
-      if (arrI < arr[result[u]]) {
-        if (u > 0) {
-          p[i] = result[u - 1]
-        }
-        result[u] = i
+      if (u > 0) {
+        p[i] = result[u - 1]
       }
+      result[u] = i
     }
   }
   u = result.length
