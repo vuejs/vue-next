@@ -1,5 +1,42 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`should generate the correct srcset 1`] = `
+"import { resolveComponent as _resolveComponent, withCtx as _withCtx, createVNode as _createVNode } from \\"vue\\"
+import { ssrRenderAttr as _ssrRenderAttr, ssrRenderComponent as _ssrRenderComponent } from \\"@vue/server-renderer\\"
+import _imports_0 from './img/foo.svg'
+import _imports_1 from './img/bar.svg'
+
+
+export function ssrRender(_ctx, _push, _parent, _attrs) {
+  const _component_router_link = _resolveComponent(\\"router-link\\")
+
+  _push(\`<!--[--><picture><source\${_ssrRenderAttr(\\"srcset\\", _imports_0)}></picture>\`)
+  _push(_ssrRenderComponent(_component_router_link, null, {
+    default: _withCtx((_, _push, _parent, _scopeId) => {
+      if (_push) {
+        _push(\`<picture\${
+          _scopeId
+        }><source\${
+          _ssrRenderAttr(\\"srcset\\", _imports_1)
+        }\${
+          _scopeId
+        }></picture>\`)
+      } else {
+        return [
+          _createVNode(\\"picture\\", null, [
+            _createVNode(\\"source\\", {
+              srcset: _imports_1
+            })
+          ])
+        ]
+      }
+    }),
+    _: 1 /* STABLE */
+  }, _parent))
+  _push(\`<!--]-->\`)
+}"
+`;
+
 exports[`source map 1`] = `
 Object {
   "mappings": ";;;wBACE,oBAA8B;IAAzB,oBAAmB,4BAAbA,WAAM",

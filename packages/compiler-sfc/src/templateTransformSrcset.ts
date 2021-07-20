@@ -5,7 +5,8 @@ import {
   createSimpleExpression,
   NodeTransform,
   NodeTypes,
-  SimpleExpressionNode
+  SimpleExpressionNode,
+  ExpressionNode
 } from '@vue/compiler-core'
 import {
   isRelativeUrl,
@@ -145,14 +146,17 @@ export const transformSrcset: NodeTransform = (
             }
           })
 
-          const hoisted = context.hoist(compoundExpression)
-          hoisted.constType = ConstantTypes.CAN_HOIST
+          let exp: ExpressionNode = compoundExpression
+          if (context.hoistStatic) {
+            exp = context.hoist(compoundExpression)
+            exp.constType = ConstantTypes.CAN_HOIST
+          }
 
           node.props[index] = {
             type: NodeTypes.DIRECTIVE,
             name: 'bind',
             arg: createSimpleExpression('srcset', true, attr.loc),
-            exp: hoisted,
+            exp,
             modifiers: [],
             loc: attr.loc
           }
