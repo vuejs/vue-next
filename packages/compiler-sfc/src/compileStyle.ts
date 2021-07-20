@@ -6,7 +6,7 @@ import postcss, {
   LazyResult
 } from 'postcss'
 import trimPlugin from './stylePluginTrim'
-import scopedPlugin from './stylePluginScoped'
+import scopedPlugin, { ScopedMode } from './stylePluginScoped'
 import {
   processors,
   StylePreprocessor,
@@ -20,7 +20,7 @@ export interface SFCStyleCompileOptions {
   source: string
   filename: string
   id: string
-  scoped?: boolean
+  scoped?: boolean | 'deep' | 'slotted'
   trim?: boolean
   isProd?: boolean
   inMap?: RawSourceMap
@@ -116,7 +116,8 @@ export function doCompileStyle(
     plugins.push(trimPlugin())
   }
   if (scoped) {
-    plugins.push(scopedPlugin(longId))
+    const mode = scoped === true ? ScopedMode.default : (scoped as ScopedMode)
+    plugins.push(scopedPlugin({ id: longId, mode }))
   }
   let cssModules: Record<string, string> | undefined
   if (modules) {

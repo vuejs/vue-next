@@ -66,7 +66,7 @@ export interface TextRange {
 
 export interface SFCStyleBlock extends SFCBlock {
   type: 'style'
-  scoped?: boolean
+  scoped?: boolean | 'deep' | 'slotted'
   module?: string | boolean
 }
 
@@ -348,7 +348,12 @@ function createBlock(
         block.src = p.value && p.value.content
       } else if (type === 'style') {
         if (p.name === 'scoped') {
-          ;(block as SFCStyleBlock).scoped = true
+          const scoped = p.value && p.value.content
+          if (scoped === 'deep' || scoped === 'slotted') {
+            ;(block as SFCStyleBlock).scoped = scoped
+          } else {
+            ;(block as SFCStyleBlock).scoped = true
+          }
         } else if (p.name === 'module') {
           ;(block as SFCStyleBlock).module = attrs[p.name]
         }

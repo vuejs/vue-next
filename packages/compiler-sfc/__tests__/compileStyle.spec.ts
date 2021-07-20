@@ -91,6 +91,30 @@ describe('SFC scoped CSS', () => {
     `)
   })
 
+  test('scoped=deep', () => {
+    expect(compileScoped(`.foo { color: red; }`, { scoped: 'deep' }))
+      .toMatchInlineSnapshot(`
+      "[data-v-test] .foo { color: red;
+      }"
+    `)
+    expect(compileScoped(`.foo { color: red; }`, { scoped: 'deep' }))
+      .toMatchInlineSnapshot(`
+      "[data-v-test] .foo { color: red;
+      }"
+    `)
+    expect(compileScoped(`.foo .bar { color: red; }`, { scoped: 'deep' }))
+      .toMatchInlineSnapshot(`
+      "[data-v-test] .foo .bar { color: red;
+      }"
+    `)
+    expect(
+      compileScoped(`.baz .qux .foo .bar { color: red; }`, { scoped: 'deep' })
+    ).toMatchInlineSnapshot(`
+      "[data-v-test] .baz .qux .foo .bar { color: red;
+      }"
+    `)
+  })
+
   test('::v-slotted', () => {
     expect(compileScoped(`:slotted(.foo) { color: red; }`))
       .toMatchInlineSnapshot(`
@@ -109,6 +133,32 @@ describe('SFC scoped CSS', () => {
     `)
     expect(compileScoped(`.baz .qux ::v-slotted(.foo .bar) { color: red; }`))
       .toMatchInlineSnapshot(`
+      ".baz .qux .foo .bar[data-v-test-s] { color: red;
+      }"
+    `)
+  })
+
+  test('scoped=slotted', () => {
+    expect(compileScoped(`.foo { color: red; }`, { scoped: 'slotted' }))
+      .toMatchInlineSnapshot(`
+    ".foo[data-v-test-s] { color: red;
+    }"
+  `)
+    expect(compileScoped(`.foo { color: red; }`, { scoped: 'slotted' }))
+      .toMatchInlineSnapshot(`
+      ".foo[data-v-test-s] { color: red;
+      }"
+    `)
+    expect(compileScoped(`.foo .bar { color: red; }`, { scoped: 'slotted' }))
+      .toMatchInlineSnapshot(`
+      ".foo .bar[data-v-test-s] { color: red;
+      }"
+    `)
+    expect(
+      compileScoped(`.baz .qux .foo .bar { color: red; }`, {
+        scoped: 'slotted'
+      })
+    ).toMatchInlineSnapshot(`
       ".baz .qux .foo .bar[data-v-test-s] { color: red;
       }"
     `)
