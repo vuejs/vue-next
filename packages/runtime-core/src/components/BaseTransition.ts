@@ -67,6 +67,7 @@ export interface TransitionHooks<
     delayedLeave: () => void
   ): void
   delayedLeave?(): void
+  effects: Function[]
 }
 
 export type TransitionHookCaller = (
@@ -83,6 +84,7 @@ export interface TransitionState {
   // Track pending leave callbacks for children of the same key.
   // This is used to force remove leaving a child when a new copy is entering.
   leavingVNodes: Map<any, Record<string, VNode>>
+  effects: Function[]
 }
 
 export interface TransitionElement {
@@ -98,7 +100,8 @@ export function useTransitionState(): TransitionState {
     isMounted: false,
     isLeaving: false,
     isUnmounting: false,
-    leavingVNodes: new Map()
+    leavingVNodes: new Map(),
+    effects: []
   }
   onMounted(() => {
     state.isMounted = true
@@ -317,6 +320,7 @@ export function resolveTransitionHooks(
   const hooks: TransitionHooks<TransitionElement> = {
     mode,
     persisted,
+    effects: state.effects,
     beforeEnter(el) {
       let hook = onBeforeEnter
       if (!state.isMounted) {
@@ -391,6 +395,11 @@ export function resolveTransitionHooks(
       callHook(onBeforeLeave, [el])
       let called = false
       const done = (el._leaveCb = (cancelled?) => {
+        state.effects.forEach(fn => {
+          fn(el)
+        })
+        state.effects = []
+
         if (called) return
         called = true
         remove()
