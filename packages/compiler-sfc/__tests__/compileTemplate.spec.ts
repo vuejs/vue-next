@@ -153,3 +153,20 @@ test('should generate the correct imports expression', () => {
   expect(code).toMatch(`_ssrRenderAttr(\"src\", _imports_1)`)
   expect(code).toMatch(`_createVNode(\"img\", { src: _imports_1 })`)
 })
+
+test('should remove first-line indent for pug or jade', () => {
+  const template = parse(`
+<template lang="pug">
+  div 1
+    div 2
+</template>
+  `).descriptor.template!
+
+  const result = compile({
+    filename: 'example.vue',
+    source: template.content,
+    preprocessLang: template.lang
+  })
+
+  expect(result.source).toBe('<div>1<div>2</div></div>')
+})

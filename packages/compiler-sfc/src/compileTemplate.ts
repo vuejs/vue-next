@@ -122,6 +122,10 @@ export function compileTemplate(
       : require('consolidate')[preprocessLang as keyof typeof consolidate]
     : false
   if (preprocessor) {
+    if (['pug', 'jade'].includes(preprocessLang as keyof typeof consolidate)) {
+      options.source = normalizeTemplate(options.source)
+    }
+
     try {
       return doCompileTemplate({
         ...options,
@@ -310,4 +314,21 @@ function patchErrors(
       }
     }
   })
+}
+
+// for pug / jade template
+function normalizeTemplate(template: string) {
+  // In order to prevent Prettier from reporting error,
+  // one more temporary variable had to be used to reconstruct follow code:
+  // const indent = template.match(/^\n?(\s+)/)?.[1]
+  const temp = template.match(/^\n?(\s+)/)
+  const indent = temp && temp[1]
+
+  if (indent) {
+    return template
+      .split('\n')
+      .map(str => str.replace(indent, ''))
+      .join('\n')
+  }
+  return template
 }
