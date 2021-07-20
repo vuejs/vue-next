@@ -26,7 +26,7 @@ export function resolveComponent(
   return resolveAsset(COMPONENTS, name, true, maybeSelfReference) || name
 }
 
-export const NULL_DYNAMIC_COMPONENT = Symbol()
+export const NULL_DYNAMIC_COMPONENT = Symbol(__DEV__ ? 'Null' : undefined)
 
 /**
  * @private

@@ -104,6 +104,7 @@ export type VNodeProps = {
 
 type VNodeChildAtom =
   | VNode
+  | typeof NULL_DYNAMIC_COMPONENT
   | string
   | number
   | boolean
