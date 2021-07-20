@@ -27,7 +27,12 @@ import { ObjectEmitsOptions } from './componentEmits'
 export interface App<HostElement = any> {
   version: string
   config: AppConfig
-  use(plugin: Plugin, ...options: any[]): this
+  use<T extends Plugin = Plugin>(
+    plugin: T,
+    ...options: T extends { install: (app: App, ...options: infer R) => any }
+      ? R
+      : T extends ((app: App, ...options: infer R) => any) ? R : any
+  ): this
   mixin(mixin: ComponentOptions): this
   component(name: string): Component | undefined
   component(name: string, component: Component): this
