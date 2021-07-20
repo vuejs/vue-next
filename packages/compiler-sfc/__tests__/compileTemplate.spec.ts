@@ -22,6 +22,26 @@ test('should work', () => {
   expect(result.code).toMatch(`export function render(`)
 })
 
+// #3967
+test('missing close tag', () => {
+  let source = `<div><div</div>`
+
+  let result = compile({ filename: 'example.vue', source })
+
+  expect(result.errors.length).toBe(0)
+  expect(result.source).toBe(source)
+
+  source = `<div><div </div>`
+  result = compile({ filename: 'example.vue', source })
+  expect(result.errors.length).toBe(0)
+  expect(result.source).toBe(source)
+
+  source = `<div><></div>`
+  result = compile({ filename: 'example.vue', source })
+  expect(result.errors.length).toBe(0)
+  expect(result.source).toBe(source)
+})
+
 test('preprocess pug', () => {
   const template = parse(
     `
