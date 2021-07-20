@@ -246,6 +246,65 @@ describe('renderer: keyed children', () => {
     ])
   })
 
+  test('reverse left children and move to right', () => {
+    elm = renderChildren([1, 2, 3, 4])
+    expect(elm.children.length).toBe(4)
+
+    elm = renderChildren([3, 4, 2, 1])
+    expect(elm.children.length).toBe(4)
+
+    expect((elm.children as TestElement[]).map(inner)).toEqual([
+      '3',
+      '4',
+      '2',
+      '1'
+    ])
+  })
+
+  test('reverse right children and move to left', () => {
+    elm = renderChildren([1, 2, 3, 4])
+    expect(elm.children.length).toBe(4)
+
+    elm = renderChildren([4, 3, 1, 2])
+    expect(elm.children.length).toBe(4)
+    expect((elm.children as TestElement[]).map(inner)).toEqual([
+      '4',
+      '3',
+      '1',
+      '2'
+    ])
+  })
+
+  test('reverse right and left children and exchange their places', () => {
+    elm = renderChildren([1, 2, 3, 4, 5, 6])
+    expect(elm.children.length).toBe(6)
+
+    elm = renderChildren([6, 5, 3, 4, 2, 1])
+    expect(elm.children.length).toBe(6)
+    expect((elm.children as TestElement[]).map(inner)).toEqual([
+      '6',
+      '5',
+      '3',
+      '4',
+      '2',
+      '1'
+    ])
+  })
+
+  test('reverse all children', () => {
+    elm = renderChildren([1, 2, 3, 4])
+    expect(elm.children.length).toBe(4)
+
+    elm = renderChildren([4, 3, 2, 1])
+    expect(elm.children.length).toBe(4)
+    expect((elm.children as TestElement[]).map(inner)).toEqual([
+      '4',
+      '3',
+      '2',
+      '1'
+    ])
+  })
+
   test('move to left & replace', () => {
     elm = renderChildren([1, 2, 3, 4, 5])
     expect(elm.children.length).toBe(5)

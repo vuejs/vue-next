@@ -1952,30 +1952,9 @@ function baseCreateRenderer(
     // [i ... e2 + 1]: a b [e d c h] f g
     // i = 2, e1 = 4, e2 = 5
     else {
-      const s1 = i // prev starting index
-      const s2 = i // next starting index
+      let s1 = i // prev starting index
+      let s2 = i // next starting index
 
-      // 5.1 build key:index map for newChildren
-      const keyToNewIndexMap: Map<string | number, number> = new Map()
-      for (i = s2; i <= e2; i++) {
-        const nextChild = (c2[i] = optimized
-          ? cloneIfMounted(c2[i] as VNode)
-          : normalizeVNode(c2[i]))
-        if (nextChild.key != null) {
-          if (__DEV__ && keyToNewIndexMap.has(nextChild.key)) {
-            warn(
-              `Duplicate keys found during update:`,
-              JSON.stringify(nextChild.key),
-              `Make sure keys are unique.`
-            )
-          }
-          keyToNewIndexMap.set(nextChild.key, i)
-        }
-      }
-
-      // 5.2 loop through old children left to be patched and try to patch
-      // matching nodes & remove nodes that are no longer present
-      let j
       let patched = 0
       const toBePatched = e2 - s2 + 1
       let moved = false
@@ -1989,6 +1968,181 @@ function baseCreateRenderer(
       const newIndexToOldIndexMap = new Array(toBePatched)
       for (i = 0; i < toBePatched; i++) newIndexToOldIndexMap[i] = 0
 
+      // build key:index map for the rest of newChildren
+      const keyToNewIndexMap: Map<string | number, number> = new Map()
+
+      // 5.1 First ReversePatch
+      // loop old children Array from left to right and
+      // loop new children Array from right to left,
+      // when their keys are same , try to patch matching nodes
+      // reverse sequence
+      // [(a,b),g,d,e]
+      // [f,c,k,(b,a)]
+      let n1 = c1[s1]
+      let n2 = (c2[e2] = optimized
+        ? cloneIfMounted(c2[e2] as VNode)
+        : normalizeVNode(c2[e2]))
+
+      // a flag that used to judge whether it has reversePatch
+      let hasReversePatched = false
+      let c1ReversedCount = 0
+
+      while (n1.key != null && n1.key === n2.key) {
+        if (__DEV__) {
+          if (keyToNewIndexMap.has(n2.key)) {
+            warn(
+              `Duplicate keys found during update:`,
+              JSON.stringify(n2.key),
+              `Make sure keys are unique.`
+            )
+          }
+          keyToNewIndexMap.set(n2.key, e2)
+        }
+
+        newIndexToOldIndexMap[e2 - s2] = s1 + 1
+        // When c1ReversedCount > 0 , the moved must be true
+        if (c1ReversedCount === 0) {
+          c1ReversedCount++
+        } else {
+          moved = true
+        }
+        if (e2 >= maxNewIndexSoFar) {
+          maxNewIndexSoFar = e2
+        }
+        patch(
+          n1,
+          n2,
+          container,
+          null,
+          parentComponent,
+          parentSuspense,
+          isSVG,
+          optimized
+        )
+        hasReversePatched = true
+        patched++
+        s1++
+        e2--
+
+        // When the following conditions are true, the ReversePatch
+        // process should stop, else it should continue
+        if (s1 > e1 || s2 > e2 || patched >= toBePatched) {
+          if (patched >= toBePatched) {
+            while (s1 <= e1) {
+              unmount(c1[s1++], parentComponent, parentSuspense, true)
+            }
+          }
+          break
+        } else {
+          n1 = c1[s1]
+          n2 = c2[e2] = optimized
+            ? cloneIfMounted(c2[e2] as VNode)
+            : normalizeVNode(c2[e2])
+        }
+      }
+
+      // 5.2 Second ReversePatch
+      // loop old children Array from right to left and
+      // loop new children Array from left to right, when their keys are same ,
+      // try to patch matching nodes
+      // reverse sequence
+      // [p,q,g,(b,a)]
+      // [(a,b),k,j,l]
+
+      // 's2' will change in ReversePatch process, so use an another
+      // variable 'c2StartIndex' to store its origin value
+      const c2StartIndex = s2
+      if (s1 <= e1 && s2 <= e2 && patched < toBePatched) {
+        n1 = c1[e1]
+        n2 = c2[s2] = optimized
+          ? cloneIfMounted(c2[s2] as VNode)
+          : normalizeVNode(c2[s2])
+        let c2ReversedCount = 0
+        while (n1.key != null && n1.key === n2.key) {
+          if (__DEV__) {
+            if (keyToNewIndexMap.has(n2.key)) {
+              warn(
+                `Duplicate keys found during update:`,
+                JSON.stringify(n2.key),
+                `Make sure keys are unique.`
+              )
+            }
+            keyToNewIndexMap.set(n2.key, s2)
+          }
+          newIndexToOldIndexMap[s2 - c2StartIndex] = e1 + 1
+          if (s2 >= maxNewIndexSoFar) {
+            maxNewIndexSoFar = s2
+          }
+
+          // When hasReversePatched is true and find a couple of
+          // same keyed children in 'Second ReversePatch',
+          // or find two couples of same keyed children
+          // in 'Second ReversePatch', the moved must be true here
+          if (hasReversePatched) {
+            moved = true
+          } else if (c2ReversedCount === 0) {
+            c2ReversedCount++
+          } else {
+            moved = true
+          }
+          patch(
+            n1,
+            n2,
+            container,
+            null,
+            parentComponent,
+            parentSuspense,
+            isSVG,
+            optimized
+          )
+          hasReversePatched = true
+          patched++
+          e1--
+          s2++
+          if (s1 > e1 || s2 > e2 || patched >= toBePatched) {
+            if (patched >= toBePatched) {
+              while (s1 <= e1) {
+                unmount(c1[e1--], parentComponent, parentSuspense, true)
+              }
+            }
+            break
+          } else {
+            n1 = c1[e1]
+            n2 = c2[s2] = optimized
+              ? cloneIfMounted(c2[s2] as VNode)
+              : normalizeVNode(c2[s2])
+          }
+        }
+      }
+
+      // 5.3 build key:index map for the rest of new children
+      // store the all unkeyed children in an array
+      const unKeyedNewChildIndexArr = []
+      // if PrePatch process deals with all elelments that needs to be patched,
+      // skip the following step
+      if (patched < toBePatched) {
+        for (i = s2; i <= e2; i++) {
+          const nextChild = (c2[i] = optimized
+            ? cloneIfMounted(c2[i] as VNode)
+            : normalizeVNode(c2[i]))
+          if (nextChild.key != null) {
+            if (__DEV__ && keyToNewIndexMap.has(nextChild.key)) {
+              warn(
+                `Duplicate keys found during update:`,
+                JSON.stringify(nextChild.key),
+                `Make sure keys are unique.`
+              )
+            }
+            keyToNewIndexMap.set(nextChild.key, i)
+          } else {
+            unKeyedNewChildIndexArr.push(i)
+          }
+        }
+      }
+
+      // 5.4 loop through old children left to be patched and try to patch
+      // matching nodes & remove nodes that are no longer present
+      let j
       for (i = s1; i <= e1; i++) {
         const prevChild = c1[i]
         if (patched >= toBePatched) {
@@ -2001,12 +2155,14 @@ function baseCreateRenderer(
           newIndex = keyToNewIndexMap.get(prevChild.key)
         } else {
           // key-less node, try to locate a key-less node of the same type
-          for (j = s2; j <= e2; j++) {
+          // in unKeyedNewChildIndexArr
+          for (j = s2; j <= unKeyedNewChildIndexArr.length; j++) {
+            const unKeyedIndex = unKeyedNewChildIndexArr[j]
             if (
-              newIndexToOldIndexMap[j - s2] === 0 &&
-              isSameVNodeType(prevChild, c2[j] as VNode)
+              newIndexToOldIndexMap[unKeyedIndex - c2StartIndex] === 0 &&
+              isSameVNodeType(prevChild, c2[unKeyedIndex] as VNode)
             ) {
-              newIndex = j
+              newIndex = unKeyedIndex
               break
             }
           }
@@ -2014,10 +2170,13 @@ function baseCreateRenderer(
         if (newIndex === undefined) {
           unmount(prevChild, parentComponent, parentSuspense, true)
         } else {
-          newIndexToOldIndexMap[newIndex - s2] = i + 1
+          newIndexToOldIndexMap[newIndex - c2StartIndex] = i + 1
           if (newIndex >= maxNewIndexSoFar) {
             maxNewIndexSoFar = newIndex
-          } else {
+          }
+          if (hasReversePatched) {
+            moved = true
+          } else if (newIndex < maxNewIndexSoFar) {
             moved = true
           }
           patch(
@@ -2035,7 +2194,7 @@ function baseCreateRenderer(
         }
       }
 
-      // 5.3 move and mount
+      // 5.5 move and mount
       // generate longest stable subsequence only when nodes have moved
       const increasingNewIndexSequence = moved
         ? getSequence(newIndexToOldIndexMap)
@@ -2043,7 +2202,7 @@ function baseCreateRenderer(
       j = increasingNewIndexSequence.length - 1
       // looping backwards so that we can use last patched node as anchor
       for (i = toBePatched - 1; i >= 0; i--) {
-        const nextIndex = s2 + i
+        const nextIndex = c2StartIndex + i
         const nextChild = c2[nextIndex] as VNode
         const anchor =
           nextIndex + 1 < l2 ? (c2[nextIndex + 1] as VNode).el : parentAnchor
