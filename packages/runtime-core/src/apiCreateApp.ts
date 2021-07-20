@@ -172,8 +172,13 @@ export function createAppAPI<HostElement>(
   hydrate?: RootHydrateFunction
 ): CreateAppFunction<HostElement> {
   return function createApp(rootComponent, rootProps = null) {
+    if (!isObject(rootComponent)) {
+      __DEV__ && warn(`root component passed to createApp() must be an object.`)
+      rootComponent = {}
+    }
+
     if (rootProps != null && !isObject(rootProps)) {
-      __DEV__ && warn(`root props passed to app.mount() must be an object.`)
+      __DEV__ && warn(`root props passed to createApp() must be an object.`)
       rootProps = null
     }
 
