@@ -16,6 +16,7 @@ export { walk } from 'estree-walker'
 // Types
 export {
   SFCParseOptions,
+  SFCParseResult,
   SFCDescriptor,
   SFCBlock,
   SFCTemplateBlock,
