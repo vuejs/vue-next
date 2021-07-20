@@ -651,6 +651,12 @@ function setupStatefulComponent(
         // async setup returned Promise.
         // bail here and wait for re-entry.
         instance.asyncDep = setupResult
+        if (__DEV__ && !instance.suspense) {
+          warn(
+            `setup() returned a Promise, but there is no suspense boundary to handle it, ` +
+              `use the <Suspense> component to create a suspense boundary.`
+          )
+        }
       } else if (__DEV__) {
         warn(
           `setup() returned a Promise, but the version of Vue you are using ` +

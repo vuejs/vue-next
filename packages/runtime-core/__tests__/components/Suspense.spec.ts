@@ -1232,4 +1232,23 @@ describe('Suspense', () => {
     await nextTick()
     expect(serializeInner(root)).toBe(`<div>parent<!----></div>`)
   })
+
+  test('warning for no suspense boundary', async () => {
+    const Comp = {
+      async setup() {
+        return () => h('div', 'child')
+      }
+    }
+    const App = {
+      setup() {
+        return () => h(Comp)
+      }
+    }
+
+    render(h(App), nodeOps.createElement('div'))
+    expect(
+      `setup() returned a Promise, but there is no suspense boundary to handle it, ` +
+        `use the <Suspense> component to create a suspense boundary.`
+    ).toHaveBeenWarnedLast()
+  })
 })
