@@ -246,11 +246,7 @@ export function generate(
     // function mode const declarations should be inside with block
     // also they should be renamed to avoid collision with user properties
     if (hasHelpers) {
-      push(
-        `const { ${ast.helpers
-          .map(s => `${helperNameMap[s]}: _${helperNameMap[s]}`)
-          .join(', ')} } = _Vue`
-      )
+      push(`const { ${ast.helpers.map(aliasHelper).join(', ')} } = _Vue`)
       push(`\n`)
       newline()
     }
@@ -313,6 +309,8 @@ export function generate(
   }
 }
 
+const aliasHelper = (s: symbol) => `${helperNameMap[s]}: _${helperNameMap[s]}`
+
 function genFunctionPreamble(ast: RootNode, context: CodegenContext) {
   const {
     ssr,
@@ -326,7 +324,6 @@ function genFunctionPreamble(ast: RootNode, context: CodegenContext) {
     !__BROWSER__ && ssr
       ? `require(${JSON.stringify(runtimeModuleName)})`
       : runtimeGlobalName
-  const aliasHelper = (s: symbol) => `${helperNameMap[s]}: _${helperNameMap[s]}`
   // Generate const declaration for helpers
   // In prefix mode, we place the const declaration at top so it's done
   // only once; But if we not prefixing, we place the declaration inside the
