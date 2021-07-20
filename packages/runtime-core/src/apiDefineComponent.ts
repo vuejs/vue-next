@@ -70,8 +70,9 @@ export type DefineComponent<
     E,
     EE,
     Defaults
-  > &
-  PP
+  > & {
+    props: PropsOrPropOptions
+  } & PP
 
 // defineComponent is a utility that is primarily used for type inference
 // when declaring components. Type inference is provided in the component
@@ -112,7 +113,7 @@ export function defineComponent<
     E,
     EE
   >
-): DefineComponent<Props, RawBindings, D, C, M, Mixin, Extends, E, EE>
+): DefineComponent<undefined, RawBindings, D, C, M, Mixin, Extends, E, EE>
 
 // overload 3: object format with array props declaration
 // props inferred as { [key in PropNames]?: any }
