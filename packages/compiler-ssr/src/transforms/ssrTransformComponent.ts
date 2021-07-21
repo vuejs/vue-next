@@ -207,7 +207,7 @@ export function ssrProcessComponent(
 
     // component is inside a slot, inherit slot scope Id
     if (context.withSlotScopeId) {
-      node.ssrCodegenNode!.arguments.push(`_scopeId`)
+      node.ssrCodegenNode.arguments.push(`_scopeId`)
     }
 
     if (typeof component === 'string') {
