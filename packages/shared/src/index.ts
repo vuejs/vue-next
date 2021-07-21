@@ -158,6 +158,10 @@ export const def = (obj: object, key: string | symbol, value: any) => {
 }
 
 export const toNumber = (val: any): any => {
+  if (typeof val === 'string') {
+    const matched = val.match(/\d+(\.\d+)?/)
+    return matched ? parseFloat(matched[0]) : val
+  }
   const n = parseFloat(val)
   return isNaN(n) ? val : n
 }
