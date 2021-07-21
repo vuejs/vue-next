@@ -130,7 +130,7 @@ function queueCb(
       !activeQueue ||
       !activeQueue.includes(
         cb,
-        (cb as SchedulerJob).allowRecurse ? index + 1 : index
+        cb.allowRecurse ? index + 1 : index
       )
     ) {
       pendingQueue.push(cb)
@@ -221,7 +221,7 @@ export function flushPostFlushCbs(seen?: CountMap) {
 }
 
 const getId = (job: SchedulerJob): number =>
-  job.id == null ? Infinity : job.id!
+  job.id == null ? Infinity : job.id
 
 function flushJobs(seen?: CountMap) {
   isFlushPending = false
