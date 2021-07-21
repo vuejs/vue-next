@@ -47,6 +47,7 @@ describe('h inference w/ Fragment', () => {
 
 describe('h inference w/ Teleport', () => {
   h(Teleport, { to: '#foo' }, 'hello')
+  h(Teleport, { to: '#foo' }, { default() {} })
   // @ts-expect-error
   expectError(h(Teleport))
   // @ts-expect-error
