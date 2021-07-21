@@ -194,7 +194,7 @@ export {
   ComponentCustomProps,
   AllowedComponentProps
 } from './component'
-export { DefineComponent } from './apiDefineComponent'
+export { DefineComponent, PublicProps } from './apiDefineComponent'
 export {
   ComponentOptions,
   ComponentOptionsMixin,
