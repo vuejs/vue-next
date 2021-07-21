@@ -148,7 +148,8 @@ const replaceHoist = (
   context: TransformContext
 ) => {
   const hoistToReplace = (node.codegenNode as SimpleExpressionNode).hoisted!
-  context.hoists[context.hoists.indexOf(hoistToReplace)] = replacement
+  const index = context.hoists.indexOf(hoistToReplace)
+  if (index !== -1) context.hoists[index] = replacement
 }
 
 const isNonStringifiable = /*#__PURE__*/ makeMap(

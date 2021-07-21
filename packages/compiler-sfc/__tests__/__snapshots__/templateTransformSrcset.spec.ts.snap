@@ -7,12 +7,11 @@ import _imports_0 from './logo.png'
 
 const _hoisted_1 = _imports_0
 const _hoisted_2 = _imports_0 + ' 2x'
-const _hoisted_3 = _imports_0 + ' 2x'
-const _hoisted_4 = _imports_0 + ', ' + _imports_0 + ' 2x'
-const _hoisted_5 = _imports_0 + ' 2x, ' + _imports_0
-const _hoisted_6 = _imports_0 + ' 2x, ' + _imports_0 + ' 3x'
-const _hoisted_7 = _imports_0 + ', ' + _imports_0 + ' 2x, ' + _imports_0 + ' 3x'
-const _hoisted_8 = \\"/logo.png\\" + ', ' + _imports_0 + ' 2x'
+const _hoisted_3 = _imports_0 + ', ' + _imports_0 + ' 2x'
+const _hoisted_4 = _imports_0 + ' 2x, ' + _imports_0
+const _hoisted_5 = _imports_0 + ' 2x, ' + _imports_0 + ' 3x'
+const _hoisted_6 = _imports_0 + ', ' + _imports_0 + ' 2x, ' + _imports_0 + ' 3x'
+const _hoisted_7 = \\"/logo.png\\" + ', ' + _imports_0 + ' 2x'
 
 export function render(_ctx, _cache) {
   return (_openBlock(), _createElementBlock(_Fragment, null, [
@@ -23,6 +22,10 @@ export function render(_ctx, _cache) {
     _createElementVNode(\\"img\\", {
       src: \\"./logo.png\\",
       srcset: _hoisted_1
+    }),
+    _createElementVNode(\\"img\\", {
+      src: \\"./logo.png\\",
+      srcset: _hoisted_2
     }),
     _createElementVNode(\\"img\\", {
       src: \\"./logo.png\\",
@@ -45,10 +48,6 @@ export function render(_ctx, _cache) {
       srcset: _hoisted_6
     }),
     _createElementVNode(\\"img\\", {
-      src: \\"./logo.png\\",
-      srcset: _hoisted_7
-    }),
-    _createElementVNode(\\"img\\", {
       src: \\"/logo.png\\",
       srcset: \\"/logo.png, /logo.png 2x\\"
     }),
@@ -58,7 +57,7 @@ export function render(_ctx, _cache) {
     }),
     _createElementVNode(\\"img\\", {
       src: \\"/logo.png\\",
-      srcset: _hoisted_8
+      srcset: _hoisted_7
     }),
     _createElementVNode(\\"img\\", {
       src: \\"data:image/png;base64,i\\",
@@ -133,13 +132,12 @@ import _imports_1 from '/logo.png'
 
 const _hoisted_1 = _imports_0
 const _hoisted_2 = _imports_0 + ' 2x'
-const _hoisted_3 = _imports_0 + ' 2x'
-const _hoisted_4 = _imports_0 + ', ' + _imports_0 + ' 2x'
-const _hoisted_5 = _imports_0 + ' 2x, ' + _imports_0
-const _hoisted_6 = _imports_0 + ' 2x, ' + _imports_0 + ' 3x'
-const _hoisted_7 = _imports_0 + ', ' + _imports_0 + ' 2x, ' + _imports_0 + ' 3x'
-const _hoisted_8 = _imports_1 + ', ' + _imports_1 + ' 2x'
-const _hoisted_9 = _imports_1 + ', ' + _imports_0 + ' 2x'
+const _hoisted_3 = _imports_0 + ', ' + _imports_0 + ' 2x'
+const _hoisted_4 = _imports_0 + ' 2x, ' + _imports_0
+const _hoisted_5 = _imports_0 + ' 2x, ' + _imports_0 + ' 3x'
+const _hoisted_6 = _imports_0 + ', ' + _imports_0 + ' 2x, ' + _imports_0 + ' 3x'
+const _hoisted_7 = _imports_1 + ', ' + _imports_1 + ' 2x'
+const _hoisted_8 = _imports_1 + ', ' + _imports_0 + ' 2x'
 
 export function render(_ctx, _cache) {
   return (_openBlock(), _createElementBlock(_Fragment, null, [
@@ -150,6 +148,10 @@ export function render(_ctx, _cache) {
     _createElementVNode(\\"img\\", {
       src: \\"./logo.png\\",
       srcset: _hoisted_1
+    }),
+    _createElementVNode(\\"img\\", {
+      src: \\"./logo.png\\",
+      srcset: _hoisted_2
     }),
     _createElementVNode(\\"img\\", {
       src: \\"./logo.png\\",
@@ -172,12 +174,8 @@ export function render(_ctx, _cache) {
       srcset: _hoisted_6
     }),
     _createElementVNode(\\"img\\", {
-      src: \\"./logo.png\\",
-      srcset: _hoisted_7
-    }),
-    _createElementVNode(\\"img\\", {
       src: \\"/logo.png\\",
-      srcset: _hoisted_8
+      srcset: _hoisted_7
     }),
     _createElementVNode(\\"img\\", {
       src: \\"https://example.com/logo.png\\",
@@ -185,7 +183,7 @@ export function render(_ctx, _cache) {
     }),
     _createElementVNode(\\"img\\", {
       src: \\"/logo.png\\",
-      srcset: _hoisted_9
+      srcset: _hoisted_8
     }),
     _createElementVNode(\\"img\\", {
       src: \\"data:image/png;base64,i\\",

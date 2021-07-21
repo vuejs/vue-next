@@ -280,9 +280,15 @@ export function createTransformContext(
     },
     hoist(exp) {
       if (isString(exp)) exp = createSimpleExpression(exp)
-      context.hoists.push(exp)
+      const index = context.hoists.findIndex(
+        d =>
+          d &&
+          d.loc.source &&
+          d.loc.source === (exp as SimpleExpressionNode).loc.source
+      )
+      if (index === -1) context.hoists.push(exp)
       const identifier = createSimpleExpression(
-        `_hoisted_${context.hoists.length}`,
+        `_hoisted_${index !== -1 ? index + 1 : context.hoists.length}`,
         false,
         exp.loc,
         ConstantTypes.CAN_HOIST
