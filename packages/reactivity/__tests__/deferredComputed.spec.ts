@@ -1,4 +1,12 @@
-import { computed, deferredComputed, effect, ref } from '../src'
+import {
+  computed,
+  deferredComputed,
+  effect,
+  isComputed,
+  reactive,
+  ref,
+  toRaw
+} from '../src'
 
 describe('deferred computed', () => {
   const tick = Promise.resolve()
@@ -181,5 +189,14 @@ describe('deferred computed', () => {
     src.value++
     await tick
     expect(c1Spy).toHaveBeenCalledTimes(1)
+  })
+
+  it('isComputed', () => {
+    expect(isComputed(computed(() => 1))).toBe(true)
+    expect(isComputed(deferredComputed(() => 1))).toBe(true)
+    expect(isComputed(ref(1))).toBe(false)
+    expect(isComputed(reactive({}))).toBe(false)
+    expect(isComputed(reactive({ c: computed(() => 1) }).c)).toBe(false)
+    expect(isComputed(toRaw(reactive({ c: computed(() => 1) })).c)).toBe(true)
   })
 })

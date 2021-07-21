@@ -20,7 +20,7 @@ export interface WritableComputedOptions<T> {
   set: ComputedSetter<T>
 }
 
-class ComputedRefImpl<T> {
+export class ComputedRefImpl<T> {
   public dep?: Dep = undefined
 
   private _value!: T

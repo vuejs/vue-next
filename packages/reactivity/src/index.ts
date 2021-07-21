@@ -36,7 +36,7 @@ export {
   ComputedGetter,
   ComputedSetter
 } from './computed'
-export { deferredComputed } from './deferredComputed'
+export { deferredComputed, isComputed } from './deferredComputed'
 export {
   effect,
   stop,

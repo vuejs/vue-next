@@ -1,6 +1,6 @@
 import { Dep } from './dep'
 import { ReactiveEffect } from './effect'
-import { ComputedGetter, ComputedRef } from './computed'
+import { ComputedGetter, ComputedRef, ComputedRefImpl } from './computed'
 import { ReactiveFlags, toRaw } from './reactive'
 import { trackRefValue, triggerRefValue } from './ref'
 
@@ -22,6 +22,15 @@ const flush = () => {
   }
   queue.length = 0
   queued = false
+}
+
+export function isComputed<T>(
+  value: ComputedRef<T> | unknown
+): value is ComputedRef<T>
+export function isComputed(value: any): value is ComputedRef {
+  return (
+    value instanceof ComputedRefImpl || value instanceof DeferredComputedRefImpl
+  )
 }
 
 class DeferredComputedRefImpl<T> {
