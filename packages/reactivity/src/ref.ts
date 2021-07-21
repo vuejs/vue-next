@@ -285,30 +285,22 @@ type UnwrapRefSimple<T> = T extends
 // Extract all known symbols from an object
 // when unwrapping Object the symbols are not `in keyof`, this should cover all the
 // known symbols
-type SymbolExtract<T> = (T extends { [Symbol.asyncIterator]: infer V }
-  ? { [Symbol.asyncIterator]: V }
-  : {}) &
-  (T extends { [Symbol.hasInstance]: infer V }
-    ? { [Symbol.hasInstance]: V }
-    : {}) &
-  (T extends { [Symbol.isConcatSpreadable]: infer V }
-    ? { [Symbol.isConcatSpreadable]: V }
-    : {}) &
-  (T extends { [Symbol.iterator]: infer V } ? { [Symbol.iterator]: V } : {}) &
-  (T extends { [Symbol.match]: infer V } ? { [Symbol.match]: V } : {}) &
-  (T extends { [Symbol.matchAll]: infer V } ? { [Symbol.matchAll]: V } : {}) &
-  (T extends { [Symbol.replace]: infer V } ? { [Symbol.replace]: V } : {}) &
-  (T extends { [Symbol.search]: infer V } ? { [Symbol.search]: V } : {}) &
-  (T extends { [Symbol.species]: infer V } ? { [Symbol.species]: V } : {}) &
-  (T extends { [Symbol.split]: infer V } ? { [Symbol.split]: V } : {}) &
-  (T extends { [Symbol.toPrimitive]: infer V }
-    ? { [Symbol.toPrimitive]: V }
-    : {}) &
-  (T extends { [Symbol.toStringTag]: infer V }
-    ? { [Symbol.toStringTag]: V }
-    : {}) &
-  (T extends { [Symbol.unscopables]: infer V }
-    ? { [Symbol.unscopables]: V }
-    : {})
+type Symbols = {
+  [Symbol.asyncIterator]: unknown
+  [Symbol.hasInstance]: unknown
+  [Symbol.isConcatSpreadable]: unknown
+  [Symbol.iterator]: unknown
+  [Symbol.match]: unknown
+  [Symbol.matchAll]: unknown
+  [Symbol.replace]: unknown
+  [Symbol.search]: unknown
+  [Symbol.species]: unknown
+  [Symbol.split]: unknown
+  [Symbol.toPrimitive]: unknown
+  [Symbol.toStringTag]: unknown
+  [Symbol.unscopables]: unknown
+}
+
+type SymbolExtract<T> = { [K in keyof T & keyof Symbols]: T[K] }
 
 type UnwrappedObject<T> = { [P in keyof T]: UnwrapRef<T[P]> } & SymbolExtract<T>
