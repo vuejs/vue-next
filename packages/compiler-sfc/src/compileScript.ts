@@ -12,7 +12,11 @@ import {
   TextRange
 } from './parse'
 import { parse as _parse, ParserOptions, ParserPlugin } from '@babel/parser'
-import { babelParserDefaultPlugins, generateCodeFrame } from '@vue/shared'
+import {
+  babelParserDefaultPlugins,
+  generateCodeFrame,
+  isString
+} from '@vue/shared'
 import {
   Node,
   Declaration,
@@ -1245,7 +1249,7 @@ export function compileScript(
         tips.forEach(warnOnce)
       }
       const err = errors[0]
-      if (typeof err === 'string') {
+      if (isString(err)) {
         throw new Error(err)
       } else if (err) {
         if (err.loc) {
@@ -1904,9 +1908,7 @@ function isCallOf(
     node &&
     node.type === 'CallExpression' &&
     node.callee.type === 'Identifier' &&
-    (typeof test === 'string'
-      ? node.callee.name === test
-      : test(node.callee.name))
+    (isString(test) ? node.callee.name === test : test(node.callee.name))
   )
 }
 

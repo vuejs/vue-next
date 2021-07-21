@@ -2,6 +2,7 @@ import {
   camelize,
   extend,
   hyphenate,
+  isString,
   isArray,
   isObject,
   isReservedProp,
@@ -170,7 +171,7 @@ export function legacyMarkOnce(tree: VNode) {
 export function legacyBindDynamicKeys(props: any, values: any[]) {
   for (let i = 0; i < values.length; i += 2) {
     const key = values[i]
-    if (typeof key === 'string' && key) {
+    if (isString(key) && key) {
       props[values[i]] = values[i + 1]
     }
   }
@@ -178,5 +179,5 @@ export function legacyBindDynamicKeys(props: any, values: any[]) {
 }
 
 export function legacyPrependModifier(value: any, symbol: string) {
-  return typeof value === 'string' ? symbol + value : value
+  return isString(value) ? symbol + value : value
 }

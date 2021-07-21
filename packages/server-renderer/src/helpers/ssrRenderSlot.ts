@@ -1,6 +1,6 @@
 import { ComponentInternalInstance, Slots } from 'vue'
 import { Props, PushFn, renderVNodeChildren, SSRBufferItem } from '../render'
-import { isArray } from '@vue/shared'
+import { isArray, isString } from '@vue/shared'
 
 export type SSRSlots = Record<string, SSRSlot>
 export type SSRSlot = (
@@ -64,5 +64,5 @@ export function ssrRenderSlot(
 
 const commentRE = /^<!--.*-->$/
 function isComment(item: SSRBufferItem) {
-  return typeof item === 'string' && commentRE.test(item)
+  return isString(item) && commentRE.test(item)
 }

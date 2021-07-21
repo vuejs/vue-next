@@ -488,9 +488,9 @@ export function warnDeprecation(
 
   const { message, link } = deprecationData[key]
   warn(
-    `(deprecation ${key}) ${
-      typeof message === 'function' ? message(...args) : message
-    }${link ? `\n  Details: ${link}` : ``}`
+    `(deprecation ${key}) ${isFunction(message) ? message(...args) : message}${
+      link ? `\n  Details: ${link}` : ``
+    }`
   )
   if (!isCompatEnabled(key, instance, true)) {
     console.error(

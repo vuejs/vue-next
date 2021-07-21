@@ -127,7 +127,7 @@ export function compatH(
   }
 
   // to support v2 string component name look!up
-  if (typeof type === 'string') {
+  if (isString(type)) {
     const t = hyphenate(type)
     if (t === 'transition' || t === 'transition-group' || t === 'keep-alive') {
       // since transition and transition-group are runtime-dom-specific,

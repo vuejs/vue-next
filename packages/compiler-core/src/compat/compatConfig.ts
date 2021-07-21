@@ -2,6 +2,7 @@ import { SourceLocation } from '../ast'
 import { CompilerError } from '../errors'
 import { ParserContext } from '../parse'
 import { TransformContext } from '../transform'
+import { isFunction } from '@vue/shared'
 
 export type CompilerCompatConfig = Partial<
   Record<CompilerDeprecationTypes, boolean | 'suppress-warning'>
@@ -157,7 +158,7 @@ export function warnDeprecation(
   }
   const { message, link } = deprecationData[key]
   const msg = `(deprecation ${key}) ${
-    typeof message === 'function' ? message(...args) : message
+    isFunction(message) ? message(...args) : message
   }${link ? `\n  Details: ${link}` : ``}`
 
   const err = new SyntaxError(msg) as CompilerError

@@ -30,6 +30,7 @@ import {
 } from '@vue/compiler-dom'
 import {
   escapeHtml,
+  isString,
   isBooleanAttr,
   isSSRSafeAttrName,
   NO,
@@ -350,7 +351,7 @@ function removeStaticBinding(
 ) {
   const regExp = new RegExp(`^ ${binding}=".+"$`)
 
-  const i = tag.findIndex(e => typeof e === 'string' && regExp.test(e))
+  const i = tag.findIndex(e => isString(e) && regExp.test(e))
 
   if (i > -1) {
     tag.splice(i, 1)
