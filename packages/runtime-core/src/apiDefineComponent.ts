@@ -80,10 +80,14 @@ export type DefineComponent<
 
 // overload 1: direct setup function
 // (uses user defined props interface)
-export function defineComponent<Props, RawBindings = object>(
+export function defineComponent<
+  Props,
+  RawBindings = object,
+  E extends EmitsOptions = {}
+>(
   setup: (
     props: Readonly<Props>,
-    ctx: SetupContext
+    ctx: SetupContext<E>
   ) => RawBindings | RenderFunction
 ): DefineComponent<Props, RawBindings>
 

@@ -459,6 +459,15 @@ describe('functional', () => {
 
     expectType<number>(props.foo)
   })
+
+  describe('emit', () => {
+    const MyComponent: FunctionalComponent<
+      { foo: number },
+      { ev: (a: string) => void }
+    > = (_, _2) => {}
+
+    defineComponent(MyComponent)
+  })
 })
 
 declare type VueClass<Props = {}> = {
